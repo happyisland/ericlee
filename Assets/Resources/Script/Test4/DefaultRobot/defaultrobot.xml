@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <GoType id="0" name1="鸟" name="Bird" level="Level2">Bird</GoType>
+  <GoType id="1" name1="起落杆" name="LiftRod" level="Level1">LiftRod</GoType>
+  
+  <GoType id="2" name1="猪" name="Pig" level="Level1">zhu</GoType>
+  <GoType id="3" name1="机甲犀牛" name="Rhinoceros" level="Level1">xiniu</GoType>
+  <GoType id="4" name1="机甲螳螂" name="Mantis" level="Level3">tanglang</GoType>
+  <GoType id="5" name1="金刚狼" name="Wolf" level="Level1">jinganglang</GoType>
+  <GoType id="6" name1="机甲蝎子" name="Scorpion" level="Level4">xiezi</GoType>
+  <GoType id="7" name1="乌龟" name="Tortoise" level="Level1">wugui</GoType>
+
+</Root>
