@@ -1,0 +1,558 @@
+﻿<?xml version="1.0" encoding="utf-8"?> <!--flag1Ϊtrue��ʾ�ò���Ϊnullstep�� flag2Ϊ0��ʾĿ����Ҫ���ţ�1��ʾ����+���֣�2��ʾ������3��ʾ����+���֣������ޣ�  -->
+<TotalSteps xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <totalSteps stepID="0">
+    <targetPath>MainUIRoot/ModelDetails/Right/Guanfang/parts</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID></stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-240</offset_x>
+        <offset_y>80</offset_y>
+        <isText>true</isText>
+        <tipObjType>0</tipObjType>
+        <flag1>false</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="1">
+        <targetPath></targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+	<stepWaitID>MainToBuildStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>0</offset_x>
+        <offset_y>0</offset_y>
+        <isText>false</isText>
+        <tipObjType>0</tipObjType>
+        <flag1>False</flag1>
+        <flag2>0</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="2">
+        <targetPath>UI Root/Camera/Right/Forward</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>-207</width>
+        <height>149</height>
+        <offset_x>-207</offset_x>
+        <offset_y>149</offset_y>
+        <isText>true</isText>
+        <tipObjType>0</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="3">
+        <targetPath>UI Root/Camera/Left/Back</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>250</offset_x>
+        <offset_y>149</offset_y>
+        <isText>true</isText>
+        <tipObjType>2</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="4">
+        <targetPath>UI Root/Camera/Bottom/StepSlider/Thumb</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>dragstepbystep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>296</offset_x>
+        <offset_y>-70</offset_y>
+        <isText>true</isText>
+        <tipObjType>5</tipObjType>
+        <flag1>false</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="5">
+        <targetPath>UI Root/Camera/Left/Return</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>277</offset_x>
+        <offset_y>-86</offset_y>
+        <isText>true</isText>
+        <tipObjType>3</tipObjType>
+        <flag1>true</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="6">
+        <targetPath></targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+	      <stepWaitID>BuildToMainStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>0</offset_x>
+        <offset_y>0</offset_y>
+        <isText>true</isText>
+        <tipObjType>0</tipObjType>
+        <flag1>False</flag1>
+        <flag2>0</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="7">
+        <targetPath>MainUIRoot/ModelDetails/TopRight/connect</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-240</offset_x>
+        <offset_y>-96</offset_y>
+        <isText>true</isText>
+        <tipObjType>1</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3>showExit</flag3>
+    </totalSteps>
+    <totalSteps stepID="8">
+        <targetPath>UIRoot(2D)(2)/UICamera/Center/ConnenctBluetoothMsg/List/Grid#</targetPath>
+        <lastStepID>8</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>BTstep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-204</offset_x>
+        <offset_y>254</offset_y>
+        <isText>true</isText>
+        <tipObjType>10</tipObjType>  //no tip
+        <flag1>true</flag1>   //triggle模式
+        <flag2>2</flag2>   //anim模式 cover false
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="9">
+        <targetPath>UIRoot(2D)(2)/UICamera/Center/PopVersionMsg/btn/Button</targetPath>
+        <lastStepID>7</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>DJConfirm</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>0</offset_x>
+        <offset_y>0</offset_y>
+        <isText>False</isText>
+        <tipObjType>10</tipObjType>
+        <flag1>False</flag1>
+        <flag2>2</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="10">
+        <targetPath>MainUIRoot/ModelDetails/Right/Guanfang/actions</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-240</offset_x>
+        <offset_y>-86</offset_y>
+        <isText>true</isText>
+        <tipObjType>1</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3>showExit</flag3>
+    </totalSteps>
+    <totalSteps stepID="11">
+        <targetPath>MainUIRoot/ModelDetails/Right/secondObj/Button</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-330</offset_x>
+        <offset_y>124</offset_y>
+        <isText>true</isText>
+        <tipObjType>0</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="12">
+        <targetPath></targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>13</nextStepID>
+	<stepWaitID>MainToEditStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>0</offset_x>
+        <offset_y>0</offset_y>
+        <isText>False</isText>
+        <tipObjType>0</tipObjType>
+        <flag1>False</flag1>
+        <flag2>0</flag2>
+        <flag3 />
+    </totalSteps>
+<totalSteps stepID="13">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/dj/djlist/grid/#0</targetPath>
+        <lastStepID>13</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>DragStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>21</offset_x>
+        <offset_y>75</offset_y>
+        <isText>true</isText>
+        <tipObjType>8</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="14">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/fix/framelist/grid/frame_1/djlist/#0</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>327</offset_x>
+        <offset_y>-67</offset_y>
+        <isText>true</isText>
+        <tipObjType>5</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="15">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/fix/framelist/grid/frame_1/djlist/fd_1_1/adjust/angleSlider/dian</targetPath>
+        <lastStepID>15</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>TurnDuojiStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>251</offset_x>
+        <offset_y>105</offset_y>
+        <isText>true</isText>
+        <tipObjType>2</tipObjType>
+        <flag1>false</flag1>
+        <flag2>1</flag2>
+        <flag3>dian</flag3>
+    </totalSteps>
+    <totalSteps stepID="16">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/dj/djlist/grid/#0</targetPath>
+        <lastStepID>16</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>DragStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>21</offset_x>
+        <offset_y>75</offset_y>
+        <isText>true</isText>
+        <tipObjType>8</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="17">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/fix/framelist/grid/frame_2/djlist/fd_2_1</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>292</offset_x>
+        <offset_y>-60</offset_y>
+        <isText>true</isText>
+        <tipObjType>5</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="18">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/fix/framelist/grid/frame_2/djlist/fd_2_1/adjust/angleSlider/dian</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>TurnDuojiStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>251</offset_x>
+        <offset_y>105</offset_y>
+        <isText>true</isText>
+        <tipObjType>2</tipObjType>
+        <flag1>false</flag1>
+        <flag2>1</flag2>
+        <flag3>dian</flag3>
+    </totalSteps>
+    <totalSteps stepID="19">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/fix/powerdownbtn</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>DiaodianStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-210</offset_x>
+        <offset_y>290</offset_y>
+        <isText>true</isText>
+        <tipObjType>4</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="20">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/readback/readbackbtn</targetPath>
+        <lastStepID>20</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>EditReadbackStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-208</offset_x>
+        <offset_y>284</offset_y>
+        <isText>true</isText>
+        <tipObjType>4</tipObjType>
+        <flag1>false</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="21">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/fix/framelist/grid/frame_1/timeedit</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>327</offset_x>
+        <offset_y>76</offset_y>
+        <isText>true</isText>
+        <tipObjType>2</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="22"> 
+        <targetPath></targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID></stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>0</offset_x>
+        <offset_y>0</offset_y>
+        <isText>true</isText>
+        <tipObjType>10</tipObjType>
+        <flag1>true</flag1>
+        <flag2>1</flag2>
+        <flag3></flag3>
+    </totalSteps>
+    <totalSteps stepID="23">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/fix/left/playbtn</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>286</offset_x>
+        <offset_y>124</offset_y>
+        <isText>true</isText>
+        <tipObjType>2</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="24">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/title/Top/savebtn1</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-226</offset_x>
+        <offset_y>-41</offset_y>
+        <isText>true</isText>
+        <tipObjType>6</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="25">
+        <targetPath>UIRoot(2D)(2)/UICamera/Bottom/CreateAction/iconList/grid/#3</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID></stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>279</offset_x>
+        <offset_y>-62</offset_y>
+        <isText>true</isText>
+        <tipObjType>5</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="26">
+        <targetPath>UIRoot(2D)(2)/UICamera/Bottom/CreateAction/action/Input</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>InputStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-92</offset_x>
+        <offset_y>259</offset_y>
+        <isText>true</isText>
+        <tipObjType>4</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3>000text</flag3>
+    </totalSteps>
+    <totalSteps stepID="27">
+        <targetPath>UIRoot(2D)(2)/UICamera/Bottom/CreateAction/action/BtnOk</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-203</offset_x>
+        <offset_y>293</offset_y>
+        <isText>true</isText>
+        <tipObjType>4</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="28">
+        <targetPath>UIRoot(2D)(1)/UICamera/Center/editFrameUI/title/TopLeft/backbtn</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>255</offset_x>
+        <offset_y>-124</offset_y>
+        <isText>true</isText>
+        <tipObjType>3</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="29">
+        <targetPath></targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+	<stepWaitID>EditToMainStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>0</offset_x>
+        <offset_y>0</offset_y>
+        <isText>False</isText>
+        <tipObjType>0</tipObjType>
+        <flag1>False</flag1>
+        <flag2>0</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="30">
+        <targetPath>MainUIRoot/ModelDetails/Right/Guanfang/console</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-240</offset_x>
+        <offset_y>95</offset_y>
+        <isText>true</isText>
+        <tipObjType>0</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3>showExit</flag3>
+    </totalSteps>
+    <totalSteps stepID="31">
+        <targetPath></targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>MainToControlStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>0</offset_x>
+        <offset_y>0</offset_y>
+        <isText>False</isText>
+        <tipObjType>0</tipObjType>
+        <flag1>False</flag1>
+        <flag2>0</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="32">
+        <targetPath>UI Root/BackGround/runwindow/Center/UserActionList/#3</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>306</offset_x>
+        <offset_y>64</offset_y>
+        <isText>true</isText>
+        <tipObjType>2</tipObjType>
+        <flag1>false</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="33">
+        <targetPath>UI Root/BackGround/editwindow/Right/TotalActionList/grid/#1</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>-240</offset_x>
+        <offset_y>-85</offset_y>
+        <isText>true</isText>
+        <tipObjType>1</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="34">
+        <targetPath>UI Root/BackGround/editwindow/Bottom/OkBtn</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>172</offset_x>
+        <offset_y>148</offset_y>
+        <isText>true</isText>
+        <tipObjType>2</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="35">
+        <targetPath>UI Root/BackGround/runwindow/Bottom/editBtn/EditToogle</targetPath>
+        <lastStepID>35</lastStepID>
+        <nextStepID>0</nextStepID>
+        <stepWaitID>TurnControlStep</stepWaitID>
+        <width>0</width>
+        <height>0</height>
+        <offset_x>252</offset_x>
+        <offset_y>-87</offset_y>
+        <isText>true</isText>
+        <tipObjType>5</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+    <totalSteps stepID="36">
+        <targetPath>UI Root/BackGround/runwindow/Center/UserActionList/#3</targetPath>
+        <lastStepID>0</lastStepID>
+        <nextStepID>999</nextStepID>
+        <stepWaitID />
+        <width>0</width>
+        <height>0</height>
+        <offset_x>306</offset_x>
+        <offset_y>64</offset_y>
+        <isText>true</isText>
+        <tipObjType>2</tipObjType>
+        <flag1>False</flag1>
+        <flag2>1</flag2>
+        <flag3 />
+    </totalSteps>
+</TotalSteps> 

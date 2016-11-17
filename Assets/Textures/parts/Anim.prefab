@@ -1,0 +1,670 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &100000
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 400000}
+  - 114: {fileID: 11400000}
+  m_Layer: 0
+  m_Name: Anim
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &400000
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d0c51bb0b6e93049af5e88f93826e3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  material: {fileID: 2100000, guid: 19615728c7bfa5947b62b629b4f7cb67, type: 2}
+  mSprites:
+  - name: bckg_00000
+    x: 881
+    y: 252
+    width: 4
+    height: 2
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 311
+    paddingRight: 135
+    paddingTop: 248
+    paddingBottom: 0
+  - name: bckg_00001
+    x: 1783
+    y: 240
+    width: 190
+    height: 190
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 128
+    paddingRight: 132
+    paddingTop: 19
+    paddingBottom: 41
+  - name: bckg_00002
+    x: 1783
+    y: 1
+    width: 242
+    height: 238
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 115
+    paddingRight: 93
+    paddingTop: 9
+    paddingBottom: 3
+  - name: bckg_00004
+    x: 1641
+    y: 1612
+    width: 402
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 40
+    paddingRight: 8
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00006
+    x: 1
+    y: 1
+    width: 450
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00008
+    x: 452
+    y: 1
+    width: 440
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 10
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00010
+    x: 1
+    y: 252
+    width: 450
+    height: 248
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 2
+    paddingBottom: 0
+  - name: bckg_00012
+    x: 1
+    y: 1238
+    width: 420
+    height: 248
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 30
+    paddingRight: 0
+    paddingTop: 2
+    paddingBottom: 0
+  - name: bckg_00016
+    x: 1643
+    y: 1361
+    width: 398
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 20
+    paddingRight: 32
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00018
+    x: 1238
+    y: 1612
+    width: 402
+    height: 246
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 16
+    paddingRight: 32
+    paddingTop: 0
+    paddingBottom: 4
+  - name: bckg_00019
+    x: 424
+    y: 1730
+    width: 402
+    height: 244
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 15
+    paddingRight: 33
+    paddingTop: 0
+    paddingBottom: 6
+  - name: bckg_00020
+    x: 827
+    y: 1802
+    width: 402
+    height: 240
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 15
+    paddingRight: 33
+    paddingTop: 0
+    paddingBottom: 10
+  - name: bckg_00021
+    x: 1240
+    y: 1361
+    width: 402
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 15
+    paddingRight: 33
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00022
+    x: 831
+    y: 1551
+    width: 406
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 13
+    paddingRight: 31
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00023
+    x: 424
+    y: 1479
+    width: 406
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 14
+    paddingRight: 30
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00024
+    x: 831
+    y: 1300
+    width: 408
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 13
+    paddingRight: 29
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00025
+    x: 422
+    y: 1228
+    width: 408
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 14
+    paddingRight: 28
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00026
+    x: 452
+    y: 497
+    width: 410
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 13
+    paddingRight: 27
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00027
+    x: 1
+    y: 1736
+    width: 414
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 13
+    paddingRight: 23
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00028
+    x: 1
+    y: 987
+    width: 420
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 11
+    paddingRight: 19
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00029
+    x: 1
+    y: 736
+    width: 422
+    height: 250
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 10
+    paddingRight: 18
+    paddingTop: 0
+    paddingBottom: 0
+  - name: bckg_00030
+    x: 1
+    y: 1487
+    width: 422
+    height: 248
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 11
+    paddingRight: 17
+    paddingTop: 2
+    paddingBottom: 0
+  - name: bckg_00031
+    x: 452
+    y: 252
+    width: 428
+    height: 244
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 9
+    paddingRight: 13
+    paddingTop: 6
+    paddingBottom: 0
+  - name: bckg_00032
+    x: 422
+    y: 987
+    width: 430
+    height: 240
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 10
+    paddingRight: 10
+    paddingTop: 10
+    paddingBottom: 0
+  - name: bckg_00033
+    x: 424
+    y: 748
+    width: 434
+    height: 238
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 9
+    paddingRight: 7
+    paddingTop: 12
+    paddingBottom: 0
+  - name: bckg_00034
+    x: 1
+    y: 501
+    width: 440
+    height: 234
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 7
+    paddingRight: 3
+    paddingTop: 16
+    paddingBottom: 0
+  - name: bckg_00035
+    x: 893
+    y: 1
+    width: 442
+    height: 232
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 7
+    paddingRight: 1
+    paddingTop: 18
+    paddingBottom: 0
+  - name: bckg_00036
+    x: 1338
+    y: 230
+    width: 444
+    height: 228
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 6
+    paddingRight: 0
+    paddingTop: 22
+    paddingBottom: 0
+  - name: bckg_00037
+    x: 893
+    y: 234
+    width: 444
+    height: 228
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 6
+    paddingRight: 0
+    paddingTop: 22
+    paddingBottom: 0
+  - name: bckg_00038
+    x: 1336
+    y: 1
+    width: 446
+    height: 228
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 4
+    paddingRight: 0
+    paddingTop: 22
+    paddingBottom: 0
+  - name: bckg_00039
+    x: 1338
+    y: 459
+    width: 448
+    height: 218
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 2
+    paddingRight: 0
+    paddingTop: 22
+    paddingBottom: 10
+  - name: bckg_00040
+    x: 1314
+    y: 678
+    width: 448
+    height: 204
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 2
+    paddingRight: 0
+    paddingTop: 42
+    paddingBottom: 4
+  - name: bckg_00041
+    x: 881
+    y: 463
+    width: 450
+    height: 200
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 50
+    paddingBottom: 0
+  - name: bckg_00042
+    x: 863
+    y: 664
+    width: 450
+    height: 192
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 58
+    paddingBottom: 0
+  - name: bckg_00043
+    x: 853
+    y: 1030
+    width: 450
+    height: 172
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 67
+    paddingBottom: 11
+  - name: bckg_00044
+    x: 859
+    y: 857
+    width: 450
+    height: 172
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 78
+    paddingBottom: 0
+  - name: bckg_00045
+    x: 1310
+    y: 883
+    width: 450
+    height: 158
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 92
+    paddingBottom: 0
+  - name: bckg_00046
+    x: 1304
+    y: 1042
+    width: 450
+    height: 124
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 110
+    paddingBottom: 16
+  - name: bckg_00047
+    x: 1304
+    y: 1167
+    width: 448
+    height: 120
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 2
+    paddingTop: 130
+    paddingBottom: 0
+  - name: bckg_00048
+    x: 853
+    y: 1203
+    width: 444
+    height: 96
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 6
+    paddingTop: 154
+    paddingBottom: 0
+  - name: bckg_00049
+    x: 1298
+    y: 1288
+    width: 404
+    height: 72
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 39
+    paddingRight: 7
+    paddingTop: 178
+    paddingBottom: 0
+  - name: bckg_00050
+    x: 1
+    y: 1987
+    width: 264
+    height: 46
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 62
+    paddingRight: 124
+    paddingTop: 204
+    paddingBottom: 0
+  - name: bckg_00051
+    x: 1230
+    y: 1859
+    width: 234
+    height: 20
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 90
+    paddingRight: 126
+    paddingTop: 226
+    paddingBottom: 4
+  - name: bckg_00052
+    x: 881
+    y: 252
+    width: 4
+    height: 2
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 311
+    paddingRight: 135
+    paddingTop: 248
+    paddingBottom: 0
+  - name: bckg_00053
+    x: 881
+    y: 252
+    width: 4
+    height: 2
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 311
+    paddingRight: 135
+    paddingTop: 248
+    paddingBottom: 0
+  - name: bckg_00054
+    x: 881
+    y: 252
+    width: 4
+    height: 2
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 311
+    paddingRight: 135
+    paddingTop: 248
+    paddingBottom: 0
+  - name: bckg_00055
+    x: 881
+    y: 252
+    width: 4
+    height: 2
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 311
+    paddingRight: 135
+    paddingTop: 248
+    paddingBottom: 0
+  mPixelSize: 1
+  mReplacement: {fileID: 0}
+  mCoordinates: 0
+  sprites: []
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 100000}
+  m_IsPrefabParent: 1
+  m_IsExploded: 1

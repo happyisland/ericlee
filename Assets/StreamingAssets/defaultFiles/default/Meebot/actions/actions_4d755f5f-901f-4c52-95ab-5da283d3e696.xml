@@ -1,0 +1,21 @@
+<Roots>
+  <Root nodeType="head" name="高兴" showName="0$高兴;1$Happy;6$Joyeux;4$Glücklich;5$Felice;7$Feliz;2$幸せ;8$Feliz;9$高興;10$سعيد" robotID="robot_e59a8c0f-d4a1-4c18-bd91-ddb14e213fb4" id="actions_4d755f5f-901f-4c52-95ab-5da283d3e696" icon="icon_20" createTime="635999408169865212" />
+  <Root nodeType="body" index="1" sportTime="200" waitTime="0" idMin="1" idMinRota="121" rotas="1$121;2$93;3$131;4$123;5$194;6$183" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="2" sportTime="200" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$39;3$55;4$120;5$143;6$107" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="3" sportTime="200" waitTime="0" idMin="1" idMinRota="121" rotas="1$121;2$93;3$131;4$123;5$194;6$183" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="4" sportTime="200" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$39;3$55;4$120;5$143;6$107" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="5" sportTime="200" waitTime="0" idMin="1" idMinRota="121" rotas="1$121;2$93;3$131;4$123;5$194;6$183" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="6" sportTime="200" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$39;3$55;4$120;5$143;6$107" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="7" sportTime="200" waitTime="0" idMin="1" idMinRota="121" rotas="1$121;2$93;3$131;4$123;5$194;6$183" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="8" sportTime="200" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$39;3$55;4$120;5$143;6$107" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="9" sportTime="200" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$60;3$42;4$118;5$174;6$195" turns="" show="2;3;4;5;6" />
+  <Root nodeType="body" index="10" sportTime="100" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$41;3$41;4$118;5$199;6$195" turns="" show="2;3;5" />
+  <Root nodeType="body" index="11" sportTime="100" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$69;3$41;4$118;5$164;6$195" turns="" show="2;5" />
+  <Root nodeType="body" index="19" sportTime="100" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$41;3$41;4$118;5$199;6$195" turns="" show="2;5" />
+  <Root nodeType="body" index="20" sportTime="100" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$69;3$41;4$118;5$164;6$195" turns="" show="2;5" />
+  <Root nodeType="body" index="21" sportTime="100" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$41;3$41;4$118;5$199;6$195" turns="" show="2;5" />
+  <Root nodeType="body" index="22" sportTime="100" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$69;3$41;4$118;5$164;6$195" turns="" show="2;5" />
+  <Root nodeType="body" index="23" sportTime="100" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$41;3$41;4$118;5$199;6$195" turns="" show="2;5" />
+  <Root nodeType="body" index="24" sportTime="100" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$69;3$41;4$118;5$164;6$195" turns="" show="2;5" />
+  <Root nodeType="body" index="18" sportTime="200" waitTime="0" idMin="1" idMinRota="121" rotas="1$121;2$115;3$118;4$120;5$116;6$118" turns="" show="1;2;3;4;5;6" />
+</Roots>

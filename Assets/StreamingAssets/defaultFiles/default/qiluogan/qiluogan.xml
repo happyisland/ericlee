@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<Root>
+  <RobotID>robot_b053f2ac-e0cd-4427-8215-5a92bfc97d53</RobotID>
+  <DataType>default</DataType>
+  <Level>1</Level>
+  <Model Pos="(0.205,0.696,-0.355)" Angle="(-7.540009,65.52,6.330003)" Scale="(1.2,1.2,1.2)" />
+  <Anim Pos="(0.6,1.2,-0.5)" Angle="(-23,65,10)" />
+  <Wires name="W2_001" num="001" />
+  <GO name="c6_004" id="1" type="c6" goPos="(0.4171092,0.3880334,-0.9991223)" goAngle="(6.502136,351.6042,172.604)" goScale="(1,1,1)" startPos="(1.091092,0.6887436,0.1306604)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="DP-001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="m54_002" id="2" type="m54" goPos="(-0.009667274,-0.07900745,0.3714193)" goAngle="(6.502136,351.6042,352.604)" goScale="(0.9451349,0.9451349,0.9451349)" startPos="(-0.3820883,0.3522325,-0.01172043)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="c6_003" id="3" type="c6" goPos="(0.4043278,0.3780565,-0.9125232)" goAngle="(6.502136,351.6042,172.604)" goScale="(1,1,1)" startPos="(1.001627,0.6887637,0.1403506)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="DP-001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="c6_001" id="4" type="c6" goPos="(0.3789201,0.3582236,-0.7403746)" goAngle="(6.502136,351.6042,172.604)" goScale="(1,1,1)" startPos="(1,1,1,1)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="DP-001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="c6_006" id="5" type="c6" goPos="(0.4425169,0.4078663,-1.171271)" goAngle="(6.502136,351.6042,172.604)" goScale="(1,1,1)" startPos="(1.270025,0.688703,0.1112799)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="DP-001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="c6_007" id="6" type="c6" goPos="(0.4552208,0.4177827,-1.257345)" goAngle="(6.502136,351.6042,172.604)" goScale="(1,1,1)" startPos="(1.359491,0.6886826,0.1015897)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="DP-001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="c4_001" id="7" type="c4" goPos="(0.2869524,0.1028676,-0.3152587)" goAngle="(6.502136,351.6042,172.604)" goScale="(1,1,1)" startPos="(0.3666009,0.4709422,0.2093476)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="W2_001" id="8" type="W2" goPos="(0.3102896,-0.04135016,0.05647985)" goAngle="(80.16421,220.5034,48.47847)" goScale="(0,0,0)" startPos="(0.2347332,0.610109,0.3364841)" djid="0" goColor="(0.2156863,0.2117647,0.2117647,1)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="m47_001" id="9" type="m47" goPos="(0.3060162,0.09038223,0.4196196)" goAngle="(7.348139,82.44637,6.556213)" goScale="(1,1,1)" startPos="(-0.3862495,0.3522373,-0.01127032)" djid="0" goColor="(0.968,0.831,0.231,1.0)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="c3_001" id="10" type="c3" goPos="(0.3205748,0.3396529,-0.5517083)" goAngle="(353.4979,171.6042,97.39598)" goScale="(1,1,1)" startPos="(0.630565,0.6874594,0.1498406)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="DP-001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="lp" id="11" type="lp" goPos="(-0.01965975,0.05959872,0.1146678)" goAngle="(279.8358,40.50338,131.5215)" goScale="(1,1,1)" startPos="(-0.1275747,0.4529737,0.02049334)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="m54_001" id="12" type="m54" goPos="(-0.1270085,-0.06374302,0.3558592)" goAngle="(6.502136,351.6042,352.604)" goScale="(0.9451349,0.9451349,0.9451349)" startPos="(-0.3689819,0.3522325,0.107766)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="m47_002" id="13" type="m47" goPos="(0.3407999,0.1175339,0.1839445)" goAngle="(7.348139,82.44637,6.556213)" goScale="(0.9198998,0.9198998,0.9198998)" startPos="(-0.3714232,0.3522369,0.1080299)" djid="0" goColor="(0.968,0.831,0.231,1.0)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="c6_002" id="14" type="c6" goPos="(0.3915465,0.3680796,-0.825924)" goAngle="(6.502136,351.6042,172.604)" goScale="(1,1,1)" startPos="(0.9121609,0.6887842,0.1500409)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="DP-001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="seivo_001" id="15" type="seivo" goPos="(0.3023185,0.3331324,-0.3783433)" goAngle="(6.502136,351.6042,82.60402)" goScale="(1,1,1)" startPos="(0.4526955,0.6882266,0.1766024)" djid="1" goColor="(0.2156863,0.2117647,0.2117647,1)" djShape="circle" isDP="1">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="onoff" id="16" type="onoff" goPos="(0.3526594,0.04288023,0.2981657)" goAngle="(279.8358,40.50338,311.5215)" goScale="(1,1,1)" startPos="(-0.8993777,0.2561468,0.1092964)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="c6_005" id="17" type="c6" goPos="(0.429813,0.3979498,-1.085197)" goAngle="(6.502136,351.6042,172.604)" goScale="(1,1,1)" startPos="(1.180558,0.6887231,0.1209702)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="DP-001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="mc" id="18" type="mc" goPos="(-0.01596131,0.005619005,0.03382287)" goAngle="(80.16421,220.5034,48.47847)" goScale="(1,1,1)" startPos="(-0.05494164,0.3907679,0.01331798)" djid="0" goColor="(0.568,0.568,0.568,1)" djShape="circle">
+    <PrePos contactGO="" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="W4" id="19" type="W4" goPos="(0.18304,-0.08751339,0.4044989)" goAngle="(80.16421,220.5034,138.4785)" goScale="(0,0,0)" startPos="(-0.5921434,0.3117225,0.2079803)" djid="0" goColor="(0.2156863,0.2117647,0.2117647,1)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="m47_004" id="20" type="m47" goPos="(0.2993385,0.03180889,0.4125164)" goAngle="(7.348139,82.44637,6.556213)" goScale="(1,1,1)" startPos="(-0.3714232,0.3522369,0.1080299)" djid="0" goColor="(0.968,0.831,0.231,1.0)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+  <GO name="m47_003" id="21" type="m47" goPos="(0.3342124,0.0590646,0.1762636)" goAngle="(7.348139,82.44637,6.556213)" goScale="(0.9198998,0.9198998,0.9198998)" startPos="(-0.3714232,0.3522369,0.1080299)" djid="0" goColor="(0.968,0.831,0.231,1.0)" djShape="circle">
+    <PrePos contactGO="mc_001" contactPoint="1">1</PrePos>
+  </GO>
+</Root>

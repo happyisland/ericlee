@@ -1,0 +1,108 @@
+{"frames": {
+
+"GuideLine1.png":
+{
+	"frame": {"x":803,"y":398,"w":65,"h":79},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":79},
+	"sourceSize": {"w":65,"h":79}
+},
+"GuideLine2.png":
+{
+	"frame": {"x":803,"y":398,"w":65,"h":79},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":65,"h":79},
+	"sourceSize": {"w":65,"h":79}
+},
+"GuideLine3.png":
+{
+	"frame": {"x":803,"y":308,"w":68,"h":68},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":0,"y":0,"w":68,"h":68},
+	"sourceSize": {"w":94,"h":68}
+},
+"GuideLine4.png":
+{
+	"frame": {"x":2,"y":453,"w":176,"h":38},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":176,"h":38},
+	"sourceSize": {"w":176,"h":38}
+},
+"cameraAreaPlane.png":
+{
+	"frame": {"x":2,"y":2,"w":799,"h":449},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":799,"h":449},
+	"sourceSize": {"w":799,"h":449}
+},
+"disablesave.png":
+{
+	"frame": {"x":803,"y":206,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"icon_acionsimple.png":
+{
+	"frame": {"x":905,"y":104,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"icon_giveup.png":
+{
+	"frame": {"x":803,"y":104,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"icon_playing.png":
+{
+	"frame": {"x":905,"y":302,"w":94,"h":94},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":3,"y":3,"w":94,"h":94},
+	"sourceSize": {"w":100,"h":100}
+},
+"icon_startplay.png":
+{
+	"frame": {"x":905,"y":206,"w":94,"h":94},
+	"rotated": false,
+	"trimmed": true,
+	"spriteSourceSize": {"x":2,"y":3,"w":94,"h":94},
+	"sourceSize": {"w":100,"h":100}
+},
+"icon_unbluetooth.png":
+{
+	"frame": {"x":905,"y":2,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+},
+"savevideo.png":
+{
+	"frame": {"x":803,"y":2,"w":100,"h":100},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":100},
+	"sourceSize": {"w":100,"h":100}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker ",
+	"version": "1.0",
+	"image": "ActionCamera.png",
+	"format": "RGBA8888",
+	"size": {"w":1024,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:b59407c03f897ab875103b4b8e28b998:1/1$"
+}
+}

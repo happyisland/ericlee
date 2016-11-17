@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<root>
+  <Anim id="1" type="LiftRod" source="LiftRod" parts="MC-GRY" firstPic="true" pic="qiluogan" start="19" end="20" step="1" name="LiftRod_1" />
+  <Anim id="2" type="LiftRod" source="LiftRod" parts="MC-GRY" pic="qiluogan" start="40" end="59" step="1" name="LiftRod_2" />
+  <Anim id="3" type="LiftRod" source="LiftRod" parts="C4-GRY" pic="qiluogan" start="59" end="60" step="1" name="LiftRod_3" />
+  <Anim id="4" type="LiftRod" source="LiftRod" parts="C4-GRY" pic="qiluogan" start="80" end="100" step="1" name="LiftRod_4" />
+  <Anim id="5" type="LiftRod" source="LiftRod" parts="C4-GRY" pic="qiluogan" start="120" end="139" step="1" name="LiftRod_5" />
+  <Anim id="6" type="LiftRod" source="djid" djid="1" parts="SERVO-BLK" pic="qiluogan" start="139" end="140" step="1" name="LiftRod_6" />
+  <Anim id="7" type="LiftRod" source="LiftRod" parts="SERVO-BLK" pic="qiluogan" start="180" end="200" step="1" name="LiftRod_7" />
+  <Anim id="8" type="LiftRod" source="LiftRod" parts="SERVO-BLK" pic="qiluogan" start="220" end="240" step="1" name="LiftRod_8" />
+  <Anim id="9" type="LiftRod" source="LiftRod" parts="C3-GRY" pic="qiluogan" start="240" end="241" step="2" name="LiftRod_9" />
+  <Anim id="10" type="LiftRod" source="LiftRod" parts="C3-GRY" pic="qiluogan" start="260" end="280" step="2" name="LiftRod_10" />
+  <Anim id="11" type="LiftRod" source="LiftRod" parts="C3-GRY" pic="qiluogan" start="300" end="320" step="2" name="LiftRod_11" />
+  <Anim id="12" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="320" end="321" step="2" name="LiftRod_12" />
+  <Anim id="13" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="340" end="360" step="2" name="LiftRod_13" />
+  <Anim id="14" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="399" end="400" step="2" name="LiftRod_14" />
+  <Anim id="15" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="420" end="440" step="2" name="LiftRod_15" />
+  <Anim id="16" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="479" end="480" step="2" name="LiftRod_16" />
+  <Anim id="17" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="500" end="520" step="2" name="LiftRod_17" />
+  <Anim id="18" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="559" end="560" step="2" name="LiftRod_18" />
+  <Anim id="19" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="580" end="600" step="2" name="LiftRod_19" />
+  <Anim id="20" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="620" end="640" step="2" name="LiftRod_20" />
+  <Anim id="21" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="640" end="641" step="2" name="LiftRod_21" />
+  <Anim id="22" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="660" end="680" step="2" name="LiftRod_22" />
+  <Anim id="23" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="720" end="721" step="2" name="LiftRod_23" />
+  <Anim id="24" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="740" end="760" step="2" name="LiftRod_24" />
+  <Anim id="25" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="799" end="800" step="2" name="LiftRod_25" />
+  <Anim id="26" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="820" end="840" step="2" name="LiftRod_26" />
+  <Anim id="27" type="LiftRod" source="LiftRod" parts="C6-GRY" pic="qiluogan" start="860" end="879" step="2" name="LiftRod_27" />
+  <Anim id="28" type="LiftRod" source="LiftRod" parts="P47-YLW" pic="qiluogan" start="879" end="880" step="3" name="LiftRod_28" />
+  <Anim id="29" type="LiftRod" source="LiftRod" parts="P47-YLW" pic="qiluogan" start="900" end="920" step="3" name="LiftRod_29" />
+  <Anim id="30" type="LiftRod" source="LiftRod" parts="P47-YLW" pic="qiluogan" start="940" end="960" step="3" name="LiftRod_30" />
+  <Anim id="31" type="LiftRod" source="LiftRod" parts="P47-YLW" pic="qiluogan" start="980" end="1000" step="3" name="LiftRod_31" />
+  <Anim id="32" type="LiftRod" source="LiftRod" parts="P47-YLW" pic="qiluogan" start="1020" end="1040" step="3" name="LiftRod_32" />
+  <Anim id="33" type="LiftRod" source="LiftRod" parts="P80-GRY" pic="qiluogan" start="1080" end="1081" step="3" name="LiftRod_33" />
+  <Anim id="34" type="LiftRod" source="LiftRod" parts="P80-GRY" pic="qiluogan" start="1100" end="1120" step="3" name="LiftRod_34" />
+  <Anim id="35" type="LiftRod" source="LiftRod" parts="P80-GRY" pic="qiluogan" start="1140" end="1159" step="3" name="LiftRod_35" />
+  <Anim id="36" type="LiftRod" source="LiftRod" parts="W2-BLK1" pic="qiluogan" start="1159" end="1160" step="3" name="LiftRod_36" />
+  <Anim id="37" type="LiftRod" source="LiftRod" parts="W2-BLK1" pic="qiluogan" start="1180" end="1200" step="3" name="LiftRod_37" />
+  <Anim id="38" type="LiftRod" source="line" line="Num2" parts="W2-BLK1" pic="qiluogan" start="1200" end="1220" step="3" name="LiftRod_38" />
+  <Anim id="39" type="LiftRod" source="LiftRod" parts="W2-BLK1" pic="qiluogan" start="1220" end="1240" step="3" name="LiftRod_39" />
+  <Anim id="40" type="LiftRod" source="LiftRod" parts="W2-BLK1" pic="qiluogan" start="1260" end="1280" step="3" name="LiftRod_40" />
+  <Anim id="41" type="LiftRod" source="LiftRod" parts="W2-BLK1" pic="qiluogan" start="1280" end="1300" step="3" name="LiftRod_41" />
+  <Anim id="42" type="LiftRod" source="LiftRod" parts="W2-BLK1" pic="qiluogan" start="1320" end="1340" step="3" name="LiftRod_42" />
+  <Anim id="43" type="LiftRod" source="LiftRod" parts="W4-BLK1" pic="qiluogan" start="1340" end="1341" step="3" name="LiftRod_43" />
+  <Anim id="44" type="LiftRod" source="LiftRod" parts="W4-BLK1" pic="qiluogan" start="1360" end="1380" step="3" name="LiftRod_44" />
+  <Anim id="45" type="LiftRod" source="line" line="Num7" parts="W4-BLK1" pic="qiluogan" start="1380" end="1400" step="3" name="LiftRod_45" />
+  <Anim id="46" type="LiftRod" source="LiftRod" parts="W4-BLK1" pic="qiluogan" start="1400" end="1420" step="3" name="LiftRod_46" />
+  <Anim id="47" type="LiftRod" source="LiftRod" parts="W4-BLK1" pic="qiluogan" start="1440" end="1460" step="3" name="LiftRod_47" />
+  <Anim id="48" type="LiftRod" source="LiftRod" parts="W4-BLK1" pic="qiluogan" start="1460" end="1480" step="3" name="LiftRod_48" />
+  <Anim id="49" type="LiftRod" source="LiftRod" parts="W4-BLK1" pic="qiluogan" start="1500" end="1520" step="3" name="LiftRod_49" />
+</root>
