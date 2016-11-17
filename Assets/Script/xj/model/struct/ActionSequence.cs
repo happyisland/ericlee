@@ -468,7 +468,12 @@ public class ActionSequence
     /// <returns></returns>
     public bool IsOfficial()
     {
-        if (null == showName)
+        Robot robot = RobotManager.GetInst().GetRobotForID(robotID);
+        if (null != robot && robot.Name.EndsWith("_playerdata"))
+        {
+            return false;
+        }
+        if (null == showName && !name.Equals(PublicFunction.Default_Actions_Name))
         {
             return false;
         }

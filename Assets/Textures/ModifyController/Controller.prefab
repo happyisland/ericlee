@@ -81,8 +81,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Checkmark 3x
-    x: 821
-    y: 405
+    x: 1947
+    y: 1496
     width: 75
     height: 75
     borderLeft: 0
@@ -94,8 +94,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Checkmark-3x
-    x: 818
-    y: 279
+    x: 821
+    y: 360
     width: 75
     height: 75
     borderLeft: 0
@@ -108,7 +108,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Checkmark-4x
     x: 818
-    y: 203
+    y: 125
     width: 75
     height: 75
     borderLeft: 0
@@ -120,8 +120,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Combined Shape@3x
-    x: 1947
-    y: 1804
+    x: 906
+    y: 743
     width: 81
     height: 244
     borderLeft: 0
@@ -134,7 +134,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: emptyAction3x
     x: 818
-    y: 27
+    y: 12
     width: 51
     height: 51
     borderLeft: 0
@@ -172,8 +172,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Icon_Trash@3x
-    x: 821
-    y: 481
+    x: 818
+    y: 264
     width: 69
     height: 90
     borderLeft: 0
@@ -250,8 +250,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: leftSprite3x
-    x: 1947
-    y: 1532
+    x: 821
+    y: 436
     width: 69
     height: 135
     borderLeft: 0
@@ -264,7 +264,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: leftSpritshade3x
     x: 1947
-    y: 1668
+    y: 1572
     width: 69
     height: 135
     borderLeft: 0
@@ -277,7 +277,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: lianglun3x
     x: 541
-    y: 201
+    y: 47
     width: 276
     height: 153
     borderLeft: 0
@@ -289,8 +289,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: lunbg1x
-    x: 906
-    y: 314
+    x: 1995
+    y: 1294
     width: 47
     height: 47
     borderLeft: 20
@@ -303,7 +303,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: lunbg2x
     x: 906
-    y: 555
+    y: 213
     width: 94
     height: 94
     borderLeft: 40
@@ -315,8 +315,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: lunshader1x
-    x: 955
-    y: 363
+    x: 1947
+    y: 1294
     width: 47
     height: 47
     borderLeft: 20
@@ -329,7 +329,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: lunshader2x
     x: 906
-    y: 460
+    y: 118
     width: 94
     height: 94
     borderLeft: 40
@@ -368,7 +368,7 @@ MonoBehaviour:
     paddingBottom: 66
   - name: placedable3x
     x: 818
-    y: 79
+    y: 64
     width: 60
     height: 60
     borderLeft: 0
@@ -394,7 +394,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: sanlun3x
     x: 541
-    y: 47
+    y: 201
     width: 276
     height: 153
     borderLeft: 0
@@ -407,7 +407,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: selectable@3x
     x: 818
-    y: 140
+    y: 203
     width: 60
     height: 60
     borderLeft: 0
@@ -419,32 +419,6 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: selected01@2x
-    x: 698
-    y: 572
-    width: 50
-    height: 50
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 0
-    paddingRight: 0
-    paddingTop: 0
-    paddingBottom: 0
-  - name: selected02@2x
-    x: 749
-    y: 572
-    width: 50
-    height: 50
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
-    paddingLeft: 0
-    paddingRight: 0
-    paddingTop: 0
-    paddingBottom: 0
-  - name: selected03@2x
     x: 801
     y: 572
     width: 50
@@ -457,7 +431,7 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
-  - name: selected04@2x
+  - name: selected02@2x
     x: 852
     y: 572
     width: 50
@@ -470,8 +444,34 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
+  - name: selected03@2x
+    x: 698
+    y: 572
+    width: 50
+    height: 50
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: selected04@2x
+    x: 749
+    y: 572
+    width: 50
+    height: 50
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
   - name: servoBg2x
-    x: 1121
+    x: 1226
     y: 1032
     width: 108
     height: 108
@@ -523,8 +523,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: servoModel_jdN3x
-    x: 1947
-    y: 1498
+    x: 633
+    y: 13
     width: 41
     height: 33
     borderLeft: 0
@@ -536,8 +536,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: servoModel_jdS3x
-    x: 1989
-    y: 1498
+    x: 675
+    y: 13
     width: 41
     height: 33
     borderLeft: 0
@@ -615,7 +615,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: vslider@3x
     x: 906
-    y: 819
+    y: 405
     width: 102
     height: 168
     borderLeft: 0
@@ -627,8 +627,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: vslider_shader@3x
-    x: 801
-    y: 623
+    x: 906
+    y: 988
     width: 102
     height: 507
     borderLeft: 0
@@ -640,8 +640,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: vslider_shadow@2x
-    x: 401
-    y: 29
+    x: 1009
+    y: 768
     width: 104
     height: 372
     borderLeft: 0
@@ -666,7 +666,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: vslider3x
-    x: 698
+    x: 801
     y: 623
     width: 102
     height: 507
@@ -679,8 +679,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: vsliderIconBoard@3x
-    x: 906
-    y: 988
+    x: 698
+    y: 623
     width: 102
     height: 507
     borderLeft: 0
@@ -706,7 +706,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: vsliderShader@3x
     x: 906
-    y: 650
+    y: 574
     width: 102
     height: 168
     borderLeft: 0
@@ -717,8 +717,47 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
+  - name: vsliderShadow@2x
+    x: 401
+    y: 25
+    width: 128
+    height: 376
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: vsliderSprite@2x
+    x: 1947
+    y: 1708
+    width: 90
+    height: 340
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: vsliderThumb@2x
+    x: 906
+    y: 308
+    width: 96
+    height: 96
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
   - name: vsliderThumb@3x
-    x: 1009
+    x: 1114
     y: 1029
     width: 111
     height: 111
@@ -731,8 +770,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: wheel01@1x
-    x: 821
-    y: 356
+    x: 906
+    y: 69
     width: 48
     height: 48
     borderLeft: 0
@@ -744,8 +783,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: wheel02@1x
-    x: 906
-    y: 411
+    x: 955
+    y: 69
     width: 48
     height: 48
     borderLeft: 0
@@ -757,8 +796,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: wheel03@1x
-    x: 955
-    y: 411
+    x: 906
+    y: 20
     width: 48
     height: 48
     borderLeft: 0
@@ -770,8 +809,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: wheel04@1x
-    x: 906
-    y: 362
+    x: 955
+    y: 20
     width: 48
     height: 48
     borderLeft: 0

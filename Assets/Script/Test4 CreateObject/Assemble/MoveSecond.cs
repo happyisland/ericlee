@@ -62,6 +62,7 @@ public class MoveSecond : MonoBehaviour
 
     //已经生成的物体
     public List<GameObject> AddedAllGOs = new List<GameObject>();
+    public Dictionary<string,GameObject> AddedAllGOsDic = new Dictionary<string,GameObject>();
 
     Dictionary<string, int> mDjInitRota = null;
     public List<GameObject> alldj = new List<GameObject>();  //所有的舵机物体-实物
@@ -91,6 +92,8 @@ public class MoveSecond : MonoBehaviour
 	
 	Dictionary<string, string> wireJionts = new Dictionary<string, string>();     //<线的名称，joint后缀>
     Dictionary<string, DJLianDongs> djld = new Dictionary<string, DJLianDongs>();//联动舵机
+    Dictionary<string, DJLianDongs> gosld = new Dictionary<string, DJLianDongs>();//舵机引起的模型联动
+    Dictionary<string, LianDongGOs> ldgos = new Dictionary<string, LianDongGOs>();
 
     public GameObject connect;   //mainScene中的connect按钮
     public GameObject Guanfang;//mainScene中的Guanfang按钮
@@ -414,7 +417,7 @@ public class MoveSecond : MonoBehaviour
                 foreach (KeyValuePair<string, int> kvp in mDjInitRota)
                 {
                     int id = RobotMgr.Instance.FinddjIDBydjNam(robotName, kvp.Key);// PublicFunction.GetDuoJiId(kvp.Key);
-                    data[id] = PublicFunction.DuoJi_Start_Rota;
+                    data[id] = (int)RobotMgr.Instance.rbt[robotName].gos[kvp.Key].oriDJAngleX; //PublicFunction.DuoJi_Start_Rota;
                 }
                 return data;
             }
@@ -735,6 +738,7 @@ public class MoveSecond : MonoBehaviour
             else if (nu == goName.Count)
             {
                 AddedAllGOs = RobotMgr.Instance.AddedAllGOs;
+                AddedAllGOsDic = NormalTools.ListToDic<GameObject>(AddedAllGOs);
                 RobotMgr.Instance.alldj = RobotMgr.Instance.FindAllDJGO(AddedAllGOs);
         
                 goPosAll=RobotMgr.Instance.goPosAll;
@@ -793,6 +797,7 @@ public class MoveSecond : MonoBehaviour
     public void CreateModelFinishSec()
     {
         AddedAllGOs = RobotMgr.Instance.AddedAllGOs;
+        AddedAllGOsDic = NormalTools.ListToDic<GameObject>(AddedAllGOs);
         alldpbox = RobotMgr.Instance.alldpbox;
         alldj = RobotMgr.Instance.alldj;
         goPosAll = RobotMgr.Instance.goPosAll;
@@ -813,6 +818,8 @@ public class MoveSecond : MonoBehaviour
 
        
         djld = RecordContactInfo.Instance.FindLDDJ(robotName);
+        ldgos = GetLianDongData.Inst.FindLDGOsData();
+       // gosld = RecordContactInfo.Instance.FindLDGOs(robotName);
         
 
         StartCoroutine(Test());
@@ -878,6 +885,9 @@ public class MoveSecond : MonoBehaviour
 
         
         StartCoroutine(Test());
+        djld = RecordContactInfo.Instance.FindLDDJ(robotName);
+        ldgos = GetLianDongData.Inst.FindLDGOsData();
+       // gosld = RecordContactInfo.Instance.FindLDGOs(robotName);
     }
 
     public delegate void voidDelegate();
@@ -1061,7 +1071,7 @@ public class MoveSecond : MonoBehaviour
                 foreach (KeyValuePair<string, int> kvp in mDjInitRota)
                 {
                     mDjEulerDict[kvp.Key] = kvp.Value;
-                    mDjRotaDict[kvp.Key] = PublicFunction.DuoJi_Start_Rota;
+                    mDjRotaDict[kvp.Key] = RobotMgr.Instance.rbt[robotName].gos[kvp.Key].oriDJAngleX; //PublicFunction.DuoJi_Start_Rota;
                 }
             }
         }
@@ -1118,7 +1128,7 @@ public class MoveSecond : MonoBehaviour
     {
         if (null != mDjInitRota && mDjInitRota.ContainsKey(name))
         {
-            float euler = djRota + mDjInitRota[name] - PublicFunction.DuoJi_Start_Rota;
+            float euler = djRota + mDjInitRota[name] - RobotMgr.Instance.rbt[robotName].gos[name].oriDJAngleX;//PublicFunction.DuoJi_Start_Rota;
             if (euler < 0)
             {
                 euler += 360;
@@ -1141,7 +1151,7 @@ public class MoveSecond : MonoBehaviour
             {
                 eulerAngles += 360;
             }
-            float rota = eulerAngles + PublicFunction.DuoJi_Start_Rota - mDjInitRota[name];
+            float rota = eulerAngles + RobotMgr.Instance.rbt[robotName].gos[name].oriDJAngleX - mDjInitRota[name];
             if (rota < 0)
             {
                 rota += 360;
@@ -1290,7 +1300,11 @@ public class MoveSecond : MonoBehaviour
                         Rotate(djName, FindRotateGO(djName), rota);
 
                         
-                        LDRotate(djName,rota);
+                       LDRotate(djName,rota);
+
+                        
+                       //LDGOsRotate(djName, rota);
+
                     }
                 }
             }
@@ -1308,29 +1322,137 @@ public class MoveSecond : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// 舵机联动
+    /// </summary>
+    /// <param name="djName"></param>
+    /// <param name="rota"></param>
     public void LDRotate(string djName,float rota)
     {
         if(djld!=null&&djld.Count>0&&djld.ContainsKey(djName))
         {
-            Debug.Log("djld.Count02:"+djld.Count);
+            //Debug.Log("djld.Count02:"+djld.Count);
             foreach(string keyChild in djld[djName].djlds.Keys)
             {
-                if (djld[djName].djlds[keyChild].difA == 0 && djld[djName].djlds[keyChild].difB==0)
+                DJLianDong djldTemp = djld[djName].djlds[keyChild];
+                if (djldTemp.difA == 0 && djldTemp.difB == 0)
                 {
-                    Rotate(keyChild, FindRotateGO(keyChild), MathTool.MathResult(0, djld[djName].djlds[keyChild].symbol,rota));
+                    Rotate(keyChild, FindRotateGO(keyChild), MathTool.MathResult(0, djldTemp.symbol, rota));
                 }
-                else if (djld[djName].djlds[keyChild].difA != 0 && djld[djName].djlds[keyChild].difB == 0)
+                else if (djldTemp.difA != 0 && djldTemp.difB == 0)
                 {
-                    Rotate(keyChild, FindRotateGO(keyChild), MathTool.MathResult(djld[djName].djlds[keyChild].difA, djld[djName].djlds[keyChild].symbol, rota));
+                    Rotate(keyChild, FindRotateGO(keyChild), MathTool.MathResult(djldTemp.difA, djldTemp.symbol, rota));
                 }
-                else if (djld[djName].djlds[keyChild].difA == 0 && djld[djName].djlds[keyChild].difB != 0)
+                else if (djldTemp.difA == 0 && djldTemp.difB != 0)
                 {
-                    Rotate(keyChild, FindRotateGO(keyChild), MathTool.MathResult(rota, djld[djName].djlds[keyChild].symbol, djld[djName].djlds[keyChild].difB));
+                    Rotate(keyChild, FindRotateGO(keyChild), MathTool.MathResult(rota, djldTemp.symbol, djldTemp.difB));
                 }
             }
                            
         }
+
+        
     }
+
+    /// <summary>
+    /// 舵机带动的联动物体角度重置
+    /// </summary>
+    /// <param name="djName"></param>
+    /// <param name="rota"></param>
+    public void LDGOsAngle(string djName)
+    {
+        //Debug.Log("LDGOnfsfsfsS:");
+        if (ldgos != null && ldgos.Count > 0)
+        {
+            GameObject dp = alldpbox[djName].dp;
+            float angleX = dp.transform.eulerAngles.x;
+
+            //Debug.Log("dp:" + dp.name + ";anglex:" + angleX);
+            if (angleX > 180)
+            {
+                angleX -= 360;
+            }
+            
+            int idTemp = 0;
+            Dictionary<int, ldgo> ldgoT = ldgos[djName].ldgos;
+            
+            foreach (int idChild in ldgoT.Keys)
+            {
+                if ((ldgoT[idChild].start < angleX) && (ldgoT[idChild].end>=angleX))
+                {
+                    idTemp = idChild;
+                    
+                }
+            }
+            
+            if (idTemp != 0)
+            {
+                Dictionary<string, Vector3> ldangle = ldgoT[idTemp].ldangle;
+                if (ldangle!=null)
+                {
+                    foreach (string nameT in ldangle.Keys)
+                    {
+                        //Debug.Log("LDGOS:" + nameT + ";vector3:" + ldangle[nameT]);
+                        AddedAllGOsDic[nameT].transform.eulerAngles = ldangle[nameT];
+                    }
+                }
+
+                Dictionary<string, Vector3> ldpos = ldgoT[idTemp].ldpos;
+                if (ldpos != null)
+                {
+                    foreach (string nameT in ldpos.Keys)
+                    {
+                        Debug.Log("LDGOS:" + nameT + ";vector3:" + ldpos[nameT]);
+                        AddedAllGOsDic[nameT].transform.position = ldpos[nameT];
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// 舵机带动的物体联动
+    /// </summary>
+    /// <param name="djName"></param>
+    /// <param name="rota"></param>
+    public void LDGOsRotate(string djName, float rota)
+    {
+        if (gosld != null && gosld.Count > 0 && gosld.ContainsKey(djName))
+        {
+            Debug.Log("rota:" + rota);
+            foreach (string keyChild in gosld[djName].djlds.Keys)
+            {
+                DJLianDong djldTemp=gosld[djName].djlds[keyChild];
+                if (djldTemp.difA == 0 && djldTemp.difB == 0&&AddedAllGOsDic.ContainsKey(keyChild))
+                {
+                    if (keyChild == "m48_0026" || keyChild == "m48_0027" || keyChild == "m48_0028" || keyChild == "m48_0023" || keyChild == "m48_0030" || keyChild == "m48_0029")
+                    {
+                        AddedAllGOsDic[keyChild].transform.Rotate(new Vector3(0, 0, MathTool.MathResult(0, djldTemp.symbol, rota)));
+                    }
+                    //else if (keyChild == "m48_0024")
+                    //{
+                    //    AddedAllGOsDic[keyChild].transform.Rotate(new Vector3(0, 0, MathTool.MathResult(0, djldTemp.symbol,rota)));
+                    //}
+                    //else
+                    //{
+                        AddedAllGOsDic[keyChild].transform.Rotate(new Vector3(0, 0, MathTool.MathResult(0, djldTemp.symbol, rota)));
+                    //}
+                   
+                   
+                }
+                else if (djldTemp.difA != 0 && djldTemp.difB == 0)
+                {
+                    AddedAllGOsDic[keyChild].transform.Rotate(new Vector3(0, 0, MathTool.MathResult(djldTemp.difA, djldTemp.symbol, rota)));
+                }
+                else if (djldTemp.difA == 0 && djldTemp.difB != 0)
+                {
+                    AddedAllGOsDic[keyChild].transform.Rotate(new Vector3(0, 0, MathTool.MathResult(rota, djldTemp.symbol, djldTemp.difB)));
+                }
+            }
+
+        }
+    }
+
 
     /// <summary>
     /// 模型旋转
@@ -1372,6 +1494,7 @@ public class MoveSecond : MonoBehaviour
 
                 mDjRotaDict[djName] += a;
                 mDjEulerDict[djName] = PublicFunction.Rounding(euler);
+
             }
 
         }
@@ -1435,8 +1558,31 @@ public class MoveSecond : MonoBehaviour
         return null;
     }
 
+    float angleXTemp=0;
     void Update()
     {
+       
+        if (ldgos != null && ldgos.Count > 0)
+        {
+            foreach(string nameT in ldgos.Keys)
+            {
+                if (alldpbox.ContainsKey(nameT))
+                {
+                    GameObject dp = alldpbox[nameT].dp;
+                    float angleX = dp.transform.localEulerAngles.x;
+                    if(angleX!=angleXTemp)
+                    {
+                        LDGOsAngle(nameT);
+                        angleXTemp = angleX;
+                    }
+                }
+                
+                
+            }
+            
+        }
+        
+        
         try
         {
             if (mSelectDjData.Count > 0)
@@ -1457,10 +1603,12 @@ public class MoveSecond : MonoBehaviour
                         float offset = kvp.Value.rota - mDjRotaDict[kvp.Key];
                         if (Mathf.Abs(offset) > 0.1f)
                         {
-                            Debug.Log("test02");
+                            //Debug.Log("test02");
                             Rotate(kvp.Value.djName, kvp.Value.selectObj, offset);
 
                             LDRotate(kvp.Value.djName, offset);
+      
+                           // LDGOsRotate(kvp.Value.djName, offset);
                         }
                     }
 

@@ -16,6 +16,8 @@ public class UserdefControllerScene : BaseScene {
     private UserCotrollerSettingUI setUI;
     private JoystickSettingUI joySettingUI;
     private VsliderSettingUI vsliderSettingUI;
+    private int vsliderServoID;
+    private string selectWidgetID;
     public UserdefControllerScene()
     {
         mUIList = new System.Collections.Generic.List<BaseUI>();
@@ -85,15 +87,41 @@ public class UserdefControllerScene : BaseScene {
     /// </summary>
     public void CloseVsliderSettingUI()
     {
+        selectWidgetID = vsliderSettingUI.sliderData.widgetId;
+        if (vsliderSettingUI.isSelectOtherServo)
+            vsliderServoID = vsliderSettingUI.sliderData.servoID;
+        else
+            vsliderServoID = 0;
         mUIList.Remove(vsliderSettingUI);
         vsliderSettingUI.OnClose();
-
     }
 
     public void BackControllerSettingUI()
     {
         if (controllerUI != null)
             controllerUI.OnShow();
+        //Debug.Log("ReEnter is Controller");
+        Transform gridPanelC = GameObject.Find("userdefineControllerUI/Center/gridPanel").transform;
+        Debug.Log("vsliderServoID is " + vsliderServoID);
+        if (gridPanelC != null && gridPanelC.childCount > 1 && vsliderSettingUI.isSelectOtherServo)
+        {
+            for (int i = 1; i < gridPanelC.childCount; i++)
+            {
+                if (gridPanelC.GetChild(i).tag.Contains("widget_vslider") && gridPanelC.GetChild(i).name == selectWidgetID)
+                {
+                    gridPanelC.GetChild(i).GetChild(4).GetComponent<UILabel>().text = LauguageTool.GetIns().GetText("舵机") + " " + vsliderServoID.ToString();
+                    for (int j = 1; j < gridPanelC.childCount; j++)
+                    {
+                        if (gridPanelC.GetChild(j).tag.Contains("widget_vslider") && gridPanelC.GetChild(j).name != selectWidgetID && gridPanelC.GetChild(j).GetChild(4).GetComponent<UILabel>().text == gridPanelC.GetChild(i).GetChild(4).GetComponent<UILabel>().text)
+                        {
+                            gridPanelC.GetChild(j).GetChild(4).GetComponent<UILabel>().text = "";
+                            ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(gridPanelC.GetChild(j).name)).servoID = 0;
+                        }
+                        
+                    }
+                }
+            }
+        }
         UpdateScene();
     }
 

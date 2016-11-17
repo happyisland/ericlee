@@ -174,7 +174,7 @@ public class JMSimulatorOnly : MonoBehaviour
         robotNameNoType = RobotMgr.NameNoType(robotname);
 
         string robotid = RobotMgr.Instance.rbt[robotname].id;
-
+  
         oriValue=RecordContactInfo.Instance.FindOriValue("Step");   //查找保存的步数
 
         shaderAnim = Resources.Load("Prefab/Test4/CommonClips/GreenColor") as AnimationClip;

@@ -85,10 +85,10 @@ namespace Game.Platform
         List<string> mCannelConDeviceList = null;
         public bool GetBluetoothState()
         {
-/*
+
 #if UNITY_EDITOR
             return true;
-#endif*/
+#endif
             return m_blueMgr.ConnenctState;
         }
         
@@ -229,8 +229,8 @@ namespace Game.Platform
             }
             /*Robot_System_Version = "Jimu_p1.30";
             Robot_System_FilePath = "Jimu2primary_P1.30";*/
-            Robot_Servo_Version = "41161301";
-            Robot_Servo_FilePath = "jimu2_app_41161301";
+            Robot_Servo_Version = "41161701";
+            Robot_Servo_FilePath = "jimu2_app_41161701";
             /*Robot_System_Version = "Jimu_p1.29";
             Robot_System_FilePath = "Jimu2primary_P1.29";
             Robot_Servo_Version = "41155201";
@@ -246,9 +246,17 @@ namespace Game.Platform
             Timer.Update();
         }
 
-#region 蓝牙模块
+        public void TestCallUnityFunc(CallUnityFuncID id, string arg)
+        {
+            if (null != mUnityDelegateDict && mUnityDelegateDict.ContainsKey(id.ToString()) && null != mUnityDelegateDict[id.ToString()])
+            {
+                mUnityDelegateDict[id.ToString()](arg);
+            }
+        }
 
-#region Unity调用Platform
+        #region 蓝牙模块
+
+        #region Unity调用Platform
 
         public void PlatformInit()
         {
@@ -392,6 +400,7 @@ namespace Game.Platform
             m_blueMgr.MatchResult(false);
             NeedUpdateFlag = false;
             NetWork.GetInst().ClearAllMsg();
+            DisConnectSpeaker();
             try
             {
                 mPlatInterface.DisConnenctBuletooth();
@@ -637,11 +646,11 @@ namespace Game.Platform
             mPlatInterface.ConnectSpeaker(speaker);
         }
 
-        public void DisConnectSpeaker(string speaker)
+        public void DisConnectSpeaker()
         {
-            mConnectingSpeakerMac = string.Empty;
+            mPlatInterface.DisConnectSpeaker(mConnectedSpeakerMac);
             mConnectedSpeakerMac = string.Empty;
-            mPlatInterface.DisConnectSpeaker(speaker);
+            mConnectingSpeakerMac = string.Empty;
         }
         #endregion
 
@@ -703,6 +712,52 @@ namespace Game.Platform
                 {
                     mCannelConDeviceList.Clear();
                 }
+            }
+        }
+
+        /// <summary>
+        /// 蓝牙音响连接结果
+        /// </summary>
+        /// <param name="str"></param>
+        public void ConnenctSpeakerCallBack(string str)
+        {
+            mConnectingSpeakerMac = string.Empty;
+            if (string.IsNullOrEmpty(str))
+            {//连接失败
+                Robot robot = null;
+                if (RobotManager.GetInst().IsCreateRobotFlag)
+                {
+                    robot = RobotManager.GetInst().GetCreateRobot();
+                }
+                else
+                {
+                    robot = RobotManager.GetInst().GetCurrentRobot();
+                }
+                if (null != robot && null != robot.MotherboardData)
+                {
+                    SpeakerData speakerData = (SpeakerData)robot.GetReadSensorData(TopologyPartType.Speaker);
+                    if (null != speakerData)
+                    {
+                        SpeakerInfoData infoData = speakerData.GetSpeakerData();
+                        if (null != infoData)
+                        {
+                            PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("检测到蓝牙音响需要连接"), infoData.speakerName), PopSpeakerOnClick);
+                        }
+                    }
+                }
+                
+            }
+            else
+            {
+                mConnectedSpeakerMac = str;
+            }
+        }
+
+        void PopSpeakerOnClick(GameObject obj)
+        {
+            if (PromptMsg.RightBtnName.Equals(obj.name))
+            {
+                PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.OpenAndroidBLESetting, string.Empty);
             }
         }
 
@@ -1022,7 +1077,10 @@ namespace Game.Platform
                     robot.ShowName = msg;
                 }
                 EventMgr.Inst.Fire(EventID.Change_Robot_Name_Back, new EventArg(msg));
-                SceneMgr.EnterScene(SceneType.MainWindow);
+                if (SceneMgr.GetCurrentSceneType() != SceneType.MainWindow)
+                {
+                    SceneMgr.EnterScene(SceneType.MainWindow);
+                }
             }
             catch (System.Exception ex)
             {
@@ -1361,6 +1419,10 @@ namespace Game.Platform
         JsShowExceptionCallback = 23,//JS异常提示
         Destroy,//销毁unity
         GiveupVideoState,//放弃视频
+        CurrentStartPlaying,//当前状态是开始录制
+        //CurrentStopPlaying,//当前状态是停止录制
+        CurrentSaveVideo,//当前状态可以保存视频
+        ReplayVideoState,//重拍当前预览的视频
     }
 
     /// <summary>
@@ -1378,8 +1440,15 @@ namespace Game.Platform
         ChargeProtected,//充电保护
         MobClickEvent,//友盟统计
         GetCameraCurrentState,//进入拍摄界面
+        GiveupCurrentVideo,//放弃录制的视频
+        StartPlayingVideo,//开始录制视频
+        StopPlayingVideo,//停止录制视频
+        SavedCurrentVideo,//保存当前视频
         GetBluetoothCurrentState,//进入蓝牙连接
         ExitBluetoothCurrentState,//退出蓝牙连接
+        JsExceptionWaitResult,//异常等待返回
+        ExitPlayVideoMode,//充电保护下注销拍摄视频模式
+        OpenAndroidBLESetting,//打开android蓝牙设置
     }
     /// <summary>
     /// 用户数据

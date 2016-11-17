@@ -124,7 +124,7 @@ namespace Game.Event
         Exit_Blue_Connect,//退出蓝牙连接
         Blue_Connect_Finished,//蓝牙连接完成
 
-
+        Read_Speaker_Data_Ack,//读取喇叭数据返回
         //////////////////////////////////////////////////////////////////////////
         //拓扑图
         Item_Drag_Drop_Start,

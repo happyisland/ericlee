@@ -1,0 +1,13 @@
+<Roots>
+  <Root nodeType="head" name="左移" showName="0$左移;1$Move Left;6$Déplacement vers la gauche;4$Nach links bewegen;5$Muovi a sinistra;7$Mover hacia la izquierda;2$左に動く;8$Ir para a esquerda;9$左移;10$تحرك يسارًا" robotID="robot_e59a8c0f-d4a1-4c18-bd91-ddb14e213fb4" id="actions_e7887a01-7805-4cf0-a0cb-de028445a98a" icon="icon_3" createTime="635999408169845211" />
+  <Root nodeType="body" index="1" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$43;3$42;4$120;5$119;6$106" turns="" show="2;3;5;6" />
+  <Root nodeType="body" index="2" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$197;3$118;4$120;5$187;6$117" turns="" show="2;3;5;6" />
+  <Root nodeType="body" index="3" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$43;3$42;4$120;5$119;6$106" turns="" show="2;3;5;6" />
+  <Root nodeType="body" index="4" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$197;3$118;4$120;5$187;6$117" turns="" show="2;3;5;6" />
+  <Root nodeType="body" index="5" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$43;3$42;4$120;5$119;6$106" turns="" show="2;3;5;6" />
+  <Root nodeType="body" index="6" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$197;3$118;4$120;5$187;6$117" turns="" show="2;3;5;6" />
+  <Root nodeType="body" index="7" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$43;3$42;4$120;5$119;6$106" turns="" show="2;3;5;6" />
+  <Root nodeType="body" index="8" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$197;3$118;4$120;5$187;6$117" turns="" show="2;3;5;6" />
+  <Root nodeType="body" index="9" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$43;3$42;4$120;5$119;6$106" turns="" show="2;3;5;6" />
+  <Root nodeType="body" index="10" sportTime="300" waitTime="100" idMin="1" idMinRota="120" rotas="1$120;2$120;3$120;4$120;5$120;6$120" turns="" show="2;3;5;6" />
+</Roots>

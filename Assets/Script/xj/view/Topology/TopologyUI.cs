@@ -1998,6 +1998,35 @@ public class TopologyUI : BaseUI
                     SetState(obj.transform, state);
                 }
                 break;
+            case TopologyPartType.Speaker:
+                {
+                    bool state = true;
+                    if (null != mRobot && null != mRobot.MotherboardData)
+                    {
+                        SensorData sensorData = mRobot.MotherboardData.GetSensorData(data.partType);
+                        if (null != sensorData)
+                        {
+                            if (sensorData.errorIds.Contains(data.id))
+                            {
+                                state = false;
+                            }
+                            else if (sensorData.ids.Count > 1)
+                            {
+                                state = false;
+                            }
+                        }
+                        else
+                        {
+                            state = false;
+                        }
+                    }
+                    else
+                    {
+                        state = false;
+                    }
+                    SetState(obj.transform, state);
+                }
+                break;
             default:
                 {
                     bool state = true;

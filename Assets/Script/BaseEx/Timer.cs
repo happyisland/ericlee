@@ -16,7 +16,7 @@ namespace Game
 		// Timer 回调封装
 		// --------------------------------------------------------------------
 		#region Timer 回调基类
-		private abstract class Callback
+		public abstract class Callback
 		{
 			private bool m_disposed;				// 是否已经废弃
 			private readonly float m_interval;		// 隔多长时间触发一次 
@@ -55,8 +55,8 @@ namespace Game
 			{
 				if (this.m_nextTime > Time.time) 
 					return false;
-
-				this.Call();
+                if (!this.Disposed)
+				    this.Call();
 
 				if (this.m_interval == 0)						// 如果没指定时间间隔，则只执行一次
 					return true;
@@ -236,11 +236,24 @@ namespace Game
 		// ----------------------------------------------------------
 		public static bool Cancel(Int64 timerID)
 		{
-			Callback cb;
-			if (sm_cbs.TryGetValue(timerID, out cb))
+			if (sm_cbs.ContainsKey(timerID))
 			{
-				cb.Dispose();
-				return sm_cbs.Remove(timerID);
+                sm_cbs[timerID].Dispose();
+				sm_cbs.Remove(timerID);
+                if (sm_cbs.Count > 0)
+                {
+                    sm_nextTime = long.MaxValue;
+                    foreach (KeyValuePair<Int64, Callback> kvp in sm_cbs)
+                    {
+                        sm_nextTime = Math.Min(sm_nextTime, kvp.Value.NextTime);
+                    }
+                }
+                else
+                {
+                    sm_nextTime = -1;
+                }
+
+                return true;
 			}
 			return false;
 		}

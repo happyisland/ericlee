@@ -1,0 +1,86 @@
+<Root>
+<Panel name="P1">
+
+
+  <GO id="1" name="Clean" pos="(-550.0, 250.0, 0.0)" count="2"/>
+  <GO id="2" name="Clean" pos="(-366.0, 250.0, 0.0)" count="2"/>
+  
+  <GO id="3" name="C1-GRY" pos="(-182.0, 250.0, 0.0)" count="2" />
+  <GO id="4" name="C2-GRY" pos="(2.0, 250.0, 0.0)" count="2" />
+  <GO id="5" name="C4-GRY" pos="(186.0, 250.0, 0.0)" count="7" />
+  
+  <GO id="6" name="P09-BLU" pos="(370.0, 250.0, 0.0)" count="2" />
+  <GO id="7" name="P09-GRN" pos="(554.0, 250.0, 0.0)" count="2" />
+  
+  
+  
+  <GO id="8" name="Clean" pos="(-550.0, 45.0, 0.0)" count="1" /> 
+  <GO id="9" name="Clean" pos="(-366.0, 45.0, 0.0)" count="1" />
+  
+  <GO id="10" name="C5-GRY" pos="(-182.0, 45.0, 0.0)" count="6" />
+  <GO id="11" name="C6-GRY" pos="(2.0, 45.0, 0.0)" count="10" />
+  <GO id="12" name="C8-GRY" pos="(186.0, 45.0, 0.0)" count="2" />
+  
+  <GO id="13" name="P12-BLU" pos="(370.0, 45.0, 0.0)" count="2" />
+  <GO id="14" name="P12-GRN" pos="(554.0, 45.0, 0.0)" count="2" />
+  
+  
+  
+  <GO id="15" name="MC-GRY" pos="(-550.0, -160.0, 0.0)" count="1" />
+  <GO id="16" name="SERVO-BLK" pos="(-366.0, -160.0, 0.0)" count="6" />
+  
+  <GO id="17" name="C10-RED" pos="(-182.0, -160.0, 0.0)" count="2" />
+  <GO id="18" name="C11-GRY" pos="(2.0, -160.0, 0.0)" count="3" />
+  <GO id="19" name="" pos="(186.0, -160.0, 0.0)" count="2" />
+  
+  <GO id="20" name="P13-BLU" pos="(370.0, -160.0, 0.0)" count="2" />
+  <GO id="21" name="P13-GRN" pos="(554.0, -160.0, 0.0)" count="2" />
+  
+  <GO id="22" name="labelP-CONNECTORS" pos="(-182, 341, 0.0)" count="1" />
+   <GO id="23" name="labelC-PARTS" pos="(386, 341, 0.0)" count="1" />
+  <GO id="24" name="labelPage-1/3" pos="(625.89, 341, 0.0)" count="1" />
+  
+    <GO id="25" name="Meebot" pos="(-458, 158, 0.0)" count="1" />
+ 
+</Panel>
+<Panel name="P2">
+  <GO id="1" name="P20-GRN" pos="(-550.0, 250.0, 0.0)" count="2"/>
+  <GO id="2" name="P22-BLU" pos="(-366.0, 250.0, 0.0)" count="1"/>
+  <GO id="3" name="P25-GRY" pos="(-182.0, 250.0, 0.0)" count="1" />
+  <GO id="4" name="P26-BLU" pos="(2.0, 250.0, 0.0)" count="3" />
+  <GO id="5" name="P26-GRN" pos="(186.0, 250.0, 0.0)" count="1" />
+  <GO id="6" name="P34-BLU" pos="(370.0, 250.0, 0.0)" count="2" />
+  <GO id="7" name="P35-BLU" pos="(554.0, 250.0, 0.0)" count="2" />
+  
+  <GO id="8" name="P35-GRN" pos="(-550.0, 45.0, 0.0)" count="6" /> 
+  <GO id="9" name="P35-GRY" pos="(-366.0, 45.0, 0.0)" count="4" />
+  <GO id="10" name="P35-RED" pos="(-182.0, 45.0, 0.0)" count="6" />
+  <GO id="11" name="P47-YLW" pos="(2.0, 45.0, 0.0)" count="13" />
+  <GO id="12" name="P48-RED" pos="(186.0, 45.0, 0.0)" count="58" />
+  <GO id="13" name="P49-GRN" pos="(370.0, 45.0, 0.0)" count="48" />
+  <GO id="14" name="P54-GRY" pos="(554.0, 45.0, 0.0)" count="2" />
+  
+  <GO id="15" name="P67-WHT" pos="(-550.0, -160.0, 0.0)" count="2" />
+  <GO id="16" name="P68-WHT" pos="(-366.0, -160.0, 0.0)" count="2" />
+  
+  <GO id="17" name="P78-GRY" pos="(-182.0, -160.0, 0.0)" count="2" />
+  <GO id="18" name="P80-GRY" pos="(2.0, -160.0, 0.0)" count="1" />
+  
+  <GO id="19" name="labelC-PARTS" pos="(-534.5, 341, 0.0)" count="1" />
+  <GO id="20" name="labelPage-2/3" pos="(625.89, 341, 0.0)" count="1" />
+</Panel>
+<Panel name="P3">
+  <GO id="1" name="WIRE1-BLU" pos="(-363.1, 250, 0.0)" count="2" />
+  <GO id="2" name="WIRE2-GRY" pos="(-362.9, 201, 0.0)" count="2" />
+  <GO id="3" name="WIRE3" pos="(-361.7, 148, 0.0)" count="2" />
+  <GO id="4" name="WIRE4" pos="(-362.9, 96, 0.0)" count="1" />
+   
+   <GO id="5" name="labelW1-W1x2" pos="(30.8, 250, 0.0)" count="1" />
+   <GO id="6" name="labelW2-W2x2" pos="(-111.8, 201, 0.0)" count="1" />
+   <GO id="7" name="labelW3-W3x2" pos="(-261.3, 148, 0.0)" count="1" />
+   <GO id="8" name="labelW4-W4x1" pos="(14.8, 96, 0.0)" count="1" /> 
+   
+   <GO id="9" name="labelW-WIRES" pos="(-575.7, 341, 0.0)" count="1" />
+   <GO id="10" name="labelPage-3/3" pos="(625.89, 341, 0.0)" count="1" />
+</Panel>
+</Root>

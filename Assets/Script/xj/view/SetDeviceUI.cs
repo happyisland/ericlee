@@ -335,6 +335,8 @@ public class SetDeviceUI : BaseUI
                 {
                     label.text = id.ToString();
                 }
+                TopologyUI.SetSensorBg(sensor.gameObject, mDevicePartType);
+                TopologyUI.SetSensorIcon(sensor.gameObject, mDevicePartType);
             }
         }
         

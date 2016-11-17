@@ -1,5 +1,5 @@
 ﻿//----------------------------------------------
-//            积木2: xiongsonglin
+//            积木2: sunyu
 // Copyright © 2015 for Open
 //----------------------------------------------
 using UnityEngine;
@@ -18,6 +18,9 @@ public class ModelDetailsWindow_new : MonoBehaviour
     bool IsOfficial; //是否是官方
     bool IsCameraState;
     bool IsFirstCamera;
+    bool IsFirstVideo;
+    bool IsActionScene;
+    bool hasSelectAction;
     string RobotName;
     public Transform officialTrans;
     public Transform defaultTrans;
@@ -29,13 +32,36 @@ public class ModelDetailsWindow_new : MonoBehaviour
     private Transform Reset_button;
     private Transform Power_button;
     private Transform Camera_button;
+    private Transform Play_button;
+    private Transform Delete_button;
+    private Transform Edit_button;
     private Transform Connect_button;
-    private Transform Guide_button;
+    private Transform GuideCamera_button;
+    private Transform GuideVideo_button;
     private Transform ScrollActionItems;
     private Transform FirstCameraEnter;
-    //private Transform Resets_button;
-    //private Transform Saved_Button;
-    //private Transform Stopped_Button;
+    private Transform FirstVideoEnter;
+    private Transform Giveup_button;
+    private Transform Saved_Button;
+    //private Transform StopPlay_Button;
+    private Transform StartPlay_Button;
+
+    private Transform CameraBgPanel;
+    private Transform CameraAreas;
+
+    private Transform CameraIconTip;
+    private Transform CameraGuideLine;
+    private Transform CameraTextTips;
+
+    private Transform VideoIconTip;
+    private Transform VideoGuideLine2;
+    private Transform VideoGuideLine3;
+    private Transform VideoGuideLine4;
+    private Transform VideoTextTip1;
+    private Transform VideoTextTip2;
+    private Transform BluetoothIconTip;
+    private Transform ActionIconTip;
+   
     private UITexture PhotoTexture;
     private GameObject AddButton;
     private GameObject TakePhotoObj;
@@ -104,6 +130,9 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     public void GoBack(GameObject go)
     {
+        if (IsActionScene)
+            IsActionScene = false;
+
         isBackCommunity = true;
         RobotMgr.Instance.GoToCommunity();
 
@@ -164,8 +193,13 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     public void BlueTooClick(GameObject go)
     {
-        if (IsCameraState)
+        Debug.Log("GetBluetoothCurrentState is taken!!");
+        Debug.Log("进入蓝牙时相机状态 is " + IsCameraState);
+        if (IsCameraState && !PlatformMgr.Instance.IsChargeProtected)
         {
+#if UNITY_ANDROID
+            StartPlay_Button.GetChild(0).gameObject.SetActive(false);
+#endif
             PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.GetBluetoothCurrentState, "");
         }
         PublicPrompt.ShowClickBlueBtnMsg();
@@ -232,15 +266,23 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 if (Back_button != null)
                     UIEventListener.Get(Back_button.gameObject).onClick = BackEffect;
               //  BT_button.gameObject.SetActive(false);
-                Power_button.gameObject.SetActive(false);
+
+                Debug.Log("动作列表显示！！");
+
+                if (!IsActionScene)
+                    IsActionScene = true;
+
+                if (Power_button != null && IsActionScene)
+                    Power_button.gameObject.SetActive(false);
+
                 robotName.gameObject.SetActive(false);
 
                 ShowRightBar(false);
-                /*if (Camera_button != null)
+                if (Camera_button != null && !IsCameraState)
                 {
                     Camera_button.gameObject.SetActive(true);
                     UIEventListener.Get(Camera_button.gameObject).onClick = CameraClick;
-                }*/
+                }
 
                 if (!flagex)
                 {
@@ -262,13 +304,26 @@ public class ModelDetailsWindow_new : MonoBehaviour
             }
             else
             {
+                hasSelectAction = false;
+
                 if (TakePhotoObj.GetComponentInChildren<BoxCollider>() != null)
                     TakePhotoObj.GetComponentInChildren<BoxCollider>().enabled = true;
+
+                if (IsActionScene)
+                    IsActionScene = false;
 
                 if (Back_button != null)
                     UIEventListener.Get(Back_button.gameObject).onClick = GoBack;
                 
                 OnBlueConnectResult(new EventArg(PlatformMgr.Instance.GetBluetoothState())); //蓝牙
+
+                Debug.Log("动作列表消失！！");
+                //Power_button.gameObject.SetActive(true);
+
+                if (Power_button != null && PlatformMgr.Instance.GetBluetoothState())
+                    StartCoroutine(ShowPowerIcons(0.3f));
+                
+
                 robotName.gameObject.SetActive(IsOfficial);
 
                 if (Camera_button != null)
@@ -276,6 +331,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
                     Camera_button.gameObject.SetActive(false);
                 }
                 ShowBottomBar(false);
+                
                 if (!flagex1)
                 {
                     ShowRightBar(true, 0.5f);
@@ -292,72 +348,419 @@ public class ModelDetailsWindow_new : MonoBehaviour
     {
         IsCameraState = true;
 
+        CameraBgPanel.gameObject.SetActive(true);
+        CameraAreas.gameObject.SetActive(false);
+
         if (AddButton != null)
         {
             AddButton.gameObject.SetActive(false);
         }
+        if (Power_button != null)
+        {
+            Power_button.gameObject.SetActive(false);
+        }
+        
+#if UNITY_ANDROID        
+        if (IsFirstVideo)
+        {
+            FirstVideoEnter.gameObject.SetActive(true);
+            VideoIconTip.gameObject.SetActive(true);
+            VideoGuideLine2.gameObject.SetActive(true);
+            VideoGuideLine3.gameObject.SetActive(true);
+            VideoGuideLine4.gameObject.SetActive(true);
+            VideoTextTip1.gameObject.SetActive(true);
+            VideoTextTip2.gameObject.SetActive(true);
+            BluetoothIconTip.gameObject.SetActive(true);
+            ActionIconTip.gameObject.SetActive(true);
+
+            CameraAreas.gameObject.SetActive(true);
+
+            GuideVideo_button.gameObject.SetActive(true);
+            UIEventListener.Get(GuideVideo_button.gameObject).onClick = EnterVideoPlayScene;
+
+            UILabel VideoTips1 = VideoTextTip1.gameObject.GetComponent<UILabel>();
+            VideoTips1.text = LauguageTool.GetIns().GetText("录制视频引导");
+            UILabel VideoTips2 = VideoTextTip2.gameObject.GetComponent<UILabel>(); 
+            VideoTips2.text = LauguageTool.GetIns().GetText("连接蓝牙运动提示");
+
+            UILabel GuideButtonTips2 = GuideVideo_button.GetChild(0).GetComponent<UILabel>();
+            GuideButtonTips2.text = LauguageTool.GetIns().GetText("首次引导按钮");
+        } 
+
+        if (hasSelectAction)
+        {
+            Edit_button.gameObject.SetActive(false);
+            GameObject eroo = null;
+            Play_button.gameObject.GetComponent<UISprite>().SetAnchor(eroo);
+            Vector2 pos22 = Play_button.localPosition;
+            pos22.x = pos22.x + (261.0f * PublicFunction.GetWidth() / 1334.0f);
+            Play_button.localPosition = pos22;
+
+            if (RecordContactInfo.Instance.openType == "default")
+            {
+                Delete_button.gameObject.SetActive(false);
+            }
+            else
+            {
+                Delete_button.gameObject.SetActive(true);
+                GameObject ccf = null;
+                Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(ccf);
+                Vector2 pos24 = Delete_button.localPosition;
+                pos24.x = pos24.x + (261.0f * PublicFunction.GetWidth() / 1334.0f);
+                Delete_button.localPosition = pos24;
+                Delete_button.gameObject.SetActive(false);
+            }
+        }
+#endif
+#if UNITY_IPHONE
+        if (hasSelectAction)
+        {
+            Edit_button.gameObject.SetActive(false);
+            GameObject ero = null;
+            Play_button.gameObject.GetComponent<UISprite>().SetAnchor(ero);
+            Vector2 pos22 = Play_button.localPosition;
+            pos22.x = pos22.x + (132.0f * PublicFunction.GetWidth() / 1334.0f);
+            Play_button.localPosition = pos22;
+
+            if (RecordContactInfo.Instance.openType == "default")
+            {
+                Delete_button.gameObject.SetActive(false);
+            }
+            else
+            {
+                Delete_button.gameObject.SetActive(true);
+                GameObject ccf = null;
+                Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(ccf);
+                Vector2 pos24 = Delete_button.localPosition;
+                pos24.x = pos24.x + (132.0f * PublicFunction.GetWidth() / 1334.0f);
+                Delete_button.localPosition = pos24;
+                Delete_button.gameObject.SetActive(false);
+            }
+        }       
+#endif
+#if UNITY_ANDROID
+        if (Giveup_button != null)
+        {
+            Giveup_button.gameObject.SetActive(true);
+            UIEventListener.Get(Giveup_button.gameObject).onClick = GiveupCurrentVideo;
+            //UIEventListener.Get(Giveup_button.gameObject).onClick = GiveupVideoState;
+        }
+        if (StartPlay_Button != null)
+        {
+            StartPlay_Button.gameObject.SetActive(true);
+            StartPlay_Button.GetChild(0).gameObject.SetActive(false);
+            StartPlay_Button.GetChild(1).gameObject.SetActive(true);
+            UIEventListener.Get(StartPlay_Button.gameObject).onClick = PlayingCurrentVideo;
+            //UIEventListener.Get(StartPlay_Button.gameObject).onClick = ReplayVideoState;
+        }
+#endif
 
         ScrollActionItems = GameObject.Find("MainUIRoot_new/ModelDetails/Bottom/ActionList/scrollRect").transform;
 
         GameObject eeo = null;
         ScrollActionItems.GetComponent<UIPanel>().SetAnchor(eeo);
-        //Vector4 rect1 = ScrollActionItems.GetComponent<UIPanel>().baseClipRegion;
-        //rect1.x = rect1.x - 149;
-        //ScrollActionItems.GetComponent<UIPanel>().baseClipRegion = rect1;
+
+        Vector4 size3 = ScrollActionItems.GetComponent<UIPanel>().baseClipRegion;
+        size3.z = size3.z + (200.0f * PublicFunction.GetWidth() / 1334.0f);
+        size3.x = size3.x + (100.0f * PublicFunction.GetWidth() / 1334.0f);
+        ScrollActionItems.GetComponent<UIPanel>().baseClipRegion = size3;
 
         Vector3 pos3 = ScrollActionItems.localPosition;
-        pos3.x = pos3.x - 179;
+        
+        pos3.x = pos3.x - (179.0f * PublicFunction.GetWidth() / 1334.0f);
+        Debug.Log("scrollaction is " + pos3.x);
         ScrollActionItems.localPosition = pos3;
 
-        Vector3 pos1 = Reset_button.localPosition;
+        //ScrollActionItems.GetComponent<UIPanel>().SetAnchor(GameObject.Find("MainUIRoot_new/ModelDetails/Bottom/ActionList"));
 
-        GameObject emp = null;
-        Connect_button = BT_button.parent;
-        Connect_button.GetComponent<UIWidget>().SetAnchor(emp);
-        Connect_button.localPosition = pos1;
+        if (Reset_button != null)
+        {
+            Vector3 pos1 = Reset_button.localPosition;
+            GameObject emp = null;
+            Connect_button = BT_button.parent;
+            Connect_button.GetComponent<UIWidget>().SetAnchor(emp);
+            Connect_button.localPosition = pos1;
 
-        Reset_button.gameObject.SetActive(false);
+            Reset_button.gameObject.SetActive(false);
+        }
 
         Back_button.gameObject.SetActive(false);
         Camera_button.gameObject.SetActive(false);
         GameObject modelObj = GameObject.Find("oriGO");
         PublicFunction.SetLayerRecursively(modelObj, LayerMask.NameToLayer("Default"));
 
+#if UNITY_IPHONE
         PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.GetCameraCurrentState, ""); 
+#endif
+
+#if UNITY_ANDROID
+        if (!IsFirstVideo)
+        {
+            PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.GetCameraCurrentState, ""); 
+        }        
+#endif
+    }
+    public void EnterVideoPlayScene(GameObject go)
+    {
+        if (FirstVideoEnter != null && FirstVideoEnter.gameObject.activeSelf)
+        {
+            IsFirstVideo = false;
+            CameraAreas.gameObject.SetActive(false);
+            FirstVideoEnter.gameObject.SetActive(false);
+#if UNITY_ANDROID
+            PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.GetCameraCurrentState, "");
+#endif
+        }
+    }
+    public void GiveupCurrentVideo(GameObject go)
+    {
+        PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.GiveupCurrentVideo, ""); 
     }
     public void GiveupVideoState(object go)
     {
-        IsCameraState = false;
+        IsCameraState = false;  
+        
+        CameraBgPanel.gameObject.SetActive(false);
 
-        PlayAcionTool = GameObject.Find("MainUIRoot_new/ModelDetails/Top/toolBars");
+        //Delete_button.gameObject.SetActive(false);
+        //Play_button.gameObject.SetActive(false);
+        //Edit_button.gameObject.SetActive(false);
+
+        /*PlayAcionTool = GameObject.Find("MainUIRoot_new/ModelDetails/Top/toolBars");
         if (PlayAcionTool != null && PlayAcionTool.activeSelf)
         {
             PlayAcionTool.SetActive(false);
+        }*/
+
+        if (Power_button != null)
+        {
+            //StartCoroutine(ShowPowerIcons(0.2f));
+            Power_button.gameObject.SetActive(false);
         }
+
+        if (hasSelectAction)
+        {
+            Edit_button.gameObject.SetActive(true);
+            UIEventListener.Get(Edit_button.gameObject).onClick = DoEditAction;
+        }        
+
+#if UNITY_ANDROID
+        if (Giveup_button != null)
+            Giveup_button.gameObject.SetActive(false);
+        if (StartPlay_Button != null)
+            StartPlay_Button.gameObject.SetActive(false);
+        if (Saved_Button != null)        
+            Saved_Button.gameObject.SetActive(false);
+#endif
 
         Back_button.gameObject.SetActive(true);
         Camera_button.gameObject.SetActive(true);
         GameObject modelObj = GameObject.Find("oriGO");
         PublicFunction.SetLayerRecursively(modelObj, LayerMask.NameToLayer("Robot"));
 
+        if (Reset_button != null)
+        {
+            Vector3 pos2 = Reset_button.localPosition;
+
+            pos2.y = pos2.y + (118.0f * PublicFunction.GetHeight() / 750.0f);
+            Connect_button.localPosition = pos2;
+            Connect_button.GetComponent<UIWidget>().SetAnchor(Reset_button);
+
+            Reset_button.gameObject.SetActive(true);
+        }
+        
+        if (AddButton != null)
+        {
+            AddButton.gameObject.SetActive(true);
+        }        
+
+        Vector4 size3 = ScrollActionItems.GetComponent<UIPanel>().baseClipRegion;
+        size3.z = size3.z - (200.0f * PublicFunction.GetWidth() / 1334.0f);
+        size3.x = size3.x - (100.0f * PublicFunction.GetWidth() / 1334.0f);
+        ScrollActionItems.GetComponent<UIPanel>().baseClipRegion = size3;
+
+        //GameObject ddo = null;
+        //ScrollActionItems.GetComponent<UIPanel>().SetAnchor(ddo);
+
         Vector3 pos3 = ScrollActionItems.localPosition;
-        pos3.x = pos3.x + 179;
+
+        if (pos3.x < (-500.0f * PublicFunction.GetWidth() / 1334.0f))
+            pos3.x = pos3.x + (179.0f * PublicFunction.GetWidth() / 1334.0f);
         ScrollActionItems.localPosition = pos3;
 
         ScrollActionItems.GetComponent<UIPanel>().SetAnchor(GameObject.Find("MainUIRoot_new/ModelDetails/Bottom/ActionList"));
 
-        Reset_button.gameObject.SetActive(true);
+        //Edit_button.gameObject.SetActive(false);
 
-        Vector3 pos2 = Reset_button.localPosition;
+#if UNITY_ANDROID
+        Vector2 pos22 = Play_button.localPosition;
+        pos22.x = pos22.x - (261.0f * PublicFunction.GetWidth() / 1334.0f);
 
-        pos2.y = pos2.y + 118;
-        Connect_button.localPosition = pos2;
-        Connect_button.GetComponent<UIWidget>().SetAnchor(Reset_button);
+        Play_button.localPosition = pos22;
+        Play_button.gameObject.GetComponent<UISprite>().SetAnchor(GameObject.Find("MainUIRoot_new"));
+
+        //Play_button.gameObject.SetActive(false);
+
+        if (Delete_button != null)
+        {
+            Vector2 pos24 = Delete_button.localPosition;
+            pos24.x = pos24.x - (261.0f * PublicFunction.GetWidth() / 1334.0f);
+            Delete_button.localPosition = pos24;
+            Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(GameObject.Find("MainUIRoot_new"));
+            if (RecordContactInfo.Instance.openType != "default" && RobotManager.GetInst().GetCurrentRobot().GetActionsNameList().Count != 0 && hasSelectAction)
+            {
+                Delete_button.gameObject.SetActive(true);
+            }
+            //Delete_button.gameObject.SetActive(false);           
+        }
+        ResetClick(null);
+#endif
+
+#if UNITY_IPHONE
+        Vector2 pos25 = Play_button.localPosition;
+        
+        pos25.x = pos25.x - (132.0f * PublicFunction.GetWidth() / 1334.0f);
+        Play_button.localPosition = pos25;
+        Play_button.gameObject.GetComponent<UISprite>().SetAnchor(GameObject.Find("MainUIRoot_new"));
+
+        if (Delete_button != null)
+        {
+            Vector2 pos27 = Delete_button.localPosition;
+            pos27.x = pos27.x - (132.0f * PublicFunction.GetWidth() / 1334.0f);
+            Delete_button.localPosition = pos27;
+            Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(GameObject.Find("MainUIRoot_new"));
+            if (RecordContactInfo.Instance.openType != "default" && RobotManager.GetInst().GetCurrentRobot().GetActionsNameList().Count != 0 && hasSelectAction)
+            {
+                Delete_button.gameObject.SetActive(true);
+            }
+            //Delete_button.gameObject.SetActive(false);
+        }      
+#endif
+    }
+    public void PlayingCurrentVideo(GameObject go)
+    {
+        if (StartPlay_Button.GetChild(1).GetComponent<UISprite>().spriteName == "icon_startplay")
+        {
+            //Debug.Log("start play video!!");
+            StartPlay_Button.GetChild(0).gameObject.SetActive(false);
+            StartPlay_Button.GetChild(1).gameObject.SetActive(false);
+            if (Saved_Button != null)
+            {
+                Saved_Button.gameObject.SetActive(true);
+                Saved_Button.GetChild(0).gameObject.SetActive(true);
+                Saved_Button.GetChild(1).gameObject.SetActive(false);
+                Saved_Button.GetChild(2).gameObject.SetActive(true);
+                //UIEventListener.Get(Saved_Button.gameObject).onClick = SaveCurrentVideo;
+            }
+            //StartPlay_Button.GetChild(1).GetComponent<UISprite>().spriteName = "icon_playing";
+            
+            PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.StartPlayingVideo, ""); 
+        }
+        /*else if (StartPlay_Button.GetChild(1).GetComponent<UISprite>().spriteName == "icon_playing")
+        {
+            //Debug.Log("stop play video!!");
+            StartPlay_Button.GetChild(1).GetComponent<UISprite>().spriteName = "icon_startplay";
+            PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.StopPlayingVideo, ""); 
+        }*/
+    }
+    public void ReplayVideoState(object go)
+    {
+        Debug.Log("重新录制！！");
+        IsCameraState = true;
+
+        CameraBgPanel.gameObject.SetActive(true);
+        CameraAreas.gameObject.SetActive(false);
 
         if (AddButton != null)
         {
-            AddButton.gameObject.SetActive(true);
-        }      
+            AddButton.gameObject.SetActive(false);
+        }
+        if (Power_button != null)
+        {
+            Power_button.gameObject.SetActive(false);
+        }
+        if (Camera_button != null)
+        {
+            Camera_button.gameObject.SetActive(false);
+        }
+        /*if (hasSelectAction)
+        {
+            Edit_button.gameObject.SetActive(false);
+            GameObject ero = null;
+            Play_button.gameObject.GetComponent<UISprite>().SetAnchor(ero);
+            Vector2 pos22 = Play_button.localPosition;
+            pos22.x = pos22.x + (132.0f * PublicFunction.GetWidth() / 1334.0f);
+            Play_button.localPosition = pos22;
+
+            if (RecordContactInfo.Instance.openType == "default")
+            {
+                Delete_button.gameObject.SetActive(false);
+            }
+            else
+            {
+                Delete_button.gameObject.SetActive(true);
+                GameObject ccf = null;
+                Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(ccf);
+                Vector2 pos24 = Delete_button.localPosition;
+                pos24.x = pos24.x + (132.0f * PublicFunction.GetWidth() / 1334.0f);
+                Delete_button.localPosition = pos24;
+                Delete_button.gameObject.SetActive(false);
+            }
+        }*/
+
+#if UNITY_ANDROID
+        CameraClick(null);
+        /*if (Giveup_button != null)
+        {
+            Giveup_button.gameObject.SetActive(true);
+            //UIEventListener.Get(Giveup_button.gameObject).onClick = GiveupCurrentVideo;
+        }
+        if (StartPlay_Button != null)
+        {
+            StartPlay_Button.gameObject.SetActive(true);
+            StartPlay_Button.GetChild(0).gameObject.SetActive(false);
+            StartPlay_Button.GetChild(1).gameObject.SetActive(true);
+            StartPlay_Button.GetChild(2).gameObject.SetActive(false);
+            //UIEventListener.Get(StartPlay_Button.gameObject).onClick = PlayingCurrentVideo;
+        }*/
+        /*Vector3 pos6 = ScrollActionItems.localPosition;
+        if (pos6.x > (-480.0f * PublicFunction.GetWidth() / 1334.0f))
+        {
+            pos6.x = pos6.x - (179.0f * PublicFunction.GetWidth() / 1334.0f);
+            ScrollActionItems.localPosition = pos6;
+        }*/        
+#endif
+    }
+    public void CurrentStartPlaying(object go)
+    {
+        /*if (Saved_Button != null)
+        {
+            Saved_Button.gameObject.SetActive(true);
+            Saved_Button.GetChild(0).gameObject.SetActive(true);
+            Saved_Button.GetChild(1).gameObject.SetActive(false);
+            Saved_Button.GetChild(2).gameObject.SetActive(true);
+            //UIEventListener.Get(Saved_Button.gameObject).onClick = SaveCurrentVideo;
+        }*/
+    }
+    public void CurrentSaveVideo(object go)
+    {
+        if (Saved_Button != null)
+        {
+            Saved_Button.gameObject.SetActive(true);
+            Saved_Button.GetChild(0).gameObject.SetActive(false);
+            Saved_Button.GetChild(1).gameObject.SetActive(true);
+            Saved_Button.GetChild(2).gameObject.SetActive(false);
+            UIEventListener.Get(Saved_Button.gameObject).onClick = SaveCurrentVideo;
+        }
+        /*if (StartPlay_Button != null)
+        {
+            StartPlay_Button.GetChild(0).gameObject.SetActive(false);
+            StartPlay_Button.GetChild(1).gameObject.SetActive(true);
+        }*/    
+    }
+    public void SaveCurrentVideo(GameObject go)
+    {
+        PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.SavedCurrentVideo, ""); 
     }
     /// <summary>
     /// 退出蓝牙
@@ -365,8 +768,32 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     public void ExitCameraBTConnect(EventArg arg)
     {
-        if (IsCameraState)
+        Debug.Log("ExitBluetoothCurrentState is taken!!");
+        Debug.Log("退出蓝牙时相机状态 is "+IsCameraState);
+        if (IsCameraState && !PlatformMgr.Instance.IsChargeProtected)
+        {
+            if (Power_button != null)
+            {
+                Power_button.gameObject.SetActive(false);
+            }
             PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.ExitBluetoothCurrentState, "");
+#if UNITY_ANDROID
+            if (StartPlay_Button != null)
+            {
+                StartPlay_Button.gameObject.SetActive(true);
+                StartPlay_Button.GetChild(0).gameObject.SetActive(false);
+                StartPlay_Button.GetChild(1).gameObject.SetActive(true);
+                Saved_Button.gameObject.SetActive(false);
+                UIEventListener.Get(StartPlay_Button.gameObject).onClick = PlayingCurrentVideo;
+            }           
+#endif
+        }
+        else if (PlatformMgr.Instance.IsChargeProtected)
+        {
+            if (!Reset_button.gameObject.activeSelf)
+                StartCoroutine(ShowResetIcons(0.3f));
+        }
+        
     }
 
     public void EffectClick(GameObject go)
@@ -377,22 +804,28 @@ public class ModelDetailsWindow_new : MonoBehaviour
             HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("adpateProtected"));
             return;
         }
+        IsActionScene = true;
         ShowPlaylist = true;
 
-        //StartCoroutine(DisplayCameraGuide(1.0f));
+        StartCoroutine(DisplayCameraGuide(1.0f));
     }
     IEnumerator DisplayCameraGuide(float t)
     {
         yield return new WaitForSeconds(t);
         if (IsFirstCamera) //  读取文件 文件不存在需要开启指引pages
         {
+            IsFirstCamera = false;
+            FirstVideoEnter.gameObject.SetActive(false);
             FirstCameraEnter.gameObject.SetActive(true);
-            Guide_button = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstCameraEnter/ConfirmTips").transform;
-            UIEventListener.Get(Guide_button.gameObject).onClick = EnterVideoPlay;
+            CameraIconTip.gameObject.SetActive(true);
+            CameraGuideLine.gameObject.SetActive(true);
+            CameraTextTips.gameObject.SetActive(true);
+            GuideCamera_button.gameObject.SetActive(true);
+            UIEventListener.Get(GuideCamera_button.gameObject).onClick = EnterCameraPlayScene;
 
-            UILabel CameraTips = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstCameraEnter/CameraTips").GetComponent<UILabel>();
+            UILabel CameraTips = CameraTextTips.gameObject.GetComponent<UILabel>();
             CameraTips.text = LauguageTool.GetIns().GetText("边玩边拍");
-            UILabel GuideButtonTips = Guide_button.GetChild(0).GetComponent<UILabel>();
+            UILabel GuideButtonTips = GuideCamera_button.GetChild(0).GetComponent<UILabel>();
             GuideButtonTips.text = LauguageTool.GetIns().GetText("首次引导按钮");
             StreamWriter sw = System.IO.File.CreateText(GuidePagesConfig);
             sw.Write("{\"instruction1\":\"0\"}");
@@ -400,16 +833,37 @@ public class ModelDetailsWindow_new : MonoBehaviour
         }
         else
         {
+            CameraIconTip.gameObject.SetActive(false);
+            CameraGuideLine.gameObject.SetActive(false);
+            CameraTextTips.gameObject.SetActive(false);
+            GuideCamera_button.gameObject.SetActive(false);
             FirstCameraEnter.gameObject.SetActive(false);
+            FirstVideoEnter.gameObject.SetActive(false);
         }
     }
     void BackEffect(GameObject go)
     {
+        if (IsActionScene)
+            IsActionScene = false;
         OnActionClick(null);
         ShowPlaylist = false;
+        if (Reset_button != null && !Reset_button.gameObject.activeSelf)
+        {
+            StartCoroutine(ShowResetIcons(0.2f));
+        }
+        IsCameraState = false;
         ResetClick(null);
+
+        //StartCoroutine(ShowResetIcons(0.5f));
+        
+        //Power_button.gameObject.SetActive(true);
     }
-    public void EnterVideoPlay(GameObject go)
+    IEnumerator ShowResetIcons(float t)
+    {
+        yield return new WaitForSeconds(t);
+        Reset_button.gameObject.SetActive(true);
+    }
+    public void EnterCameraPlayScene(GameObject go)
     {
         if (FirstCameraEnter != null && FirstCameraEnter.gameObject.activeSelf)
         {
@@ -654,7 +1108,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     void DoStopAction(GameObject go)
     {
         ActionLogic.GetIns().DoStopAction(go);
-        bar.transform.GetChild(1).GetChild(0).GetComponent<UISprite>().spriteName = "icon_play";
+        Play_button.GetChild(0).GetComponent<UISprite>().spriteName = "icon_play";
     }
     /// <summary>
     /// 动作编辑
@@ -664,6 +1118,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     {
         GameObject oriGO = GameObject.Find("oriGO");
         SceneMgrTest.Instance.LastScene = SceneType.EditAction;
+        
         if (oriGO != null)
         {
             
@@ -761,10 +1216,10 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 t.GetChild(i).GetChild(0).GetComponent<UISprite>().spriteName = act.IconName;
             }
             t.GetChild(i).GetChild(0).GetComponent<UISprite>().MakePixelPerfect();
-            if (name == PublicFunction.Default_Actions_Name)
+            /*if (name == PublicFunction.Default_Actions_Name)
             {
                 name = LauguageTool.GetIns().GetText("FuWei");
-            }
+            }*/
             t.GetChild(i).GetComponentInChildren<UILabel>().text = name;
             UIEventListener.Get(t.GetChild(i).gameObject).onClick = OnActionClick;
         }
@@ -787,47 +1242,111 @@ public class ModelDetailsWindow_new : MonoBehaviour
     {
         if (go == null)
         {
+            hasSelectAction = false;
             ActionLogic.GetIns().DoSelectItem(null);
-            bar.SetActive(false);
+            Play_button.gameObject.SetActive(false);
+            Edit_button.gameObject.SetActive(false);
+            Delete_button.gameObject.SetActive(false);
             return;
         }
+        //hasSelectAction = true;
         ActionLogic.GetIns().DoSelectItem(go);
         if (RobotManager.GetInst().GetCurrentRobot().IsOfficialForName(go.GetComponentInChildren<UILabel>().text)) //官方动作不可删除 可编辑
         {
-            bar.transform.GetChild(0).gameObject.SetActive(false);
+            Delete_button.gameObject.SetActive(false);
         }
         else
         {
-            bar.transform.GetChild(0).gameObject.SetActive(true);
-        }
-        StartCoroutine(WaitAMoment());
-        if (go.GetComponentInChildren<UILabel>().text == ActionLogic.GetIns().GetNowPlayingActionName())
-        {
-            bar.transform.GetChild(1).GetChild(0).GetComponent<UISprite>().spriteName = "icon_stop";
-        }
-        else
-        {
-            bar.transform.GetChild(1).GetChild(0).GetComponent<UISprite>().spriteName = "icon_play";
+            Delete_button.gameObject.SetActive(true);
         }
 
-    }
-    GameObject bar;
-    IEnumerator WaitAMoment()
-    {
-        if (bar == null)
-            yield break;
-        bar.SetActive(false);
-        yield return new WaitForSeconds(0.03f);
-        bar.SetActive(true);
-        UIEventListener.Get(bar.transform.GetChild(0).gameObject).onClick = PopDeletaWin;
-        UIEventListener.Get(bar.transform.GetChild(1).gameObject).onClick = DoPlayAction;
-        UIEventListener.Get(bar.transform.GetChild(2).gameObject).onClick = DoStopAction;
-        if (IsCameraState)
-            bar.transform.GetChild(3).gameObject.SetActive(false);
+        StartCoroutine(WaitAMoment());
+
+        if (go.GetComponentInChildren<UILabel>().text == ActionLogic.GetIns().GetNowPlayingActionName() && PlatformMgr.Instance.GetBluetoothState())
+        {
+            Play_button.GetChild(0).GetComponent<UISprite>().spriteName = "icon_stop";
+        }
         else
         {
-            bar.transform.GetChild(3).gameObject.SetActive(true);
-            UIEventListener.Get(bar.transform.GetChild(3).gameObject).onClick = DoEditAction;
+            Play_button.GetChild(0).GetComponent<UISprite>().spriteName = "icon_play";
+        }
+
+        /*if (!hasSelectAction)
+        {
+            hasSelectAction = true;
+        }*/     
+    }
+    //GameObject bar;
+    IEnumerator WaitAMoment()
+    {
+        //GameObject goo = null;
+        if (Play_button == null && Edit_button == null && Delete_button == null)
+            yield break;
+        //Play_button.gameObject.SetActive(false);
+        //Edit_button.gameObject.SetActive(false);
+        //Delete_button.gameObject.SetActive(false);
+        //yield return new WaitForSeconds(0.05f);
+        Play_button.gameObject.SetActive(true);
+        //Edit_button.gameObject.SetActive(true);
+        //Delete_button.gameObject.SetActive(true);
+        if (Delete_button != null)
+        {
+            UIEventListener.Get(Delete_button.gameObject).onClick = PopDeletaWin;
+        }       
+        UIEventListener.Get(Play_button.gameObject).onClick = DoPlayAction;
+
+        DoPlayAction(Play_button.gameObject);
+        //UIEventListener.Get(bar.transform.GetChild(2).gameObject).onClick = DoStopAction;
+
+        if (IsCameraState)
+        {
+            Edit_button.gameObject.SetActive(false);
+            Debug.Log("hasSelectAction is " + hasSelectAction);
+
+            Delete_button.gameObject.SetActive(true);
+            GameObject ccf = null;
+            Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(ccf);
+            Vector2 pos24 = Delete_button.localPosition;
+            pos24.x = pos24.x + (132.0f * PublicFunction.GetWidth() / 1334.0f);
+            Delete_button.localPosition = pos24;
+            Delete_button.gameObject.SetActive(false);
+
+            if (!hasSelectAction)
+            {
+                hasSelectAction = true;
+                GameObject ero = null;
+                Play_button.gameObject.GetComponent<UISprite>().SetAnchor(ero);
+                Vector2 pos22 = Play_button.localPosition;
+#if UNITY_ANDROID
+                pos22.x = pos22.x + (261.0f * PublicFunction.GetWidth() / 1334.0f);
+#endif
+#if UNITY_IPHONE
+                pos22.x = pos22.x + (132.0f * PublicFunction.GetWidth() / 1334.0f);
+#endif
+                Play_button.localPosition = pos22;
+
+                /*if (RecordContactInfo.Instance.openType == "default")
+                {
+                    Delete_button.gameObject.SetActive(false);
+                }
+                else
+                {
+                    Delete_button.gameObject.SetActive(true);
+                    GameObject ccf = null;
+                    Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(ccf);
+                    Vector2 pos24 = Delete_button.localPosition;
+                    pos24.x = pos24.x + (132.0f * PublicFunction.GetWidth() / 1334.0f);
+                    Delete_button.localPosition = pos24;
+                    Delete_button.gameObject.SetActive(false);
+                }*/
+            }
+            
+        }
+        else
+        {
+            hasSelectAction = true;
+            Edit_button.gameObject.SetActive(true);
+            UIEventListener.Get(Edit_button.gameObject).onClick = DoEditAction;
         }
     }
 
@@ -843,6 +1362,8 @@ public class ModelDetailsWindow_new : MonoBehaviour
         flagex = false;
         flagex1 = true;
         IsCameraState = false;
+        IsActionScene = false;
+        hasSelectAction = false;
         EventMgr.Inst.Regist(EventID.UI_MainRightbar_hide, RightBarCallback);
         EventMgr.Inst.Regist(EventID.Set_Choice_Robot, SetRobot);
         EventMgr.Inst.Regist(EventID.Read_Power_Msg_Ack, GetPowerState);
@@ -851,6 +1372,10 @@ public class ModelDetailsWindow_new : MonoBehaviour
         EventMgr.Inst.Regist(EventID.Change_Robot_Name_Back, GetNameChanged);
         EventMgr.Inst.Regist(EventID.Exit_Blue_Connect, ExitCameraBTConnect);
         PlatformMgr.Instance.RegesiterCallUnityDelegate(CallUnityFuncID.GiveupVideoState, GiveupVideoState);
+        PlatformMgr.Instance.RegesiterCallUnityDelegate(CallUnityFuncID.CurrentStartPlaying, CurrentStartPlaying);
+        //PlatformMgr.Instance.RegesiterCallUnityDelegate(CallUnityFuncID.CurrentStopPlaying, CurrentStopPlaying);
+        PlatformMgr.Instance.RegesiterCallUnityDelegate(CallUnityFuncID.CurrentSaveVideo, CurrentSaveVideo);
+        PlatformMgr.Instance.RegesiterCallUnityDelegate(CallUnityFuncID.ReplayVideoState, ReplayVideoState);
         isBackCommunity = false; // unity or community flag
         if (RecordContactInfo.Instance.openType != "playerdata") //official模型
             IsOfficial = true;
@@ -858,9 +1383,15 @@ public class ModelDetailsWindow_new : MonoBehaviour
             IsOfficial = false;
 
         if (!System.IO.File.Exists(GuidePagesConfig)) //  读取文件 文件不存在需要开启指引pages
+        {
             IsFirstCamera = true;
+            IsFirstVideo = true;
+        }
         else
+        {
             IsFirstCamera = false;
+            IsFirstVideo = false;
+        }
 
         Transform offGrid = GameObject.Find("MainUIRoot_new/ModelDetails/BottomLeft/grid_Official").transform;
         Transform defaultGrid = GameObject.Find("MainUIRoot_new/ModelDetails/BottomLeft/grid_Default").transform;
@@ -868,8 +1399,65 @@ public class ModelDetailsWindow_new : MonoBehaviour
         Camera_button = GameObject.Find("MainUIRoot_new/ModelDetails/Top/Camera").transform;
         Camera_button.gameObject.SetActive(false);
 
+        Giveup_button = GameObject.Find("MainUIRoot_new/ModelDetails/TopLeft/giveup").transform;
+        Giveup_button.gameObject.SetActive(false);
+
+        StartPlay_Button = GameObject.Find("MainUIRoot_new/ModelDetails/Right/playingIcon").transform;
+
+        Saved_Button = StartPlay_Button.GetChild(2);
+        Saved_Button.gameObject.SetActive(false);
+
+        StartPlay_Button.gameObject.SetActive(false);
+
         FirstCameraEnter = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstCameraEnter").transform;
+        FirstVideoEnter = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter").transform;
+
+        CameraIconTip = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstCameraEnter/CameraIcons").transform;
+        CameraIconTip.gameObject.SetActive(false);
+
+        CameraGuideLine = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstCameraEnter/GuideLine").transform;
+        CameraGuideLine.gameObject.SetActive(false);
+
+        CameraTextTips = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstCameraEnter/CameraTips").transform;
+        CameraTextTips.gameObject.SetActive(false);
+
+        GuideCamera_button = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstCameraEnter/ConfirmTips").transform;
+        GuideCamera_button.gameObject.SetActive(false);
+
+        VideoIconTip = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter/VideoIcons").transform;
+        VideoIconTip.gameObject.SetActive(false);
+
+        VideoGuideLine2 = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter/GuideLine2").transform;
+        VideoGuideLine2.gameObject.SetActive(false);
+
+        VideoGuideLine3 = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter/GuideLine3").transform;
+        VideoGuideLine3.gameObject.SetActive(false);
+
+        VideoGuideLine4 = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter/GuideLine4").transform;
+        VideoGuideLine4.gameObject.SetActive(false);
+
+        VideoTextTip1 = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter/VideoTips1").transform;
+        VideoTextTip1.gameObject.SetActive(false);
+
+        VideoTextTip2 = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter/VideoTips2").transform;
+        VideoTextTip2.gameObject.SetActive(false);
+
+        BluetoothIconTip = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter/BlueToothIcons").transform;
+        BluetoothIconTip.gameObject.SetActive(false);
+
+        ActionIconTip = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter/ActionIcons").transform;
+        ActionIconTip.gameObject.SetActive(false);
+
+        GuideVideo_button = GameObject.Find("MainUIRoot_new/ModelDetails/Center/FirstVideoEnter/ConfirmTips").transform;
+        GuideVideo_button.gameObject.SetActive(false);
+
         FirstCameraEnter.gameObject.SetActive(false);
+        FirstVideoEnter.gameObject.SetActive(false);
+
+        CameraBgPanel = GameObject.Find("MainUIRoot_new/ModelDetails/Center/CameraBg").transform;
+        CameraAreas = CameraBgPanel.GetChild(1);
+        CameraAreas.gameObject.SetActive(false);
+        CameraBgPanel.gameObject.SetActive(false);
 
         if (IsOfficial)   //官方
         {
@@ -965,12 +1553,23 @@ public class ModelDetailsWindow_new : MonoBehaviour
         }
 
         UpdateActionsData();
-        bar = GameObject.Find("MainUIRoot_new/ModelDetails/Top/toolBars");
-        bar.SetActive(false);
+        //bar = GameObject.Find("MainUIRoot_new/ModelDetails/Top/toolBars");
+        //Vector2 posBar = bar.transform.localPosition;
+        //posBar.x = posBar.x * PublicFunction.GetWidth() / 1334.0f;
+        //posBar.y = posBar.y * PublicFunction.GetHeight() / 750.0f;
+        //bar.transform.localPosition = posBar;
+        //bar.SetActive(false);
+        Play_button = GameObject.Find("MainUIRoot_new/ModelDetails/Top/play").transform;
+        Play_button.gameObject.SetActive(false);
+        Edit_button = GameObject.Find("MainUIRoot_new/ModelDetails/Top/edit").transform;
+        Edit_button.gameObject.SetActive(false);
+        Delete_button = GameObject.Find("MainUIRoot_new/ModelDetails/Top/delta").transform;
+        Delete_button.gameObject.SetActive(false);
+
         OnBlueConnectResult(new EventArg(PlatformMgr.Instance.GetBluetoothState())); //蓝牙
         if (PlatformMgr.Instance.GetBluetoothState()) //蓝牙连接时 发送电量信息
         {
-            EventMgr.Inst.Fire(EventID.Read_Power_Msg_Ack);
+            GetPowerState(null);
         }
 
         Transform trans = GameObject.Find("MainUIRoot_new/ModelDetails/Bottom/ActionList").transform;
@@ -1092,12 +1691,14 @@ public class ModelDetailsWindow_new : MonoBehaviour
 
             bool flag = (bool)arg[0];
             string iconName;
+            //StartCoroutine(ShowPowerIcons(0.5f));
             if (flag)
             {
                 iconName = "connect";
-                if (Power_button != null)
+                if (Power_button != null && !IsActionScene)
                 {
-                    Power_button.gameObject.SetActive(true);
+                    StartCoroutine(ShowPowerIcons(0.3f));
+                    //Power_button.gameObject.SetActive(true);
                     firstAdapter = false; //断开蓝牙，表示充电结束
                     GetPowerState(null);
                     /*Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "Shape";
@@ -1135,6 +1736,13 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
+    }
+    IEnumerator ShowPowerIcons(float t)
+    {
+        yield return new WaitForSeconds(t);
+
+        if (!IsActionScene)
+            Power_button.gameObject.SetActive(true);     
     }
 
     /// <summary>
@@ -1369,16 +1977,21 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 {
                     RobotMgr.Instance.openActionList = false;
                     flagex = true;
-                    ShowPlaylist = true;
+
+                    IsActionScene = true;
+
+                    ShowPlaylist = true;                    
 
                     if (Back_button != null)
                         UIEventListener.Get(Back_button.gameObject).onClick = BackEffect;
                 }
                 else
                 {
+                    IsActionScene = false;
                     ShowPlaylist = false;
                     flagex = false;
                     flagex1 = true;
+
                     // ShowRightBar((bool)arg[0]);
                     if (Back_button != null)
                         UIEventListener.Get(Back_button.gameObject).onClick = GoBack;
@@ -1399,6 +2012,29 @@ public class ModelDetailsWindow_new : MonoBehaviour
     {
         try
         {
+            if (PlatformMgr.Instance.IsChargeProtected) //充电保护
+            {
+                //充电保护的情况下在动作表界面插上电源
+                if (ShowPlaylist)// && IsProtected())
+                {
+#if UNITY_ANDROID
+                    GuideVideo_button.gameObject.SetActive(false);
+                    Saved_Button.gameObject.SetActive(false);
+                    StartPlay_Button.gameObject.SetActive(false);
+
+#endif
+                    Back_button.gameObject.SetActive(true);
+                    Camera_button.gameObject.SetActive(false);
+                    GameObject modelObj2 = GameObject.Find("oriGO");
+                    PublicFunction.SetLayerRecursively(modelObj2, LayerMask.NameToLayer("Robot"));
+
+                    //StartCoroutine(ShowResetIcons(0.5f));
+                    CameraBgPanel.gameObject.SetActive(false);
+                    PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.ExitPlayVideoMode, "");
+                    PublicPrompt.ShowChargePrompt(GoBack);
+                }
+            }
+
             if (PlatformMgr.Instance.PowerData.isAdapter) //插上适配器
             {
                 if (!firstAdapter)  //第一次插入适配器时
@@ -1409,19 +2045,6 @@ public class ModelDetailsWindow_new : MonoBehaviour
                         Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "Shape";
                         Power_button.GetChild(1).GetComponent<UISprite>().enabled = false;
                         Power_button.GetChild(2).GetComponent<UISprite>().enabled = true;
-                    }
-
-                    if (PlatformMgr.Instance.IsChargeProtected) //充电保护
-                    {
-                        //充电保护的情况下在动作表界面插上电源
-                        if (ShowPlaylist)// && IsProtected())
-                        {
-                            PublicPrompt.ShowChargePrompt(GoBack);
-                        }
-                    }
-                    else
-                    {
-
                     }
                 }
                 if (PlatformMgr.Instance.PowerData.isChargingFinished) //充满
@@ -1474,7 +2097,12 @@ public class ModelDetailsWindow_new : MonoBehaviour
 
     void GoBack()
     {
+        if (IsCameraState)
+        {
+            GiveupCurrentVideo(null);
+        }
         BackEffect(null);
+        //Game.Scene.SceneMgr.EnterScene(Game.Scene.SceneType.MainWindow);
     }
 
     void SetRobot(EventArg arg)
@@ -1508,7 +2136,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
         Transform centerTrans = GameObject.Find("MainUIRoot_new/ModelDetails/Center").transform;
         if (centerTrans != null)
         {
-            FirstGuidePage.GetIns().Show(0.5f);
+            FirstGuidePage.GetIns().Show(0.3f);
              //FirstGuidePage.LoadGuidePage("Prefabs/FirstGuidePage", centerTrans);   
             //UIRoot root = GameObject.FindObjectOfType<UIRoot>();
             //Vector2 temp = Vector2.zero;

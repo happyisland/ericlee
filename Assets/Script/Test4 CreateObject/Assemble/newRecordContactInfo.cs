@@ -571,6 +571,77 @@ public class RecordContactInfo
 
     #region 查找
     /// <summary>
+    /// 查找联动物体信息
+    /// </summary>
+    /// <returns></returns>
+    public Dictionary<string, DJLianDongs> FindLDGOs(string robotNameTemp)
+    {
+        robotname = RobotMgr.NameNoType(robotNameTemp);
+
+        xele.Load(Path);
+        Dictionary<string, DJLianDongs> ldDJ = null;
+        XmlNodeList nodeList = xele.GetElementsByTagName("rotateGOs");
+        if (nodeList != null && nodeList.Count > 0)
+        {
+            ldDJ = new Dictionary<string, DJLianDongs>();
+            foreach (XmlNode xn in nodeList)
+            {
+                if (xn != null)
+                {
+                    XmlElement xe = (XmlElement)xn;
+                    string djName = xe.GetAttribute("name");
+                    DJLianDongs djdata = new DJLianDongs();
+                    XmlNodeList childNodeList = xe.GetElementsByTagName("tGOs");
+                    if (childNodeList != null && childNodeList.Count > 0)
+                    {
+                        foreach (XmlNode xnT in childNodeList)
+                        {
+                            XmlElement xeT = (XmlElement)xnT;
+                            string ldDJName = xeT.GetAttribute("name");
+
+                            if (djdata.djlds.ContainsKey(ldDJName) == false)
+                            {
+                                DJLianDong tDJ = new DJLianDong();
+                                tDJ.djid = RobotMgr.Instance.rbt[robotNameTemp].gos[ldDJName].djID;
+
+                                string difAT = xeT.GetAttribute("difA");
+                                if (difAT != null)
+                                {
+                                    tDJ.difA = MathTool.StrToFloat(difAT);
+                                }
+                                else
+                                {
+                                    tDJ.difA = 0;
+                                }
+
+                                tDJ.symbol = xeT.GetAttribute("symbol");
+
+                                string difBT = xeT.GetAttribute("difB");
+                                if (difBT != null)
+                                {
+                                    tDJ.difB = MathTool.StrToFloat(difBT);
+                                }
+                                else
+                                {
+                                    tDJ.difB = 0;
+                                }
+
+                                djdata.djlds.Add(ldDJName, tDJ);
+                            }
+                        }
+                    }
+
+                    if (ldDJ.ContainsKey(djName) == false)
+                    {
+                        ldDJ.Add(djName, djdata);
+                    }
+                }
+            }
+        }
+        return ldDJ;
+    }
+
+    /// <summary>
     /// 查找联动舵机信息
     /// </summary>
     /// <returns></returns>
@@ -614,7 +685,15 @@ public class RecordContactInfo
                                     tDJ.difA = 0;
                                 }
 
-                                tDJ.symbol = xeT.GetAttribute("symbol");
+                                string symbol = xeT.GetAttribute("symbol");
+                                if (symbol != null)
+                                {
+                                    tDJ.symbol = symbol;
+                                }
+                                else
+                                {
+                                    tDJ.symbol = "+";
+                                }
 
                                 string difBT = xeT.GetAttribute("difB");
                                 if (difBT != null)
@@ -1344,6 +1423,14 @@ public class RecordContactInfo
                             {
                                 go.color = "";
                             }
+                            if (xe.HasAttribute("shape"))
+                            {
+                                go.shape = xe.GetAttribute("shape");
+                            }
+                            else
+                            {
+                                go.shape = "Circle";
+                            }
                             if (xe.HasAttribute("hidego"))
                             {
                                 go.hidego = xe.GetAttribute("hidego");
@@ -1351,6 +1438,17 @@ public class RecordContactInfo
                             else
                             {
                                 go.hidego = "false";
+                            }
+
+                            if (xe.HasAttribute("oriDJAngleX"))
+                            {
+                                 string angleXT= xe.GetAttribute("oriDJAngleX");
+                                float angleX=float.Parse(angleXT);
+                                go.oriDJAngleX = angleX;
+                            }
+                            else
+                            {
+                                go.oriDJAngleX = 120.0f;
                             }
 
 

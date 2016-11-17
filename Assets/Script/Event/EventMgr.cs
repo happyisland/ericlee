@@ -59,7 +59,7 @@ namespace Game.Event
 		}
 	}
 
-	class EventMgr
+	public class EventMgr
 	{
 		private static EventMgr sm_inst;
 		private Dictionary<EventID, MyEventDelegates> m_events;

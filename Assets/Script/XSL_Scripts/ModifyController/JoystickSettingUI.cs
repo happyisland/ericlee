@@ -427,11 +427,14 @@ public class JoystickSettingUI :BaseUI
         string name = obj.name;
         if (name.Contains("backM"))  //返回 取消修改
         {
-            UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
+            UserdefControllerScene.Ins.CloseJoystickSettingUI();
+            UserdefControllerScene.Ins.BackControllerSettingUI();
+            //UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
         }
         else if (name.Contains("backS"))
         {
-            if (joyData.type == JockstickData.JockType.twoServo)
+            ShowSetting_1();
+            /*if (joyData.type == JockstickData.JockType.twoServo)
             {
                 if (joyData.leftUpID == 0)
                     UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
@@ -452,13 +455,13 @@ public class JoystickSettingUI :BaseUI
                     UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
                 else
                     ShowSetting_1();
-            }
+            }*/
 
             //UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("not save wheel tip"), AbandonSetting, isChange);
-            if (selectServo != null)
+            /*if (selectServo != null)
             {
                 selectServo.enabled = true;
-            }
+            }*/
             //UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("not save Controller tip"), OnSecondbackClicked, isTotalDataChange);
         }
         else if (name.Contains("save")) //保存数据

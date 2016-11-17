@@ -43,8 +43,45 @@ public class MyProjectBuild
         return names.ToArray();
     }
     
-    [MenuItem("ProjectBuild/Android/导出社区正式版")]
-    public static void BuildForGoogle()
+    [MenuItem("ProjectBuild/Android/导出社区fir_test")]
+    public static void BuildForGoogle_fir_test()
+    {
+        BuildAndroidGoogle(AndroidChannel.fir_test);
+    }
+
+    [MenuItem("ProjectBuild/Android/导出社区google_play")]
+    public static void BuildForGoogle_google_play()
+    {
+        BuildAndroidGoogle(AndroidChannel.google_play);
+    }
+
+    [MenuItem("ProjectBuild/Android/导出社区official_website")]
+    public static void BuildForGoogle_official_website()
+    {
+        BuildAndroidGoogle(AndroidChannel.official_website);
+    }
+
+    [MenuItem("ProjectBuild/Android/导出社区fir_customers")]
+    public static void BuildForGoogle_fir_customers()
+    {
+        BuildAndroidGoogle(AndroidChannel.fir_customers);
+    }
+
+    [MenuItem("ProjectBuild/Android/导出社区build_all")]
+    public static void BuildForGoogle_build_all()
+    {
+        BuildAndroidGoogle(AndroidChannel.build_all);
+    }
+
+    enum AndroidChannel
+    {
+        fir_test,
+        google_play,
+        official_website,
+        fir_customers,
+        build_all,
+    }
+    static void BuildAndroidGoogle(AndroidChannel channel)
     {
         //打包之前先设置一下 预定义标签， 我建议大家最好 做一些  91 同步推 快用 PP助手一类的标签。 这样在代码中可以灵活的开启 或者关闭 一些代码。
         //因为 这里我是承接 上一篇文章， 我就以sharesdk做例子 ，这样方便大家学习 ，
@@ -66,11 +103,15 @@ public class MyProjectBuild
             }
             //path = EditorUtility.SaveFilePanel("选择导出路径", path, "", "");
             BuildPipeline.BuildPlayer(GetBuildScenes(), path, BuildTarget.Android, BuildOptions.AcceptExternalModificationsToPlayer);
-            EditorUtility.RevealInFinder(Path.Combine(path, PlayerSettings.productName));
+            //EditorUtility.RevealInFinder(Path.Combine(path, PlayerSettings.productName));
+            AndroidMoveFloder(Path.Combine(path, PlayerSettings.productName + "/assets/bin"), channel);
+            PublicFunction.DelDirector(path, true);
         }
     }
 
-    [MenuItem("ProjectBuild/Android/导出社区带个人模型版")]
+
+
+    /*[MenuItem("ProjectBuild/Android/导出社区带个人模型版")]
     public static void BuildForGoogleAndData()
     {
         //打包之前先设置一下 预定义标签， 我建议大家最好 做一些  91 同步推 快用 PP助手一类的标签。 这样在代码中可以灵活的开启 或者关闭 一些代码。
@@ -93,11 +134,13 @@ public class MyProjectBuild
             }
             //path = EditorUtility.SaveFilePanel("选择导出路径", path, "", "");
             BuildPipeline.BuildPlayer(GetBuildScenes(), path, BuildTarget.Android, BuildOptions.AcceptExternalModificationsToPlayer);
-            EditorUtility.RevealInFinder(Path.Combine(path, PlayerSettings.productName));
+            //EditorUtility.RevealInFinder(Path.Combine(path, PlayerSettings.productName));
+            AndroidMoveFloder(Path.Combine(path, PlayerSettings.productName + "/assets/bin"));
+            PublicFunction.DelDirector(path, true);
         }
-    }
+    }*/
 
-    [MenuItem("ProjectBuild/Android/导出社区测试版")]
+    [MenuItem("ProjectBuild/Android/导出社区打日志版")]
     public static void BuildForGoogleTest()
     {
         if (SetCommunity(true,false, BuildTarget.Android))
@@ -117,7 +160,9 @@ public class MyProjectBuild
             }
             //path = EditorUtility.SaveFilePanel("选择导出路径", path, "", "");
             BuildPipeline.BuildPlayer(GetBuildScenes(), path, BuildTarget.Android, BuildOptions.AcceptExternalModificationsToPlayer);
-            EditorUtility.RevealInFinder(Path.Combine(path, PlayerSettings.productName));
+            //EditorUtility.RevealInFinder(Path.Combine(path, PlayerSettings.productName));
+            AndroidMoveFloder(Path.Combine(path, PlayerSettings.productName + "/assets/bin"), AndroidChannel.fir_test);
+            PublicFunction.DelDirector(path, true);
         }
         
     }
@@ -135,16 +180,15 @@ public class MyProjectBuild
                 BuildPipeline.BuildPlayer(GetBuildScenes(), path, BuildTarget.Android, BuildOptions.None);
                 EditorUtility.RevealInFinder(path);
             }
+        }
 #if UNITY_ANDROID
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
+        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
 #elif UNITY_IPHONE
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
 #endif
-        }
-
     }
 
-    [MenuItem("ProjectBuild/Android/导出unity测试版")]
+    [MenuItem("ProjectBuild/Android/导出unity打日志版")]
     static void BuildForAndroidTest()
     {
         if (SetUnity(true, BuildTarget.Android))
@@ -157,13 +201,12 @@ public class MyProjectBuild
                 BuildPipeline.BuildPlayer(GetBuildScenes(), path, BuildTarget.Android, BuildOptions.None);
                 EditorUtility.RevealInFinder(path);
             }
+        }
 #if UNITY_ANDROID
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
+        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
 #elif UNITY_IPHONE
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
 #endif
-        }
-
     }
 
     [MenuItem("ProjectBuild/IOS/导出社区正式版")]
@@ -196,7 +239,7 @@ public class MyProjectBuild
         
     }
 
-    [MenuItem("ProjectBuild/IOS/导出社区带个人模型版")]
+    /*[MenuItem("ProjectBuild/IOS/导出社区带个人模型版")]
     public static void BuildForIOSAndModel()
     {
         if (SetCommunity(false, true, BuildTarget.iPhone))
@@ -225,9 +268,9 @@ public class MyProjectBuild
             
         }
         
-    }
+    }*/
 
-    [MenuItem("ProjectBuild/IOS/导出社区测试版")]
+    [MenuItem("ProjectBuild/IOS/导出社区打日志版")]
     public static void BuildForIOSTest()
     {
         if (SetCommunity(true, false, BuildTarget.iPhone))
@@ -281,16 +324,16 @@ public class MyProjectBuild
                 BuildPipeline.BuildPlayer(GetBuildScenes(), path, BuildTarget.iPhone, BuildOptions.None);
                 EditorUtility.RevealInFinder(path);
             }
+
+        }
 #if UNITY_ANDROID
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
+        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
 #elif UNITY_IPHONE
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
 #endif
-        }
-
     }
 
-    [MenuItem("ProjectBuild/IOS/导出unity测试版")]
+    [MenuItem("ProjectBuild/IOS/导出unity打日志版")]
     static void BuildForUnityIOSTest()
     {
         if (SetUnity(true, BuildTarget.iPhone))
@@ -314,13 +357,13 @@ public class MyProjectBuild
                 BuildPipeline.BuildPlayer(GetBuildScenes(), path, BuildTarget.iPhone, BuildOptions.None);
                 EditorUtility.RevealInFinder(path);
             }
+
+        }
 #if UNITY_ANDROID
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
+        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
 #elif UNITY_IPHONE
             PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
 #endif
-        }
-
     }
 
 
@@ -395,11 +438,7 @@ public class MyProjectBuild
             EditorUtility.DisplayDialog("错误", "多语言配置文件缺少部分翻译", "确定");
             //return false;
         }
-#if UNITY_ANDROID
-        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
-#elif UNITY_IPHONE
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
-#endif
+
         ClientMain.GetInst().useThirdAppFlag = true;
         ClientMain.GetInst().simulationUseThirdAppFlag = false;
         ClientMain.GetInst().debugLogFlag = isTest;
@@ -531,6 +570,55 @@ public class MyProjectBuild
         {
             EditorApplication.OpenScene(sceneName);
         }
+    }
+
+    static void AndroidMoveFloder(string srcPath, AndroidChannel channel)
+    {
+        string destPath = string.Empty;
+        if (srcPath.Contains("Jimu-Unity"))
+        {
+            destPath = srcPath.Substring(0, srcPath.IndexOf("Jimu-Unity"));
+            destPath += "Jimu-Android";
+        }
+        else if (srcPath.Contains("Jimu-Education-Unity"))
+        {
+            destPath = srcPath.Substring(0, srcPath.IndexOf("Jimu-Education-Unity"));
+            destPath += "Jimu-Education-Android";
+        }
+        if (!Directory.Exists(destPath))
+        {
+            return;
+        }
+        string batPath = destPath;
+        destPath += "/jimu/src/main/assets/bin";
+        if (Directory.Exists(destPath))
+        {
+            PublicFunction.DelDirector(destPath);
+        }
+        else
+        {
+            Directory.CreateDirectory(destPath);
+        }
+        PublicFunction.CopyDirectory(srcPath, destPath);
+        switch (channel)
+        {
+            case AndroidChannel.fir_test:
+                PublicFunction.OpenProcess(batPath, "fir_test", "bat");
+                break;
+            case AndroidChannel.google_play:
+                PublicFunction.OpenProcess(batPath, "google_play", "bat");
+                break;
+            case AndroidChannel.official_website:
+                PublicFunction.OpenProcess(batPath, "official_website", "bat");
+                break;
+            case AndroidChannel.fir_customers:
+                PublicFunction.OpenProcess(batPath, "fir_customers", "bat");
+                break;
+            case AndroidChannel.build_all:
+                PublicFunction.OpenProcess(batPath, "build_all", "bat");
+                break;
+        }
+        
     }
 
 

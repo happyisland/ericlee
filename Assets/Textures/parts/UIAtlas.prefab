@@ -826,10 +826,10 @@ MonoBehaviour:
     y: 1969
     width: 65
     height: 79
-    borderLeft: 0
-    borderRight: 0
-    borderTop: 0
-    borderBottom: 0
+    borderLeft: 11
+    borderRight: 43
+    borderTop: 50
+    borderBottom: 12
     paddingLeft: 0
     paddingRight: 0
     paddingTop: 0

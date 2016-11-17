@@ -344,7 +344,7 @@ public class LauguageConvert : EditorWindow
                             TextCell tmp = new TextCell();
                             Lauguage lg = new Lauguage();
                             lg.lauType = StringToLauguageType(arys[keyIndex]);
-                            lg.value = lgstr[keyIndex].Trim().TrimStart('"').TrimEnd('"');
+                            lg.value = lgstr[keyIndex].TrimStart('"').TrimEnd('"').Trim();
                             tmp.lauguages.Add(lg);
                             TextCell findTextCell = LauguageTool.GetIns().FindForLauguage(lg);
                             if (null != findTextCell)

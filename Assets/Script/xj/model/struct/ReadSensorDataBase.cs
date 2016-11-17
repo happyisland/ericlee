@@ -15,11 +15,18 @@ public class ReadSensorDataBase
     #endregion
 
     #region 其他属性
-    protected List<byte> ids;
+    public List<byte> ids;
+    /// <summary>
+    /// 读取单种传感器
+    /// </summary>
     protected List<byte> readIds;
 
     protected List<byte> errIds;
     protected List<byte> backIds;
+    /// <summary>
+    /// 读取所有传感器
+    /// </summary>
+    protected List<byte> readAllIds;
     #endregion
 
     #region 公有函数
@@ -38,8 +45,13 @@ public class ReadSensorDataBase
     {
         readIds = ids;
     }
+
+    public virtual void ReadAllDataMsg(List<byte> ids)
+    {
+        readAllIds = ids;
+    }
     
-    public virtual void ReadCallBackMsg(BinaryReader br)
+    public virtual void ReadCallBackMsg(BinaryReader br, int len)
     {
         try
         {
@@ -71,13 +83,22 @@ public class ReadSensorDataBase
     }
     
 
-    public virtual object GetReadResult()
+    public virtual string GetReadResult()
     {
         return string.Empty;
     }
 
-    public virtual string GetOnlyTypeReadResult()
+    public virtual object GetReadAllResult()
     {
+        return string.Empty;
+    }
+
+    public string GetErrorID()
+    {
+        if (null != errIds)
+        {
+            return PublicFunction.ListToString<byte>(errIds);
+        }
         return string.Empty;
     }
     #endregion

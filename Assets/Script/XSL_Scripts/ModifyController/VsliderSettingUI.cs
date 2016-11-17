@@ -8,6 +8,7 @@ public class VsliderSettingUI : BaseUI
     bool isChange = false;
     public SliderWidgetData sliderData;  //滑竿数据
     private UISprite selectServo;
+    public bool isSelectOtherServo = false;
     public VsliderSettingUI(string widgetID)
     {
         mUIResPath = "Prefabs/VsliderSetting";
@@ -62,7 +63,7 @@ public class VsliderSettingUI : BaseUI
         if (sliderData.servoID != 0) //已配置过的
         {
             UILabel selectText = GameObject.Find("VsliderSetting/sliderWiget").transform.GetChild(1).GetComponent<UILabel>();
-            selectText.text = "Servo " + sliderData.servoID.ToString();
+            selectText.text = LauguageTool.GetIns().GetText("舵机") + " " + sliderData.servoID.ToString();
             //舵机特殊表示
             
             for (int j = 0; j < p.childCount; j++)
@@ -132,6 +133,7 @@ public class VsliderSettingUI : BaseUI
                 {
                     CopyData((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(sliderData.widgetId), sliderData);  //确定修改， 
                     UserdefControllerUI.isTotalDataChange = true;
+                    isSelectOtherServo = true;
                 }
                 UserdefControllerScene.Ins.CloseVsliderSettingUI();
                 UserdefControllerScene.Ins.BackControllerSettingUI();
@@ -141,7 +143,10 @@ public class VsliderSettingUI : BaseUI
         {
             if (sliderData.directionDisclock != ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(sliderData.widgetId)).directionDisclock)
                 isChange = true;
-            UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("保存遥控器提示"), DoCancel, isChange);
+            isSelectOtherServo = false;
+            UserdefControllerScene.Ins.CloseVsliderSettingUI();
+            UserdefControllerScene.Ins.BackControllerSettingUI();
+            //UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("保存遥控器提示"), DoCancel, isChange);
         }
     }
     /// <summary>

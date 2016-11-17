@@ -42,8 +42,8 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: fd43fd477b927994bbf6bb44c0f76289, type: 2}
   mSprites:
   - name: C10-GRN2
-    x: 676
-    y: 606
+    x: 1148
+    y: 704
     width: 116
     height: 46
     borderLeft: 0
@@ -55,8 +55,8 @@ MonoBehaviour:
     paddingTop: 73
     paddingBottom: 65
   - name: C10-GRY
-    x: 636
-    y: 1448
+    x: 1134
+    y: 812
     width: 106
     height: 46
     borderLeft: 0
@@ -68,8 +68,8 @@ MonoBehaviour:
     paddingTop: 69
     paddingBottom: 69
   - name: C10-RED
-    x: 232
-    y: 1106
+    x: 1512
+    y: 466
     width: 122
     height: 52
     borderLeft: 0
@@ -81,8 +81,8 @@ MonoBehaviour:
     paddingTop: 74
     paddingBottom: 58
   - name: C11-GRN2
-    x: 298
-    y: 102
+    x: 1320
+    y: 172
     width: 64
     height: 76
     borderLeft: 0
@@ -94,8 +94,8 @@ MonoBehaviour:
     paddingTop: 50
     paddingBottom: 58
   - name: C11-GRY
-    x: 550
-    y: 1676
+    x: 1036
+    y: 1104
     width: 70
     height: 74
     borderLeft: 0
@@ -107,8 +107,8 @@ MonoBehaviour:
     paddingTop: 55
     paddingBottom: 55
   - name: C11-ORG1
-    x: 728
-    y: 1710
+    x: 1630
+    y: 604
     width: 58
     height: 64
     borderLeft: 0
@@ -119,9 +119,22 @@ MonoBehaviour:
     paddingRight: 73
     paddingTop: 62
     paddingBottom: 58
+  - name: C11-RED
+    x: 394
+    y: 976
+    width: 92
+    height: 96
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 45
+    paddingRight: 47
+    paddingTop: 44
+    paddingBottom: 44
   - name: C12-GRY
-    x: 320
-    y: 1524
+    x: 2
+    y: 714
     width: 114
     height: 50
     borderLeft: 0
@@ -133,8 +146,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 67
   - name: C13-GRY
-    x: 454
-    y: 1314
+    x: 802
+    y: 750
     width: 108
     height: 48
     borderLeft: 0
@@ -146,8 +159,8 @@ MonoBehaviour:
     paddingTop: 68
     paddingBottom: 68
   - name: C14-GRY
-    x: 528
-    y: 1450
+    x: 1134
+    y: 764
     width: 106
     height: 46
     borderLeft: 0
@@ -159,8 +172,8 @@ MonoBehaviour:
     paddingTop: 69
     paddingBottom: 69
   - name: C14-ORG1
-    x: 254
-    y: 868
+    x: 910
+    y: 856
     width: 104
     height: 60
     borderLeft: 0
@@ -171,9 +184,22 @@ MonoBehaviour:
     paddingRight: 45
     paddingTop: 62
     paddingBottom: 62
+  - name: C14-RED
+    x: 916
+    y: 730
+    width: 108
+    height: 48
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 40
+    paddingRight: 36
+    paddingTop: 67
+    paddingBottom: 69
   - name: C15-GRN2
-    x: 290
-    y: 1878
+    x: 732
+    y: 648
     width: 68
     height: 76
     borderLeft: 0
@@ -185,8 +211,8 @@ MonoBehaviour:
     paddingTop: 54
     paddingBottom: 54
   - name: C15-GRY
-    x: 476
-    y: 1960
+    x: 1768
+    y: 1028
     width: 66
     height: 64
     borderLeft: 0
@@ -198,8 +224,8 @@ MonoBehaviour:
     paddingTop: 60
     paddingBottom: 60
   - name: C15-ORG1
-    x: 556
-    y: 1752
+    x: 1320
+    y: 250
     width: 64
     height: 70
     borderLeft: 0
@@ -211,8 +237,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 57
   - name: C16-GRY
-    x: 454
-    y: 1224
+    x: 872
+    y: 918
     width: 88
     height: 88
     borderLeft: 0
@@ -224,8 +250,8 @@ MonoBehaviour:
     paddingTop: 45
     paddingBottom: 51
   - name: C19-GRY
-    x: 648
-    y: 1230
+    x: 932
+    y: 238
     width: 90
     height: 88
     borderLeft: 0
@@ -237,8 +263,8 @@ MonoBehaviour:
     paddingTop: 48
     paddingBottom: 48
   - name: C1-GRY
-    x: 746
-    y: 1384
+    x: 1614
+    y: 742
     width: 74
     height: 76
     borderLeft: 0
@@ -249,9 +275,22 @@ MonoBehaviour:
     paddingRight: 55
     paddingTop: 54
     paddingBottom: 54
+  - name: C1-RED
+    x: 440
+    y: 878
+    width: 94
+    height: 96
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 47
+    paddingRight: 43
+    paddingTop: 52
+    paddingBottom: 36
   - name: C20-ORG1
-    x: 390
-    y: 1684
+    x: 1122
+    y: 1004
     width: 76
     height: 76
     borderLeft: 0
@@ -263,8 +302,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 51
   - name: C2-GRY
-    x: 394
-    y: 1608
+    x: 1114
+    y: 1082
     width: 70
     height: 74
     borderLeft: 0
@@ -276,8 +315,8 @@ MonoBehaviour:
     paddingTop: 55
     paddingBottom: 55
   - name: C2-ORG1
-    x: 414
-    y: 1960
+    x: 1808
+    y: 746
     width: 60
     height: 70
     borderLeft: 0
@@ -288,9 +327,22 @@ MonoBehaviour:
     paddingRight: 69
     paddingTop: 55
     paddingBottom: 59
+  - name: C2-RED
+    x: 1126
+    y: 908
+    width: 84
+    height: 94
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 52
+    paddingRight: 48
+    paddingTop: 54
+    paddingBottom: 36
   - name: C3-GRY
-    x: 468
-    y: 1676
+    x: 1754
+    y: 930
     width: 80
     height: 80
     borderLeft: 0
@@ -302,8 +354,8 @@ MonoBehaviour:
     paddingTop: 52
     paddingBottom: 52
   - name: C4-BLU2
-    x: 620
-    y: 1834
+    x: 1296
+    y: 1070
     width: 78
     height: 72
     borderLeft: 0
@@ -315,8 +367,8 @@ MonoBehaviour:
     paddingTop: 56
     paddingBottom: 56
   - name: C4-GRN2
-    x: 210
-    y: 1696
+    x: 718
+    y: 934
     width: 86
     height: 78
     borderLeft: 0
@@ -328,8 +380,8 @@ MonoBehaviour:
     paddingTop: 48
     paddingBottom: 58
   - name: C4-GRY
-    x: 120
-    y: 1798
+    x: 932
+    y: 414
     width: 90
     height: 78
     borderLeft: 0
@@ -341,8 +393,8 @@ MonoBehaviour:
     paddingTop: 53
     paddingBottom: 53
   - name: C4-ORG1
-    x: 958
-    y: 1656
+    x: 1628
+    y: 670
     width: 60
     height: 70
     borderLeft: 0
@@ -354,8 +406,8 @@ MonoBehaviour:
     paddingTop: 56
     paddingBottom: 58
   - name: C4-ORG2
-    x: 360
-    y: 1874
+    x: 718
+    y: 1014
     width: 72
     height: 70
     borderLeft: 0
@@ -367,8 +419,8 @@ MonoBehaviour:
     paddingTop: 54
     paddingBottom: 60
   - name: C4-PUR
-    x: 622
-    y: 1600
+    x: 1670
+    y: 938
     width: 80
     height: 76
     borderLeft: 0
@@ -380,21 +432,21 @@ MonoBehaviour:
     paddingTop: 54
     paddingBottom: 54
   - name: C4-RED
-    x: 138
-    y: 1978
-    width: 72
-    height: 66
+    x: 2
+    y: 1114
+    width: 88
+    height: 80
     borderLeft: 0
     borderRight: 0
     borderTop: 0
     borderBottom: 0
-    paddingLeft: 57
-    paddingRight: 55
-    paddingTop: 56
-    paddingBottom: 62
+    paddingLeft: 48
+    paddingRight: 48
+    paddingTop: 51
+    paddingBottom: 53
   - name: C5-GRY
-    x: 436
-    y: 1524
+    x: 296
+    y: 988
     width: 92
     height: 72
     borderLeft: 0
@@ -406,8 +458,8 @@ MonoBehaviour:
     paddingTop: 56
     paddingBottom: 56
   - name: C5-ORG1
-    x: 794
-    y: 598
+    x: 618
+    y: 648
     width: 112
     height: 90
     borderLeft: 0
@@ -419,8 +471,8 @@ MonoBehaviour:
     paddingTop: 35
     paddingBottom: 59
   - name: C6-GRY
-    x: 476
-    y: 1842
+    x: 962
+    y: 926
     width: 78
     height: 70
     borderLeft: 0
@@ -432,8 +484,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 57
   - name: C6-ORG1
-    x: 876
-    y: 1530
+    x: 962
+    y: 1016
     width: 74
     height: 66
     borderLeft: 0
@@ -445,8 +497,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 61
   - name: C7-GRN2
-    x: 708
-    y: 1776
+    x: 1042
+    y: 926
     width: 78
     height: 58
     borderLeft: 0
@@ -458,8 +510,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 59
   - name: C7-GRY
-    x: 390
-    y: 1810
+    x: 1584
+    y: 888
     width: 84
     height: 62
     borderLeft: 0
@@ -471,8 +523,8 @@ MonoBehaviour:
     paddingTop: 61
     paddingBottom: 61
   - name: C8-GRY
-    x: 876
-    y: 1598
+    x: 1042
+    y: 986
     width: 78
     height: 56
     borderLeft: 0
@@ -484,8 +536,8 @@ MonoBehaviour:
     paddingTop: 64
     paddingBottom: 64
   - name: C8-ORG1
-    x: 622
-    y: 1766
+    x: 1498
+    y: 874
     width: 84
     height: 66
     borderLeft: 0
@@ -496,9 +548,22 @@ MonoBehaviour:
     paddingRight: 56
     paddingTop: 62
     paddingBottom: 56
+  - name: C8-YLW
+    x: 2
+    y: 908
+    width: 96
+    height: 68
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 42
+    paddingRight: 46
+    paddingTop: 64
+    paddingBottom: 52
   - name: C9-GRN2
-    x: 228
-    y: 1372
+    x: 912
+    y: 780
     width: 106
     height: 74
     borderLeft: 0
@@ -510,8 +575,8 @@ MonoBehaviour:
     paddingTop: 62
     paddingBottom: 48
   - name: C9-GRY
-    x: 432
-    y: 1462
+    x: 776
+    y: 872
     width: 94
     height: 60
     borderLeft: 0
@@ -522,9 +587,126 @@ MonoBehaviour:
     paddingRight: 45
     paddingTop: 62
     paddingBottom: 62
+  - name: L01-RED
+    x: 2
+    y: 766
+    width: 112
+    height: 128
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 36
+    paddingRight: 36
+    paddingTop: 33
+    paddingBottom: 23
+  - name: L02-RED
+    x: 1690
+    y: 504
+    width: 118
+    height: 130
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 35
+    paddingRight: 31
+    paddingTop: 30
+    paddingBottom: 24
+  - name: L03-YLW
+    x: 1992
+    y: 618
+    width: 54
+    height: 82
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 65
+    paddingRight: 65
+    paddingTop: 51
+    paddingBottom: 51
+  - name: L04-YLW
+    x: 878
+    y: 46
+    width: 52
+    height: 82
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 71
+    paddingRight: 61
+    paddingTop: 49
+    paddingBottom: 53
+  - name: L05-RED
+    x: 1852
+    y: 378
+    width: 22
+    height: 36
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 84
+    paddingRight: 78
+    paddingTop: 67
+    paddingBottom: 81
+  - name: L06-RED
+    x: 802
+    y: 690
+    width: 112
+    height: 58
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 38
+    paddingRight: 34
+    paddingTop: 64
+    paddingBottom: 62
+  - name: L07-GRY
+    x: 1862
+    y: 248
+    width: 26
+    height: 62
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 79
+    paddingRight: 79
+    paddingTop: 61
+    paddingBottom: 61
+  - name: L08-GRY
+    x: 1996
+    y: 466
+    width: 40
+    height: 42
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 73
+    paddingRight: 71
+    paddingTop: 68
+    paddingBottom: 74
+  - name: L14-YLW
+    x: 932
+    y: 328
+    width: 90
+    height: 84
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 46
+    paddingRight: 48
+    paddingTop: 50
+    paddingBottom: 50
   - name: LP-GRY
-    x: 136
-    y: 1162
+    x: 680
+    y: 872
     width: 94
     height: 60
     borderLeft: 0
@@ -536,8 +718,8 @@ MonoBehaviour:
     paddingTop: 62
     paddingBottom: 62
   - name: MC-GRN2
-    x: 154
-    y: 510
+    x: 2
+    y: 462
     width: 134
     height: 122
     borderLeft: 0
@@ -549,8 +731,8 @@ MonoBehaviour:
     paddingTop: 34
     paddingBottom: 28
   - name: MC-GRY
-    x: 2
-    y: 386
+    x: 1024
+    y: 158
     width: 146
     height: 126
     borderLeft: 0
@@ -562,8 +744,8 @@ MonoBehaviour:
     paddingTop: 27
     paddingBottom: 31
   - name: MC-ORG1
-    x: 444
-    y: 258
+    x: 2
+    y: 98
     width: 142
     height: 122
     borderLeft: 0
@@ -574,9 +756,22 @@ MonoBehaviour:
     paddingRight: 26
     paddingTop: 34
     paddingBottom: 28
+  - name: MC-RED
+    x: 1690
+    y: 280
+    width: 160
+    height: 136
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 8
+    paddingRight: 16
+    paddingTop: 27
+    paddingBottom: 21
   - name: P01-BLK
-    x: 434
-    y: 524
+    x: 802
+    y: 562
     width: 124
     height: 126
     borderLeft: 0
@@ -588,8 +783,8 @@ MonoBehaviour:
     paddingTop: 32
     paddingBottom: 26
   - name: P01-GRN
-    x: 2
-    y: 1174
+    x: 434
+    y: 98
     width: 124
     height: 136
     borderLeft: 0
@@ -601,8 +796,8 @@ MonoBehaviour:
     paddingTop: 25
     paddingBottom: 23
   - name: P01-GRN3
-    x: 790
-    y: 336
+    x: 1152
+    y: 540
     width: 122
     height: 124
     borderLeft: 0
@@ -614,8 +809,8 @@ MonoBehaviour:
     paddingTop: 30
     paddingBottom: 30
   - name: P01-ORG
-    x: 2
-    y: 102
+    x: 1890
+    y: 2
     width: 156
     height: 156
     borderLeft: 0
@@ -626,9 +821,22 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 28
     paddingBottom: 0
+  - name: P01-RED
+    x: 290
+    y: 166
+    width: 138
+    height: 114
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 24
+    paddingRight: 22
+    paddingTop: 40
+    paddingBottom: 30
   - name: P01-WHT
-    x: 2
-    y: 638
+    x: 1024
+    y: 286
     width: 130
     height: 136
     borderLeft: 0
@@ -640,8 +848,8 @@ MonoBehaviour:
     paddingTop: 28
     paddingBottom: 20
   - name: P01-YLW2
-    x: 290
-    y: 524
+    x: 146
+    y: 98
     width: 142
     height: 110
     borderLeft: 0
@@ -653,8 +861,8 @@ MonoBehaviour:
     paddingTop: 40
     paddingBottom: 34
   - name: P02-BLK
-    x: 134
-    y: 638
+    x: 386
+    y: 538
     width: 114
     height: 126
     borderLeft: 0
@@ -666,8 +874,8 @@ MonoBehaviour:
     paddingTop: 27
     paddingBottom: 31
   - name: P02-GRN
-    x: 792
-    y: 462
+    x: 1866
+    y: 850
     width: 114
     height: 134
     borderLeft: 0
@@ -679,8 +887,8 @@ MonoBehaviour:
     paddingTop: 25
     paddingBottom: 25
   - name: P02-GRN3
-    x: 254
-    y: 744
+    x: 826
+    y: 438
     width: 104
     height: 122
     borderLeft: 0
@@ -692,8 +900,8 @@ MonoBehaviour:
     paddingTop: 26
     paddingBottom: 36
   - name: P02-ORG
-    x: 908
-    y: 502
+    x: 138
+    y: 558
     width: 114
     height: 128
     borderLeft: 0
@@ -704,9 +912,22 @@ MonoBehaviour:
     paddingRight: 35
     paddingTop: 30
     paddingBottom: 26
+  - name: P02-RED
+    x: 1024
+    y: 564
+    width: 122
+    height: 112
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 41
+    paddingRight: 21
+    paddingTop: 31
+    paddingBottom: 41
   - name: P02-WHT
-    x: 2
-    y: 1588
+    x: 1266
+    y: 716
     width: 114
     height: 138
     borderLeft: 0
@@ -718,8 +939,8 @@ MonoBehaviour:
     paddingTop: 23
     paddingBottom: 23
   - name: P02-YLW2
-    x: 794
-    y: 690
+    x: 116
+    y: 772
     width: 112
     height: 112
     borderLeft: 0
@@ -731,8 +952,8 @@ MonoBehaviour:
     paddingTop: 32
     paddingBottom: 40
   - name: P03-BLK
-    x: 2
-    y: 1450
+    x: 1876
+    y: 434
     width: 118
     height: 136
     borderLeft: 0
@@ -744,8 +965,8 @@ MonoBehaviour:
     paddingTop: 25
     paddingBottom: 23
   - name: P03-GRN
-    x: 2
-    y: 1728
+    x: 1874
+    y: 572
     width: 116
     height: 136
     borderLeft: 0
@@ -756,9 +977,22 @@ MonoBehaviour:
     paddingRight: 34
     paddingTop: 26
     paddingBottom: 22
+  - name: P03-RED
+    x: 1630
+    y: 1016
+    width: 68
+    height: 70
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 58
+    paddingRight: 58
+    paddingTop: 54
+    paddingBottom: 60
   - name: P03-WHT
-    x: 2
-    y: 1312
+    x: 1386
+    y: 492
     width: 120
     height: 136
     borderLeft: 0
@@ -770,8 +1004,8 @@ MonoBehaviour:
     paddingTop: 25
     paddingBottom: 23
   - name: P03-YLW2
-    x: 118
-    y: 1588
+    x: 932
+    y: 30
     width: 90
     height: 106
     borderLeft: 0
@@ -783,8 +1017,8 @@ MonoBehaviour:
     paddingTop: 43
     paddingBottom: 35
   - name: P04-BLK
-    x: 560
-    y: 518
+    x: 270
+    y: 538
     width: 114
     height: 132
     borderLeft: 0
@@ -796,8 +1030,8 @@ MonoBehaviour:
     paddingTop: 28
     paddingBottom: 24
   - name: P04-GRN
-    x: 138
-    y: 766
+    x: 502
+    y: 632
     width: 114
     height: 124
     borderLeft: 0
@@ -808,9 +1042,22 @@ MonoBehaviour:
     paddingRight: 35
     paddingTop: 31
     paddingBottom: 29
+  - name: P04-RED
+    x: 940
+    y: 1142
+    width: 70
+    height: 62
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 56
+    paddingRight: 58
+    paddingTop: 60
+    paddingBottom: 62
   - name: P04-WHT
-    x: 908
-    y: 632
+    x: 2
+    y: 586
     width: 114
     height: 126
     borderLeft: 0
@@ -822,8 +1069,8 @@ MonoBehaviour:
     paddingTop: 31
     paddingBottom: 27
   - name: P04-YLW2
-    x: 876
-    y: 1462
+    x: 1614
+    y: 820
     width: 74
     height: 66
     borderLeft: 0
@@ -835,8 +1082,8 @@ MonoBehaviour:
     paddingTop: 62
     paddingBottom: 56
   - name: P05-BLU
-    x: 676
-    y: 470
+    x: 1690
+    y: 760
     width: 114
     height: 134
     borderLeft: 0
@@ -848,8 +1095,8 @@ MonoBehaviour:
     paddingTop: 26
     paddingBottom: 24
   - name: P05-GRN
-    x: 552
-    y: 382
+    x: 1498
+    y: 738
     width: 114
     height: 134
     borderLeft: 0
@@ -861,8 +1108,8 @@ MonoBehaviour:
     paddingTop: 22
     paddingBottom: 28
   - name: P06-BLU
-    x: 2
-    y: 776
+    x: 140
+    y: 372
     width: 134
     height: 132
     borderLeft: 0
@@ -874,8 +1121,8 @@ MonoBehaviour:
     paddingTop: 24
     paddingBottom: 28
   - name: P06-GRN
-    x: 160
-    y: 102
+    x: 2
+    y: 222
     width: 136
     height: 140
     borderLeft: 0
@@ -887,8 +1134,8 @@ MonoBehaviour:
     paddingTop: 19
     paddingBottom: 25
   - name: P07-BLK
-    x: 656
-    y: 654
+    x: 278
+    y: 282
     width: 136
     height: 78
     borderLeft: 0
@@ -900,8 +1147,8 @@ MonoBehaviour:
     paddingTop: 52
     paddingBottom: 54
   - name: P07-ORG
-    x: 160
-    y: 244
+    x: 560
+    y: 186
     width: 136
     height: 78
     borderLeft: 0
@@ -912,9 +1159,22 @@ MonoBehaviour:
     paddingRight: 28
     paddingTop: 50
     paddingBottom: 56
+  - name: P07-RED
+    x: 1732
+    y: 30
+    width: 156
+    height: 90
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 15
+    paddingRight: 13
+    paddingTop: 45
+    paddingBottom: 49
   - name: P07-WHT
-    x: 298
-    y: 258
+    x: 1386
+    y: 288
     width: 144
     height: 82
     borderLeft: 0
@@ -926,8 +1186,8 @@ MonoBehaviour:
     paddingTop: 51
     paddingBottom: 51
   - name: P08-BLK
-    x: 896
-    y: 30
+    x: 1386
+    y: 372
     width: 126
     height: 86
     borderLeft: 0
@@ -939,8 +1199,8 @@ MonoBehaviour:
     paddingTop: 50
     paddingBottom: 48
   - name: P08-GRN2
-    x: 908
-    y: 760
+    x: 386
+    y: 666
     width: 114
     height: 112
     borderLeft: 0
@@ -952,8 +1212,8 @@ MonoBehaviour:
     paddingTop: 32
     paddingBottom: 40
   - name: P08-RED
-    x: 872
-    y: 1064
+    x: 1508
+    y: 654
     width: 118
     height: 82
     borderLeft: 0
@@ -965,8 +1225,8 @@ MonoBehaviour:
     paddingTop: 48
     paddingBottom: 54
   - name: P08-WHT
-    x: 748
-    y: 1058
+    x: 1690
+    y: 418
     width: 122
     height: 84
     borderLeft: 0
@@ -978,8 +1238,8 @@ MonoBehaviour:
     paddingTop: 49
     paddingBottom: 51
   - name: P09-BLU
-    x: 128
-    y: 1224
+    x: 1026
+    y: 756
     width: 106
     height: 84
     borderLeft: 0
@@ -991,8 +1251,8 @@ MonoBehaviour:
     paddingTop: 50
     paddingBottom: 50
   - name: P09-GRN
-    x: 254
-    y: 930
+    x: 1020
+    y: 842
     width: 104
     height: 82
     borderLeft: 0
@@ -1004,8 +1264,8 @@ MonoBehaviour:
     paddingTop: 51
     paddingBottom: 51
   - name: P09-GRN2
-    x: 956
-    y: 1588
+    x: 1700
+    y: 1028
     width: 66
     height: 66
     borderLeft: 0
@@ -1017,8 +1277,8 @@ MonoBehaviour:
     paddingTop: 61
     paddingBottom: 57
   - name: P09-ORG
-    x: 124
-    y: 1358
+    x: 1282
+    y: 464
     width: 102
     height: 84
     borderLeft: 0
@@ -1030,8 +1290,8 @@ MonoBehaviour:
     paddingTop: 50
     paddingBottom: 50
   - name: P09-WHT
-    x: 914
-    y: 336
+    x: 1276
+    y: 550
     width: 108
     height: 88
     borderLeft: 0
@@ -1043,8 +1303,8 @@ MonoBehaviour:
     paddingTop: 48
     paddingBottom: 48
   - name: P100-RED
-    x: 838
-    y: 1868
+    x: 1982
+    y: 868
     width: 38
     height: 38
     borderLeft: 0
@@ -1056,8 +1316,8 @@ MonoBehaviour:
     paddingTop: 72
     paddingBottom: 74
   - name: P103-BLK
-    x: 808
-    y: 306
+    x: 1208
+    y: 76
     width: 176
     height: 28
     borderLeft: 0
@@ -1069,8 +1329,8 @@ MonoBehaviour:
     paddingTop: 79
     paddingBottom: 77
   - name: P106-BLK
-    x: 844
-    y: 184
+    x: 1208
+    y: 46
     width: 176
     height: 28
     borderLeft: 0
@@ -1082,8 +1342,8 @@ MonoBehaviour:
     paddingTop: 79
     paddingBottom: 77
   - name: P107-BLK
-    x: 624
-    y: 830
+    x: 560
+    y: 46
     width: 160
     height: 28
     borderLeft: 0
@@ -1095,8 +1355,8 @@ MonoBehaviour:
     paddingTop: 79
     paddingBottom: 77
   - name: P109-BLK
-    x: 358
-    y: 1068
+    x: 1386
+    y: 460
     width: 124
     height: 30
     borderLeft: 0
@@ -1108,8 +1368,8 @@ MonoBehaviour:
     paddingTop: 78
     paddingBottom: 76
   - name: P110-BLK
-    x: 320
-    y: 1576
+    x: 118
+    y: 740
     width: 114
     height: 30
     borderLeft: 0
@@ -1121,8 +1381,8 @@ MonoBehaviour:
     paddingTop: 78
     paddingBottom: 76
   - name: P115
-    x: 822
-    y: 214
+    x: 1172
+    y: 172
     width: 146
     height: 90
     borderLeft: 0
@@ -1134,8 +1394,8 @@ MonoBehaviour:
     paddingTop: 40
     paddingBottom: 54
   - name: P116-YLW
-    x: 530
-    y: 1600
+    x: 2
+    y: 1038
     width: 90
     height: 74
     borderLeft: 0
@@ -1147,8 +1407,8 @@ MonoBehaviour:
     paddingTop: 56
     paddingBottom: 54
   - name: P12-BLK
-    x: 128
-    y: 1310
+    x: 370
+    y: 780
     width: 106
     height: 46
     borderLeft: 0
@@ -1160,8 +1420,8 @@ MonoBehaviour:
     paddingTop: 69
     paddingBottom: 69
   - name: P12-BLU
-    x: 232
-    y: 1160
+    x: 928
+    y: 678
     width: 116
     height: 50
     borderLeft: 0
@@ -1173,8 +1433,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 67
   - name: P12-GRN
-    x: 238
-    y: 1052
+    x: 1690
+    y: 636
     width: 118
     height: 52
     borderLeft: 0
@@ -1186,8 +1446,8 @@ MonoBehaviour:
     paddingTop: 66
     paddingBottom: 66
   - name: P12-GRN2
-    x: 124
-    y: 1444
+    x: 230
+    y: 834
     width: 102
     height: 66
     borderLeft: 0
@@ -1199,8 +1459,8 @@ MonoBehaviour:
     paddingTop: 64
     paddingBottom: 54
   - name: P12-ORG
-    x: 336
-    y: 1310
+    x: 1870
+    y: 796
     width: 116
     height: 52
     borderLeft: 0
@@ -1212,8 +1472,8 @@ MonoBehaviour:
     paddingTop: 65
     paddingBottom: 67
   - name: P12-ORG1
-    x: 336
-    y: 1310
+    x: 1870
+    y: 796
     width: 116
     height: 52
     borderLeft: 0
@@ -1225,8 +1485,8 @@ MonoBehaviour:
     paddingTop: 65
     paddingBottom: 67
   - name: P12-YLW
-    x: 138
-    y: 892
+    x: 118
+    y: 688
     width: 114
     height: 50
     borderLeft: 0
@@ -1238,8 +1498,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 67
   - name: P13-BLK
-    x: 914
-    y: 1382
+    x: 200
+    y: 992
     width: 92
     height: 60
     borderLeft: 0
@@ -1251,8 +1511,8 @@ MonoBehaviour:
     paddingTop: 61
     paddingBottom: 63
   - name: P13-BLU
-    x: 228
-    y: 1448
+    x: 830
+    y: 370
     width: 100
     height: 66
     borderLeft: 0
@@ -1264,8 +1524,8 @@ MonoBehaviour:
     paddingTop: 59
     paddingBottom: 59
   - name: P13-GRN
-    x: 528
-    y: 1378
+    x: 802
+    y: 800
     width: 106
     height: 70
     borderLeft: 0
@@ -1277,8 +1537,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 57
   - name: P13-GRN2
-    x: 298
-    y: 1608
+    x: 200
+    y: 916
     width: 94
     height: 74
     borderLeft: 0
@@ -1290,8 +1550,8 @@ MonoBehaviour:
     paddingTop: 53
     paddingBottom: 57
   - name: P13-ORG
-    x: 218
-    y: 1516
+    x: 830
+    y: 300
     width: 100
     height: 68
     borderLeft: 0
@@ -1303,8 +1563,8 @@ MonoBehaviour:
     paddingTop: 60
     paddingBottom: 56
   - name: P13-ORG1
-    x: 218
-    y: 1516
+    x: 830
+    y: 300
     width: 100
     height: 68
     borderLeft: 0
@@ -1316,8 +1576,8 @@ MonoBehaviour:
     paddingTop: 60
     paddingBottom: 56
   - name: P13-YLW
-    x: 330
-    y: 1458
+    x: 1046
+    y: 678
     width: 100
     height: 64
     borderLeft: 0
@@ -1329,8 +1589,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 63
   - name: P14-GRN2
-    x: 780
-    y: 894
+    x: 1154
+    y: 456
     width: 126
     height: 82
     borderLeft: 0
@@ -1342,8 +1602,8 @@ MonoBehaviour:
     paddingTop: 51
     paddingBottom: 51
   - name: P14-WHT
-    x: 490
-    y: 886
+    x: 276
+    y: 468
     width: 130
     height: 68
     borderLeft: 0
@@ -1355,8 +1615,8 @@ MonoBehaviour:
     paddingTop: 59
     paddingBottom: 57
   - name: P15-WHT
-    x: 656
-    y: 734
+    x: 278
+    y: 362
     width: 136
     height: 58
     borderLeft: 0
@@ -1368,8 +1628,8 @@ MonoBehaviour:
     paddingTop: 65
     paddingBottom: 61
   - name: P16-BLU
-    x: 360
-    y: 848
+    x: 1024
+    y: 424
     width: 128
     height: 58
     borderLeft: 0
@@ -1381,8 +1641,8 @@ MonoBehaviour:
     paddingTop: 70
     paddingBottom: 56
   - name: P16-WHT
-    x: 158
-    y: 324
+    x: 146
+    y: 210
     width: 138
     height: 62
     borderLeft: 0
@@ -1394,8 +1654,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 55
   - name: P17-BLU
-    x: 364
-    y: 144
+    x: 1386
+    y: 116
     width: 140
     height: 48
     borderLeft: 0
@@ -1407,8 +1667,8 @@ MonoBehaviour:
     paddingTop: 73
     paddingBottom: 63
   - name: P17-GRN2
-    x: 490
-    y: 840
+    x: 276
+    y: 422
     width: 132
     height: 44
     borderLeft: 0
@@ -1420,8 +1680,8 @@ MonoBehaviour:
     paddingTop: 72
     paddingBottom: 68
   - name: P17-ORG
-    x: 2
-    y: 2002
+    x: 560
+    y: 266
     width: 134
     height: 44
     borderLeft: 0
@@ -1433,8 +1693,8 @@ MonoBehaviour:
     paddingTop: 70
     paddingBottom: 70
   - name: P17-WHT
-    x: 298
-    y: 342
+    x: 1532
+    y: 340
     width: 144
     height: 48
     borderLeft: 0
@@ -1446,8 +1706,8 @@ MonoBehaviour:
     paddingTop: 72
     paddingBottom: 64
   - name: P17-YLW
-    x: 662
-    y: 284
+    x: 1532
+    y: 288
     width: 144
     height: 50
     borderLeft: 0
@@ -1459,8 +1719,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 67
   - name: P18-BLU
-    x: 360
-    y: 988
+    x: 1156
+    y: 376
     width: 128
     height: 78
     borderLeft: 0
@@ -1472,8 +1732,8 @@ MonoBehaviour:
     paddingTop: 60
     paddingBottom: 46
   - name: P18-GRN
-    x: 622
-    y: 1052
+    x: 1514
+    y: 390
     width: 124
     height: 74
     borderLeft: 0
@@ -1485,8 +1745,8 @@ MonoBehaviour:
     paddingTop: 61
     paddingBottom: 49
   - name: P18-GRN3
-    x: 360
-    y: 908
+    x: 1156
+    y: 296
     width: 128
     height: 78
     borderLeft: 0
@@ -1498,8 +1758,8 @@ MonoBehaviour:
     paddingTop: 61
     paddingBottom: 45
   - name: P18-GRY
-    x: 758
-    y: 978
+    x: 410
+    y: 458
     width: 130
     height: 78
     borderLeft: 0
@@ -1511,8 +1771,8 @@ MonoBehaviour:
     paddingTop: 65
     paddingBottom: 41
   - name: P18-YLW
-    x: 490
-    y: 956
+    x: 550
+    y: 444
     width: 130
     height: 78
     borderLeft: 0
@@ -1524,8 +1784,8 @@ MonoBehaviour:
     paddingTop: 62
     paddingBottom: 44
   - name: P19-BLU
-    x: 740
-    y: 1144
+    x: 1690
+    y: 690
     width: 116
     height: 68
     borderLeft: 0
@@ -1537,8 +1797,8 @@ MonoBehaviour:
     paddingTop: 62
     paddingBottom: 54
   - name: P20-BLU
-    x: 350
-    y: 1162
+    x: 746
+    y: 30
     width: 184
     height: 14
     borderLeft: 0
@@ -1550,8 +1810,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 85
   - name: P20-GRN
-    x: 350
-    y: 1194
+    x: 1024
+    y: 78
     width: 182
     height: 14
     borderLeft: 0
@@ -1563,8 +1823,8 @@ MonoBehaviour:
     paddingTop: 84
     paddingBottom: 86
   - name: P20-GRN3
-    x: 350
-    y: 1178
+    x: 1024
+    y: 62
     width: 182
     height: 14
     borderLeft: 0
@@ -1576,8 +1836,8 @@ MonoBehaviour:
     paddingTop: 84
     paddingBottom: 86
   - name: P20-GRY
-    x: 350
-    y: 1210
+    x: 1708
+    y: 204
     width: 180
     height: 12
     borderLeft: 0
@@ -1589,8 +1849,8 @@ MonoBehaviour:
     paddingTop: 86
     paddingBottom: 86
   - name: P20-ORG
-    x: 564
-    y: 1128
+    x: 1526
+    y: 190
     width: 180
     height: 14
     borderLeft: 0
@@ -1601,9 +1861,22 @@ MonoBehaviour:
     paddingRight: 3
     paddingTop: 85
     paddingBottom: 85
+  - name: P20-RED
+    x: 722
+    y: 62
+    width: 154
+    height: 10
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 14
+    paddingRight: 16
+    paddingTop: 78
+    paddingBottom: 96
   - name: P20-YLW
-    x: 358
-    y: 1100
+    x: 560
+    y: 30
     width: 184
     height: 14
     borderLeft: 0
@@ -1615,8 +1888,8 @@ MonoBehaviour:
     paddingTop: 78
     paddingBottom: 92
   - name: P21-BLU
-    x: 564
-    y: 1144
+    x: 1526
+    y: 206
     width: 174
     height: 14
     borderLeft: 0
@@ -1628,8 +1901,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 85
   - name: P21-GRN
-    x: 564
-    y: 1178
+    x: 1526
+    y: 222
     width: 168
     height: 14
     borderLeft: 0
@@ -1641,8 +1914,8 @@ MonoBehaviour:
     paddingTop: 84
     paddingBottom: 86
   - name: P21-GRN3
-    x: 648
-    y: 1336
+    x: 1526
+    y: 274
     width: 162
     height: 12
     borderLeft: 0
@@ -1654,8 +1927,21 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 87
   - name: P21-GRY
-    x: 648
-    y: 1320
+    x: 1694
+    y: 264
+    width: 166
+    height: 14
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 9
+    paddingRight: 9
+    paddingTop: 85
+    paddingBottom: 85
+  - name: P21-YLW
+    x: 1526
+    y: 258
     width: 166
     height: 14
     borderLeft: 0
@@ -1667,8 +1953,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 85
   - name: P22-BLU
-    x: 648
-    y: 1368
+    x: 722
+    y: 46
     width: 154
     height: 14
     borderLeft: 0
@@ -1680,8 +1966,8 @@ MonoBehaviour:
     paddingTop: 86
     paddingBottom: 84
   - name: P22-BRO
-    x: 622
-    y: 1694
+    x: 1172
+    y: 280
     width: 146
     height: 14
     borderLeft: 0
@@ -1693,8 +1979,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 85
   - name: P22-GRN
-    x: 564
-    y: 1160
+    x: 1714
+    y: 122
     width: 174
     height: 16
     borderLeft: 0
@@ -1706,8 +1992,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 83
   - name: P22-GRN3
-    x: 622
-    y: 1678
+    x: 1172
+    y: 264
     width: 146
     height: 14
     borderLeft: 0
@@ -1719,8 +2005,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 85
   - name: P22-ORG1
-    x: 624
-    y: 880
+    x: 1890
+    y: 306
     width: 154
     height: 14
     borderLeft: 0
@@ -1731,22 +2017,48 @@ MonoBehaviour:
     paddingRight: 16
     paddingTop: 85
     paddingBottom: 85
-  - name: P22-YLW
-    x: 648
-    y: 1350
-    width: 154
-    height: 16
+  - name: P22-RED
+    x: 1136
+    y: 752
+    width: 108
+    height: 10
     borderLeft: 0
     borderRight: 0
     borderTop: 0
     borderBottom: 0
-    paddingLeft: 13
-    paddingRight: 17
-    paddingTop: 79
-    paddingBottom: 89
+    paddingLeft: 35
+    paddingRight: 41
+    paddingTop: 82
+    paddingBottom: 92
+  - name: P22-WHT
+    x: 618
+    y: 740
+    width: 110
+    height: 10
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 39
+    paddingRight: 35
+    paddingTop: 83
+    paddingBottom: 91
+  - name: P22-YLW
+    x: 1026
+    y: 744
+    width: 108
+    height: 10
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 38
+    paddingRight: 38
+    paddingTop: 84
+    paddingBottom: 90
   - name: P23-BLU
-    x: 312
-    y: 2034
+    x: 1286
+    y: 450
     width: 98
     height: 12
     borderLeft: 0
@@ -1758,8 +2070,8 @@ MonoBehaviour:
     paddingTop: 86
     paddingBottom: 86
   - name: P23-GRN
-    x: 624
-    y: 860
+    x: 1890
+    y: 160
     width: 156
     height: 18
     borderLeft: 0
@@ -1771,8 +2083,8 @@ MonoBehaviour:
     paddingTop: 83
     paddingBottom: 83
   - name: P23-GRN2
-    x: 836
-    y: 1316
+    x: 200
+    y: 902
     width: 96
     height: 12
     borderLeft: 0
@@ -1784,8 +2096,8 @@ MonoBehaviour:
     paddingTop: 87
     paddingBottom: 85
   - name: P23-GRN3
-    x: 212
-    y: 2034
+    x: 1286
+    y: 436
     width: 98
     height: 12
     borderLeft: 0
@@ -1797,8 +2109,8 @@ MonoBehaviour:
     paddingTop: 86
     paddingBottom: 86
   - name: P23-GRY
-    x: 484
-    y: 1088
+    x: 2
+    y: 896
     width: 98
     height: 10
     borderLeft: 0
@@ -1810,8 +2122,8 @@ MonoBehaviour:
     paddingTop: 87
     paddingBottom: 87
   - name: P23-ORG1
-    x: 218
-    y: 1586
+    x: 116
+    y: 886
     width: 100
     height: 12
     borderLeft: 0
@@ -1823,8 +2135,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 87
   - name: P23-RED
-    x: 822
-    y: 1448
+    x: 1286
+    y: 422
     width: 98
     height: 12
     borderLeft: 0
@@ -1836,8 +2148,8 @@ MonoBehaviour:
     paddingTop: 88
     paddingBottom: 84
   - name: P23-WHT
-    x: 564
-    y: 1210
+    x: 1526
+    y: 238
     width: 166
     height: 18
     borderLeft: 0
@@ -1849,8 +2161,8 @@ MonoBehaviour:
     paddingTop: 82
     paddingBottom: 84
   - name: P24-BLU
-    x: 474
-    y: 1914
+    x: 1468
+    y: 1006
     width: 80
     height: 12
     borderLeft: 0
@@ -1862,8 +2174,8 @@ MonoBehaviour:
     paddingTop: 87
     paddingBottom: 85
   - name: P24-GRN2
-    x: 616
-    y: 1922
+    x: 1670
+    y: 924
     width: 82
     height: 12
     borderLeft: 0
@@ -1875,8 +2187,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 87
   - name: P24-GRN3
-    x: 616
-    y: 1908
+    x: 1754
+    y: 916
     width: 82
     height: 12
     borderLeft: 0
@@ -1888,8 +2200,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 87
   - name: P24-GRY
-    x: 444
-    y: 1946
+    x: 1670
+    y: 910
     width: 82
     height: 12
     borderLeft: 0
@@ -1900,9 +2212,22 @@ MonoBehaviour:
     paddingRight: 50
     paddingTop: 86
     paddingBottom: 86
+  - name: P24-RED
+    x: 1754
+    y: 902
+    width: 82
+    height: 12
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 53
+    paddingRight: 49
+    paddingTop: 86
+    paddingBottom: 86
   - name: P24-WHT
-    x: 360
-    y: 1946
+    x: 1670
+    y: 896
     width: 82
     height: 12
     borderLeft: 0
@@ -1914,8 +2239,8 @@ MonoBehaviour:
     paddingTop: 86
     paddingBottom: 86
   - name: P24-YLW
-    x: 212
-    y: 1860
+    x: 230
+    y: 816
     width: 104
     height: 16
     borderLeft: 0
@@ -1927,8 +2252,8 @@ MonoBehaviour:
     paddingTop: 84
     paddingBottom: 84
   - name: P25-BLU
-    x: 434
-    y: 1928
+    x: 1556
+    y: 992
     width: 80
     height: 16
     borderLeft: 0
@@ -1940,8 +2265,8 @@ MonoBehaviour:
     paddingTop: 84
     paddingBottom: 84
   - name: P25-GRN2
-    x: 700
-    y: 1908
+    x: 1464
+    y: 1102
     width: 66
     height: 14
     borderLeft: 0
@@ -1953,8 +2278,8 @@ MonoBehaviour:
     paddingTop: 84
     paddingBottom: 86
   - name: P25-GRN3
-    x: 414
-    y: 2032
+    x: 1548
+    y: 1094
     width: 66
     height: 14
     borderLeft: 0
@@ -1966,8 +2291,8 @@ MonoBehaviour:
     paddingTop: 84
     paddingBottom: 86
   - name: P25-GRY
-    x: 616
-    y: 1936
+    x: 962
+    y: 998
     width: 78
     height: 16
     borderLeft: 0
@@ -1979,8 +2304,8 @@ MonoBehaviour:
     paddingTop: 84
     paddingBottom: 84
   - name: P25-ORG
-    x: 952
-    y: 1572
+    x: 1752
+    y: 1012
     width: 70
     height: 14
     borderLeft: 0
@@ -1991,9 +2316,35 @@ MonoBehaviour:
     paddingRight: 57
     paddingTop: 85
     paddingBottom: 85
+  - name: P25-RED
+    x: 1996
+    y: 454
+    width: 46
+    height: 10
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 74
+    paddingRight: 64
+    paddingTop: 82
+    paddingBottom: 92
+  - name: P25-WHT
+    x: 1992
+    y: 744
+    width: 52
+    height: 10
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 65
+    paddingRight: 67
+    paddingTop: 82
+    paddingBottom: 92
   - name: P25-YLW
-    x: 922
-    y: 1444
+    x: 1330
+    y: 898
     width: 86
     height: 16
     borderLeft: 0
@@ -2005,8 +2356,8 @@ MonoBehaviour:
     paddingTop: 88
     paddingBottom: 80
   - name: P26-BLU
-    x: 700
-    y: 1924
+    x: 1806
+    y: 862
     width: 58
     height: 18
     borderLeft: 0
@@ -2018,8 +2369,8 @@ MonoBehaviour:
     paddingTop: 82
     paddingBottom: 84
   - name: P26-GRN
-    x: 546
-    y: 2026
+    x: 874
+    y: 184
     width: 56
     height: 20
     borderLeft: 0
@@ -2031,8 +2382,8 @@ MonoBehaviour:
     paddingTop: 82
     paddingBottom: 82
   - name: P26-GRN2
-    x: 844
-    y: 98
+    x: 1996
+    y: 434
     width: 50
     height: 18
     borderLeft: 0
@@ -2044,8 +2395,8 @@ MonoBehaviour:
     paddingTop: 83
     paddingBottom: 83
   - name: P26-ORG
-    x: 544
-    y: 2004
+    x: 874
+    y: 162
     width: 56
     height: 20
     borderLeft: 0
@@ -2057,8 +2408,8 @@ MonoBehaviour:
     paddingTop: 86
     paddingBottom: 78
   - name: P26-RED
-    x: 760
-    y: 1924
+    x: 1806
+    y: 882
     width: 56
     height: 18
     borderLeft: 0
@@ -2070,8 +2421,8 @@ MonoBehaviour:
     paddingTop: 84
     paddingBottom: 82
   - name: P26-WHT
-    x: 482
-    y: 2026
+    x: 1808
+    y: 724
     width: 62
     height: 20
     borderLeft: 0
@@ -2082,9 +2433,22 @@ MonoBehaviour:
     paddingRight: 62
     paddingTop: 83
     paddingBottom: 81
+  - name: P27-RED
+    x: 1556
+    y: 952
+    width: 80
+    height: 38
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 61
+    paddingRight: 43
+    paddingTop: 72
+    paddingBottom: 74
   - name: P27-WHT
-    x: 622
-    y: 896
+    x: 290
+    y: 98
     width: 142
     height: 66
     borderLeft: 0
@@ -2096,8 +2460,8 @@ MonoBehaviour:
     paddingTop: 62
     paddingBottom: 56
   - name: P27-YLW
-    x: 662
-    y: 208
+    x: 1888
+    y: 322
     width: 158
     height: 74
     borderLeft: 0
@@ -2109,8 +2473,8 @@ MonoBehaviour:
     paddingTop: 55
     paddingBottom: 55
   - name: P28-WHT
-    x: 588
-    y: 336
+    x: 884
+    y: 1008
     width: 76
     height: 44
     borderLeft: 0
@@ -2122,8 +2486,8 @@ MonoBehaviour:
     paddingTop: 70
     paddingBottom: 70
   - name: P28-YLW
-    x: 872
-    y: 1656
+    x: 1300
+    y: 916
     width: 84
     height: 50
     borderLeft: 0
@@ -2135,8 +2499,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 67
   - name: P34-BLU
-    x: 850
-    y: 1330
+    x: 1384
+    y: 986
     width: 82
     height: 44
     borderLeft: 0
@@ -2148,8 +2512,8 @@ MonoBehaviour:
     paddingTop: 70
     paddingBottom: 70
   - name: P34-GRN
-    x: 788
-    y: 1592
+    x: 1126
+    y: 860
     width: 86
     height: 46
     borderLeft: 0
@@ -2161,8 +2525,8 @@ MonoBehaviour:
     paddingTop: 70
     paddingBottom: 68
   - name: P34-GRN2
-    x: 296
-    y: 1812
+    x: 100
+    y: 994
     width: 92
     height: 46
     borderLeft: 0
@@ -2174,8 +2538,8 @@ MonoBehaviour:
     paddingTop: 69
     paddingBottom: 69
   - name: P34-GRN3
-    x: 864
-    y: 1708
+    x: 1386
+    y: 940
     width: 84
     height: 44
     borderLeft: 0
@@ -2187,8 +2551,8 @@ MonoBehaviour:
     paddingTop: 71
     paddingBottom: 69
   - name: P34-GRY
-    x: 388
-    y: 1762
+    x: 1242
+    y: 856
     width: 86
     height: 46
     borderLeft: 0
@@ -2199,9 +2563,22 @@ MonoBehaviour:
     paddingRight: 48
     paddingTop: 70
     paddingBottom: 68
+  - name: P34-RED
+    x: 874
+    y: 130
+    width: 56
+    height: 30
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 63
+    paddingRight: 65
+    paddingTop: 76
+    paddingBottom: 78
   - name: P35-BLU
-    x: 556
-    y: 1824
+    x: 1810
+    y: 648
     width: 62
     height: 74
     borderLeft: 0
@@ -2213,8 +2590,8 @@ MonoBehaviour:
     paddingTop: 55
     paddingBottom: 55
   - name: P35-GRN
-    x: 466
-    y: 1598
+    x: 1810
+    y: 570
     width: 62
     height: 76
     borderLeft: 0
@@ -2226,8 +2603,8 @@ MonoBehaviour:
     paddingTop: 54
     paddingBottom: 54
   - name: P35-GRN2
-    x: 622
-    y: 1710
+    x: 478
+    y: 822
     width: 104
     height: 54
     borderLeft: 0
@@ -2239,8 +2616,8 @@ MonoBehaviour:
     paddingTop: 69
     paddingBottom: 61
   - name: P35-GRY
-    x: 354
-    y: 1960
+    x: 1630
+    y: 530
     width: 58
     height: 72
     borderLeft: 0
@@ -2252,8 +2629,8 @@ MonoBehaviour:
     paddingTop: 56
     paddingBottom: 56
   - name: P35-ORG
-    x: 292
-    y: 1956
+    x: 1814
+    y: 418
     width: 60
     height: 76
     borderLeft: 0
@@ -2265,8 +2642,8 @@ MonoBehaviour:
     paddingTop: 54
     paddingBottom: 54
   - name: P35-RED
-    x: 940
-    y: 1788
+    x: 1814
+    y: 496
     width: 60
     height: 72
     borderLeft: 0
@@ -2278,8 +2655,8 @@ MonoBehaviour:
     paddingTop: 56
     paddingBottom: 56
   - name: P36-BLU
-    x: 788
-    y: 1808
+    x: 1038
+    y: 1044
     width: 74
     height: 58
     borderLeft: 0
@@ -2291,8 +2668,8 @@ MonoBehaviour:
     paddingTop: 63
     paddingBottom: 63
   - name: P36-GRY
-    x: 298
-    y: 1684
+    x: 932
+    y: 494
     width: 90
     height: 74
     borderLeft: 0
@@ -2303,9 +2680,22 @@ MonoBehaviour:
     paddingRight: 47
     paddingTop: 55
     paddingBottom: 55
+  - name: P36-RED
+    x: 1852
+    y: 348
+    width: 32
+    height: 28
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 76
+    paddingRight: 76
+    paddingTop: 78
+    paddingBottom: 78
   - name: P36-WHT
-    x: 770
-    y: 1868
+    x: 1630
+    y: 1088
     width: 66
     height: 54
     borderLeft: 0
@@ -2317,8 +2707,8 @@ MonoBehaviour:
     paddingTop: 64
     paddingBottom: 66
   - name: P37-BLU
-    x: 2
-    y: 1866
+    x: 1382
+    y: 720
     width: 114
     height: 134
     borderLeft: 0
@@ -2330,8 +2720,8 @@ MonoBehaviour:
     paddingTop: 25
     paddingBottom: 25
   - name: P38-BLU
-    x: 950
-    y: 1728
+    x: 866
+    y: 1116
     width: 72
     height: 58
     borderLeft: 0
@@ -2343,8 +2733,8 @@ MonoBehaviour:
     paddingTop: 63
     paddingBottom: 63
   - name: P38-GRY
-    x: 788
-    y: 1682
+    x: 884
+    y: 1054
     width: 74
     height: 60
     borderLeft: 0
@@ -2356,8 +2746,8 @@ MonoBehaviour:
     paddingTop: 62
     paddingBottom: 62
   - name: P46-GRY
-    x: 556
-    y: 1900
+    x: 1806
+    y: 818
     width: 58
     height: 42
     borderLeft: 0
@@ -2369,8 +2759,8 @@ MonoBehaviour:
     paddingTop: 72
     paddingBottom: 70
   - name: P47-RED
-    x: 544
-    y: 1944
+    x: 1988
+    y: 808
     width: 58
     height: 58
     borderLeft: 0
@@ -2382,8 +2772,8 @@ MonoBehaviour:
     paddingTop: 64
     paddingBottom: 62
   - name: P47-YLW
-    x: 934
-    y: 1324
+    x: 92
+    y: 1114
     width: 88
     height: 56
     borderLeft: 0
@@ -2395,8 +2785,8 @@ MonoBehaviour:
     paddingTop: 64
     paddingBottom: 64
   - name: P48-BLU
-    x: 864
-    y: 1808
+    x: 960
+    y: 1084
     width: 74
     height: 56
     borderLeft: 0
@@ -2408,8 +2798,8 @@ MonoBehaviour:
     paddingTop: 65
     paddingBottom: 63
   - name: P48-RED
-    x: 952
-    y: 1520
+    x: 1836
+    y: 986
     width: 70
     height: 50
     borderLeft: 0
@@ -2421,8 +2811,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 67
   - name: P48-YLW
-    x: 952
-    y: 1462
+    x: 1186
+    y: 1086
     width: 70
     height: 56
     borderLeft: 0
@@ -2434,8 +2824,8 @@ MonoBehaviour:
     paddingTop: 66
     paddingBottom: 62
   - name: P49-GRN
-    x: 970
-    y: 260
+    x: 1640
+    y: 438
     width: 48
     height: 44
     borderLeft: 0
@@ -2447,8 +2837,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 73
   - name: P49-GRY
-    x: 654
-    y: 1954
+    x: 1992
+    y: 756
     width: 38
     height: 50
     borderLeft: 0
@@ -2460,8 +2850,8 @@ MonoBehaviour:
     paddingTop: 65
     paddingBottom: 69
   - name: P49-ORG
-    x: 604
-    y: 1954
+    x: 1640
+    y: 390
     width: 48
     height: 46
     borderLeft: 0
@@ -2473,8 +2863,8 @@ MonoBehaviour:
     paddingTop: 66
     paddingBottom: 72
   - name: P49-RGY
-    x: 654
-    y: 1954
+    x: 1992
+    y: 756
     width: 38
     height: 50
     borderLeft: 0
@@ -2486,8 +2876,8 @@ MonoBehaviour:
     paddingTop: 65
     paddingBottom: 69
   - name: P50-RED
-    x: 970
-    y: 214
+    x: 1636
+    y: 484
     width: 52
     height: 44
     borderLeft: 0
@@ -2499,8 +2889,8 @@ MonoBehaviour:
     paddingTop: 70
     paddingBottom: 70
   - name: P51-RED
-    x: 878
-    y: 1866
+    x: 1852
+    y: 312
     width: 34
     height: 34
     borderLeft: 0
@@ -2512,8 +2902,8 @@ MonoBehaviour:
     paddingTop: 75
     paddingBottom: 75
   - name: P53-GRY
-    x: 968
-    y: 1148
+    x: 1992
+    y: 702
     width: 54
     height: 40
     borderLeft: 0
@@ -2525,8 +2915,21 @@ MonoBehaviour:
     paddingTop: 72
     paddingBottom: 72
   - name: P54-GRY
-    x: 434
-    y: 1874
+    x: 1996
+    y: 564
+    width: 38
+    height: 52
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 74
+    paddingRight: 72
+    paddingTop: 67
+    paddingBottom: 65
+  - name: P54-RED
+    x: 1996
+    y: 510
     width: 38
     height: 52
     borderLeft: 0
@@ -2538,8 +2941,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 65
   - name: P67-BLU2
-    x: 588
-    y: 258
+    x: 728
+    y: 798
     width: 72
     height: 72
     borderLeft: 0
@@ -2551,8 +2954,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 55
   - name: P67-ORG1
-    x: 360
-    y: 750
+    x: 672
+    y: 550
     width: 128
     height: 96
     borderLeft: 0
@@ -2564,8 +2967,8 @@ MonoBehaviour:
     paddingTop: 40
     paddingBottom: 48
   - name: P67-ORG2
-    x: 212
-    y: 1960
+    x: 1384
+    y: 1032
     width: 78
     height: 72
     borderLeft: 0
@@ -2577,8 +2980,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 55
   - name: P67-PUR
-    x: 788
-    y: 1744
+    x: 792
+    y: 1062
     width: 72
     height: 62
     borderLeft: 0
@@ -2590,8 +2993,8 @@ MonoBehaviour:
     paddingTop: 62
     paddingBottom: 60
   - name: P67-RED
-    x: 700
-    y: 1836
+    x: 732
+    y: 726
     width: 68
     height: 70
     borderLeft: 0
@@ -2603,8 +3006,8 @@ MonoBehaviour:
     paddingTop: 58
     paddingBottom: 56
   - name: P67-WHT
-    x: 822
-    y: 1376
+    x: 94
+    y: 1042
     width: 90
     height: 70
     borderLeft: 0
@@ -2616,8 +3019,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 57
   - name: P68-WHT
-    x: 236
-    y: 1312
+    x: 2
+    y: 978
     width: 96
     height: 58
     borderLeft: 0
@@ -2629,8 +3032,8 @@ MonoBehaviour:
     paddingTop: 63
     paddingBottom: 63
   - name: P69-GRY
-    x: 862
-    y: 1754
+    x: 806
+    y: 1008
     width: 76
     height: 52
     borderLeft: 0
@@ -2642,8 +3045,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 65
   - name: P70-GRN3
-    x: 858
-    y: 1148
+    x: 618
+    y: 752
     width: 108
     height: 72
     borderLeft: 0
@@ -2655,8 +3058,8 @@ MonoBehaviour:
     paddingTop: 51
     paddingBottom: 61
   - name: P70-GRY
-    x: 150
-    y: 388
+    x: 1386
+    y: 166
     width: 138
     height: 120
     borderLeft: 0
@@ -2668,8 +3071,8 @@ MonoBehaviour:
     paddingTop: 36
     paddingBottom: 28
   - name: P71-BLU
-    x: 210
-    y: 1600
+    x: 630
+    y: 934
     width: 86
     height: 94
     borderLeft: 0
@@ -2681,8 +3084,8 @@ MonoBehaviour:
     paddingTop: 40
     paddingBottom: 50
   - name: P71-GRN
-    x: 120
-    y: 1696
+    x: 276
+    y: 1062
     width: 88
     height: 100
     borderLeft: 0
@@ -2694,8 +3097,8 @@ MonoBehaviour:
     paddingTop: 39
     paddingBottom: 45
   - name: P71-GRN3
-    x: 136
-    y: 1054
+    x: 928
+    y: 570
     width: 94
     height: 106
     borderLeft: 0
@@ -2707,8 +3110,8 @@ MonoBehaviour:
     paddingTop: 36
     paddingBottom: 42
   - name: P71-ORG
-    x: 530
-    y: 1498
+    x: 92
+    y: 1172
     width: 86
     height: 100
     borderLeft: 0
@@ -2720,8 +3123,8 @@ MonoBehaviour:
     paddingTop: 40
     paddingBottom: 44
   - name: P71-RED
-    x: 702
-    y: 1496
+    x: 1214
+    y: 904
     width: 84
     height: 96
     borderLeft: 0
@@ -2733,8 +3136,8 @@ MonoBehaviour:
     paddingTop: 35
     paddingBottom: 53
   - name: P71-WHT
-    x: 118
-    y: 1878
+    x: 932
+    y: 138
     width: 90
     height: 98
     borderLeft: 0
@@ -2746,8 +3149,8 @@ MonoBehaviour:
     paddingTop: 37
     paddingBottom: 49
   - name: P71-YLW
-    x: 934
-    y: 1222
+    x: 186
+    y: 1054
     width: 88
     height: 100
     borderLeft: 0
@@ -2759,8 +3162,8 @@ MonoBehaviour:
     paddingTop: 38
     paddingBottom: 46
   - name: P72-BLK
-    x: 2
-    y: 514
+    x: 722
+    y: 74
     width: 150
     height: 122
     borderLeft: 0
@@ -2772,8 +3175,8 @@ MonoBehaviour:
     paddingTop: 33
     paddingBottom: 29
   - name: P72-GRN3
-    x: 636
-    y: 1384
+    x: 502
+    y: 758
     width: 108
     height: 62
     borderLeft: 0
@@ -2785,8 +3188,8 @@ MonoBehaviour:
     paddingTop: 58
     paddingBottom: 64
   - name: P72-WHT
-    x: 2
-    y: 260
+    x: 1890
+    y: 180
     width: 154
     height: 124
     borderLeft: 0
@@ -2798,8 +3201,8 @@ MonoBehaviour:
     paddingTop: 30
     paddingBottom: 30
   - name: P78-GRY
-    x: 298
-    y: 1760
+    x: 182
+    y: 1156
     width: 88
     height: 50
     borderLeft: 0
@@ -2811,8 +3214,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 67
   - name: P79-BLK
-    x: 490
-    y: 1036
+    x: 138
+    y: 506
     width: 130
     height: 50
     borderLeft: 0
@@ -2824,8 +3227,8 @@ MonoBehaviour:
     paddingTop: 67
     paddingBottom: 67
   - name: P79-ORG1
-    x: 784
-    y: 1640
+    x: 1330
+    y: 856
     width: 86
     height: 40
     borderLeft: 0
@@ -2837,8 +3240,8 @@ MonoBehaviour:
     paddingTop: 73
     paddingBottom: 71
   - name: P80-GRY
-    x: 564
-    y: 1314
+    x: 1472
+    y: 942
     width: 82
     height: 62
     borderLeft: 0
@@ -2850,8 +3253,8 @@ MonoBehaviour:
     paddingTop: 61
     paddingBottom: 61
   - name: P82-GRY
-    x: 336
-    y: 1364
+    x: 102
+    y: 900
     width: 96
     height: 92
     borderLeft: 0
@@ -2863,8 +3266,8 @@ MonoBehaviour:
     paddingTop: 47
     paddingBottom: 45
   - name: P82-YLW
-    x: 836
-    y: 1222
+    x: 834
+    y: 206
     width: 96
     height: 92
     borderLeft: 0
@@ -2876,8 +3279,8 @@ MonoBehaviour:
     paddingTop: 47
     paddingBottom: 45
   - name: P84-BLK
-    x: 618
-    y: 1498
+    x: 1300
+    y: 968
     width: 82
     height: 100
     borderLeft: 0
@@ -2889,8 +3292,8 @@ MonoBehaviour:
     paddingTop: 42
     paddingBottom: 42
   - name: P85-BLU
-    x: 914
-    y: 426
+    x: 1276
+    y: 640
     width: 108
     height: 74
     borderLeft: 0
@@ -2902,8 +3305,8 @@ MonoBehaviour:
     paddingTop: 56
     paddingBottom: 54
   - name: P86-GRY
-    x: 788
-    y: 1496
+    x: 2
+    y: 1196
     width: 86
     height: 94
     borderLeft: 0
@@ -2915,8 +3318,8 @@ MonoBehaviour:
     paddingTop: 46
     paddingBottom: 44
   - name: P86-ORG1
-    x: 740
-    y: 1214
+    x: 584
+    y: 826
     width: 94
     height: 104
     borderLeft: 0
@@ -2928,8 +3331,8 @@ MonoBehaviour:
     paddingTop: 40
     paddingBottom: 40
   - name: P87-BLK
-    x: 122
-    y: 1512
+    x: 298
+    y: 912
     width: 94
     height: 74
     borderLeft: 0
@@ -2941,8 +3344,8 @@ MonoBehaviour:
     paddingTop: 53
     paddingBottom: 57
   - name: P89-GRY
-    x: 434
-    y: 1364
+    x: 536
+    y: 932
     width: 92
     height: 96
     borderLeft: 0
@@ -2954,8 +3357,8 @@ MonoBehaviour:
     paddingTop: 44
     paddingBottom: 44
   - name: P91-GRY
-    x: 236
-    y: 1212
+    x: 1286
+    y: 322
     width: 98
     height: 98
     borderLeft: 0
@@ -2967,8 +3370,8 @@ MonoBehaviour:
     paddingTop: 43
     paddingBottom: 43
   - name: P97-GRY
-    x: 544
-    y: 1230
+    x: 336
+    y: 828
     width: 102
     height: 82
     borderLeft: 0
@@ -2980,8 +3383,8 @@ MonoBehaviour:
     paddingTop: 51
     paddingBottom: 51
   - name: P98-BLK
-    x: 238
-    y: 1014
+    x: 1148
+    y: 666
     width: 120
     height: 36
     borderLeft: 0
@@ -2993,8 +3396,8 @@ MonoBehaviour:
     paddingTop: 75
     paddingBottom: 73
   - name: P99-BLK
-    x: 744
-    y: 1462
+    x: 230
+    y: 782
     width: 104
     height: 32
     borderLeft: 0
@@ -3006,8 +3409,8 @@ MonoBehaviour:
     paddingTop: 77
     paddingBottom: 75
   - name: PT01
-    x: 668
-    y: 336
+    x: 1508
+    y: 520
     width: 120
     height: 132
     borderLeft: 0
@@ -3019,8 +3422,8 @@ MonoBehaviour:
     paddingTop: 28
     paddingBottom: 24
   - name: PT02
-    x: 2
-    y: 1042
+    x: 560
+    y: 312
     width: 132
     height: 130
     borderLeft: 0
@@ -3032,8 +3435,8 @@ MonoBehaviour:
     paddingTop: 27
     paddingBottom: 27
   - name: PT03
-    x: 2
-    y: 910
+    x: 696
+    y: 286
     width: 132
     height: 130
     borderLeft: 0
@@ -3045,8 +3448,8 @@ MonoBehaviour:
     paddingTop: 27
     paddingBottom: 27
   - name: PT04
-    x: 422
-    y: 392
+    x: 430
+    y: 236
     width: 128
     height: 130
     borderLeft: 0
@@ -3058,8 +3461,8 @@ MonoBehaviour:
     paddingTop: 28
     paddingBottom: 26
   - name: PT05
-    x: 290
-    y: 392
+    x: 694
+    y: 418
     width: 130
     height: 130
     borderLeft: 0
@@ -3071,8 +3474,8 @@ MonoBehaviour:
     paddingTop: 27
     paddingBottom: 27
   - name: PT06
-    x: 890
-    y: 984
+    x: 1024
+    y: 484
     width: 126
     height: 78
     borderLeft: 0
@@ -3084,8 +3487,8 @@ MonoBehaviour:
     paddingTop: 53
     paddingBottom: 53
   - name: PT07
-    x: 518
-    y: 652
+    x: 2
+    y: 364
     width: 136
     height: 96
     borderLeft: 0
@@ -3097,8 +3500,8 @@ MonoBehaviour:
     paddingTop: 44
     paddingBottom: 44
   - name: PT08
-    x: 490
-    y: 750
+    x: 416
+    y: 368
     width: 132
     height: 88
     borderLeft: 0
@@ -3110,8 +3513,8 @@ MonoBehaviour:
     paddingTop: 49
     paddingBottom: 47
   - name: PT09
-    x: 622
-    y: 964
+    x: 698
+    y: 198
     width: 134
     height: 86
     borderLeft: 0
@@ -3123,8 +3526,8 @@ MonoBehaviour:
     paddingTop: 50
     paddingBottom: 48
   - name: PT10
-    x: 476
-    y: 1758
+    x: 1550
+    y: 1010
     width: 78
     height: 82
     borderLeft: 0
@@ -3136,8 +3539,8 @@ MonoBehaviour:
     paddingTop: 51
     paddingBottom: 51
   - name: PT11
-    x: 704
-    y: 1594
+    x: 1418
+    y: 856
     width: 78
     height: 82
     borderLeft: 0
@@ -3149,8 +3552,8 @@ MonoBehaviour:
     paddingTop: 51
     paddingBottom: 51
   - name: PT12
-    x: 212
-    y: 1776
+    x: 1212
+    y: 1002
     width: 82
     height: 82
     borderLeft: 0
@@ -3162,8 +3565,8 @@ MonoBehaviour:
     paddingTop: 49
     paddingBottom: 53
   - name: PT13
-    x: 210
-    y: 1878
+    x: 1468
+    y: 1020
     width: 78
     height: 80
     borderLeft: 0
@@ -3175,8 +3578,8 @@ MonoBehaviour:
     paddingTop: 52
     paddingBottom: 52
   - name: PT14
-    x: 356
-    y: 1116
+    x: 1702
+    y: 218
     width: 172
     height: 28
     borderLeft: 0
@@ -3188,8 +3591,8 @@ MonoBehaviour:
     paddingTop: 78
     paddingBottom: 78
   - name: PT15
-    x: 356
-    y: 1146
+    x: 1024
+    y: 46
     width: 182
     height: 14
     borderLeft: 0
@@ -3201,8 +3604,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 85
   - name: PT16
-    x: 564
-    y: 1194
+    x: 1694
+    y: 248
     width: 166
     height: 14
     borderLeft: 0
@@ -3214,8 +3617,8 @@ MonoBehaviour:
     paddingTop: 85
     paddingBottom: 85
   - name: PT17
-    x: 624
-    y: 794
+    x: 1876
+    y: 398
     width: 160
     height: 34
     borderLeft: 0
@@ -3227,8 +3630,8 @@ MonoBehaviour:
     paddingTop: 76
     paddingBottom: 74
   - name: PT18
-    x: 692
-    y: 98
+    x: 560
+    y: 76
     width: 150
     height: 108
     borderLeft: 0
@@ -3240,8 +3643,8 @@ MonoBehaviour:
     paddingTop: 34
     paddingBottom: 42
   - name: S01
-    x: 380
-    y: 652
+    x: 140
+    y: 274
     width: 136
     height: 96
     borderLeft: 0
@@ -3253,8 +3656,8 @@ MonoBehaviour:
     paddingTop: 47
     paddingBottom: 41
   - name: S02
-    x: 364
-    y: 46
+    x: 1386
+    y: 18
     width: 140
     height: 96
     borderLeft: 0
@@ -3266,8 +3669,8 @@ MonoBehaviour:
     paddingTop: 41
     paddingBottom: 47
   - name: S03
-    x: 786
-    y: 804
+    x: 1386
+    y: 630
     width: 120
     height: 88
     borderLeft: 0
@@ -3279,8 +3682,8 @@ MonoBehaviour:
     paddingTop: 48
     paddingBottom: 48
   - name: S04
-    x: 250
-    y: 636
+    x: 542
+    y: 524
     width: 128
     height: 106
     borderLeft: 0
@@ -3292,21 +3695,21 @@ MonoBehaviour:
     paddingTop: 44
     paddingBottom: 34
   - name: S05
-    x: 136
-    y: 944
-    width: 100
-    height: 108
+    x: 932
+    y: 328
+    width: 90
+    height: 84
     borderLeft: 0
     borderRight: 0
     borderTop: 0
     borderBottom: 0
-    paddingLeft: 44
-    paddingRight: 40
-    paddingTop: 41
-    paddingBottom: 35
+    paddingLeft: 46
+    paddingRight: 48
+    paddingTop: 50
+    paddingBottom: 50
   - name: S06
-    x: 336
-    y: 1224
+    x: 1874
+    y: 710
     width: 116
     height: 84
     borderLeft: 0
@@ -3318,8 +3721,8 @@ MonoBehaviour:
     paddingTop: 51
     paddingBottom: 49
   - name: SERVO-BLK
-    x: 908
-    y: 874
+    x: 254
+    y: 672
     width: 114
     height: 108
     borderLeft: 0
@@ -3331,8 +3734,8 @@ MonoBehaviour:
     paddingTop: 37
     paddingBottom: 39
   - name: W1-BLK1
-    x: 506
-    y: 126
+    x: 374
+    y: 30
     width: 184
     height: 66
     borderLeft: 0
@@ -3344,8 +3747,8 @@ MonoBehaviour:
     paddingTop: 56
     paddingBottom: 62
   - name: W1-BLU
-    x: 506
-    y: 58
+    x: 188
+    y: 30
     width: 184
     height: 66
     borderLeft: 0
@@ -3357,8 +3760,8 @@ MonoBehaviour:
     paddingTop: 57
     paddingBottom: 61
   - name: W2-BLK1
-    x: 480
-    y: 194
+    x: 1528
+    y: 126
     width: 180
     height: 62
     borderLeft: 0
@@ -3370,8 +3773,8 @@ MonoBehaviour:
     paddingTop: 60
     paddingBottom: 62
   - name: W2-GRY
-    x: 844
-    y: 118
+    x: 1206
+    y: 106
     width: 178
     height: 64
     borderLeft: 0
@@ -3383,8 +3786,8 @@ MonoBehaviour:
     paddingTop: 59
     paddingBottom: 61
   - name: W3-BLK1
-    x: 298
-    y: 194
+    x: 1024
+    y: 94
     width: 180
     height: 62
     borderLeft: 0
@@ -3395,9 +3798,35 @@ MonoBehaviour:
     paddingRight: 4
     paddingTop: 60
     paddingBottom: 62
+  - name: W3-COLOR
+    x: 1710
+    y: 140
+    width: 178
+    height: 62
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 6
+    paddingTop: 60
+    paddingBottom: 62
   - name: W4-BLK1
-    x: 710
+    x: 2
     y: 30
+    width: 184
+    height: 66
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 60
+    paddingBottom: 58
+  - name: W4-COLOR
+    x: 1528
+    y: 58
     width: 184
     height: 66
     borderLeft: 0
@@ -3435,8 +3864,8 @@ MonoBehaviour:
     paddingTop: 263
     paddingBottom: 263
   - name: WIRE2
-    x: 2
-    y: 46
+    x: 1528
+    y: 2
     width: 360
     height: 26
     borderLeft: 0
@@ -3448,8 +3877,8 @@ MonoBehaviour:
     paddingTop: 263
     paddingBottom: 263
   - name: WIRE2-GRY
-    x: 2
-    y: 74
+    x: 1024
+    y: 18
     width: 360
     height: 26
     borderLeft: 0
@@ -3461,7 +3890,7 @@ MonoBehaviour:
     paddingTop: 263
     paddingBottom: 263
   - name: WIRE3
-    x: 506
+    x: 1528
     y: 30
     width: 202
     height: 26
@@ -3474,8 +3903,8 @@ MonoBehaviour:
     paddingTop: 263
     paddingBottom: 263
   - name: WIRE4
-    x: 2
-    y: 30
+    x: 1024
+    y: 2
     width: 502
     height: 14
     borderLeft: 0

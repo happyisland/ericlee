@@ -25,6 +25,8 @@
     BOOL bStopRun;
 }
 
+@property (atomic,assign) NSInteger sendCount;
+
 @end
 
 
@@ -41,7 +43,7 @@
     
     resendArray = [NSMutableArray new];
     thread = [[NSThread alloc]initWithTarget:self selector:@selector(processResendData:) object:nil];
-    
+    self.sendCount = 0;
     [thread start];
     
     return self;
@@ -53,7 +55,7 @@
             DataPacketSend* remove = nil;
             for(DataPacketSend* resend in resendArray) {
                 // 如果500MS没有收到回应
-                if ([[NSDate date] timeIntervalSince1970]-resend.lastSendTime > 1) {
+                if ([[NSDate date] timeIntervalSince1970]-resend.lastSendTime >= 10) {
                     // 如果超过重发次数，移除列表
                     if (resend.remainSendCount <= 0)
                     {
@@ -103,7 +105,10 @@
 -(BOOL) isTimeOut {
     double currentTime = [[NSDate date] timeIntervalSince1970];
     
-    if (currentTime-_lastRcvTime >= 6)//6
+//    if (currentTime-_lastRcvTime >= 6)//6
+//        return true;
+    
+    if(self.sendCount>3)
         return true;
     
     return false;
@@ -166,6 +171,8 @@
     @synchronized(self){
         [resendArray addObject:dataPacketSend];
     }
+    
+    self.sendCount++;
 }
 
 -(void) initClientHandler {
@@ -181,7 +188,7 @@
     @synchronized(self) {
         [resendArray removeAllObjects];
     }
-    
+    self.sendCount = 0;
     [thread cancel];
 }
 
@@ -213,6 +220,7 @@
 #pragma <#arguments#>
 - (void)MyPeripheral:(MyPeripheral *)peripheral didReceiveTransparentData:(NSData *)data {
     //NSLog(@"Rcv data");
+    self.sendCount=0;
     unsigned char * pData = (unsigned char*)[data bytes];
     NSUInteger nLen = [data length];
     

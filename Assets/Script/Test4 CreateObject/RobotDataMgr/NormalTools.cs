@@ -1,8 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
-public class NormalTools : MonoBehaviour {
+public static class NormalTools
+{
+    /// <summary>
+    /// List转换为Dictionary
+    /// </summary>
+    /// <typeparam name="T2"></typeparam>
+    /// <param name="listT"></param>
+    /// <returns></returns>
+    public static Dictionary<string, T2> ListToDic<T2>(List<T2> listT) where T2 : Object
+    {
+        Dictionary<string, T2> dicT = new Dictionary<string, T2>();
+        foreach (T2 child in listT)
+        {
+            if (dicT.ContainsKey(child.name) == false)
+            {
+                dicT.Add(child.name, child);
+            }
+        }
 
+        return dicT;
+    }
 }
 
 /// <summary>
@@ -53,4 +73,6 @@ public static class MathTool
 
         return res;
     }
+
+
 }

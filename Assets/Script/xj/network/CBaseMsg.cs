@@ -92,6 +92,7 @@ public class MyBitConverter
         }
         return (long)num;
     }
+
     /// <summary>
     /// 写入一位ushort
     /// </summary>
@@ -970,6 +971,7 @@ public class SelfCheckDjErrorAck : CBaseMsg
     public List<byte> hfProtect;//过压保护
     public List<byte> lfProtect;//欠压保护
     public List<byte> otherProtect;//其他保护
+    public List<byte> encryptProtect;//熔丝位或加密位错误保护
 
 
     public SelfCheckDjErrorAck()
@@ -980,6 +982,7 @@ public class SelfCheckDjErrorAck : CBaseMsg
         hfProtect = new List<byte>();
         lfProtect = new List<byte>();
         otherProtect = new List<byte>();
+        encryptProtect = new List<byte>();
     }
 
     public override void Read(BinaryReader br)
@@ -993,6 +996,7 @@ public class SelfCheckDjErrorAck : CBaseMsg
             UInt32 hid = MyBitConverter.ReadUInt32(br);
             UInt32 lid = MyBitConverter.ReadUInt32(br);
             UInt32 oid = MyBitConverter.ReadUInt32(br);
+            UInt32 enid = MyBitConverter.ReadUInt32(br);
             for (int i = 0; i < 32; ++i)
             {
                 if ((tid & (UInt32)Math.Pow(2, i)) >= 1)
@@ -1018,6 +1022,10 @@ public class SelfCheckDjErrorAck : CBaseMsg
                 if ((oid & (UInt32)Math.Pow(2, i)) >= 1)
                 {
                     otherProtect.Add((byte)(i + 1));
+                }
+                if ((enid & (UInt32)Math.Pow(2, i)) >= 1)
+                {
+                    encryptProtect.Add((byte)(i + 1));
                 }
             }
 
@@ -1074,7 +1082,6 @@ public class ReadMotherboardDataMsgAck : CBaseMsg
     //public List<byte> infraredIds;//红外id
     //public List<byte> errorInfraredIds;//红外异常id
     Dictionary<TopologyPartType, SensorData> sensorDataDict;
-    public string speakerMac;
 
     public ReadMotherboardDataMsgAck()
     {
@@ -1084,7 +1091,6 @@ public class ReadMotherboardDataMsgAck : CBaseMsg
         //infraredIds = new List<byte>();
         //errorInfraredIds = new List<byte>();
         sensorDataDict = new Dictionary<TopologyPartType, SensorData>();
-        speakerMac = string.Empty;
     }
     /// <summary>
     /// 获取传感器数据
@@ -1194,6 +1200,12 @@ public class SensorData
             }
         }
         
+    }
+
+
+    public override string ToString()
+    {
+        return string.Format("id = {0}, errorIds = {1} , errorVerIds = {2} version = {3}", PublicFunction.ListToString(ids), PublicFunction.ListToString(errorIds), PublicFunction.ListToString(errorVerIds), version);
     }
 }
 #endregion
@@ -2071,15 +2083,47 @@ public class ReadGyroDataMsgAck : CBaseMsg
         try
         {
             base.Read(br);
-            gyroData.direction.z = MyBitConverter.ReadInt16(br);
-            gyroData.direction.y = MyBitConverter.ReadInt16(br);
-            gyroData.direction.x = MyBitConverter.ReadInt16(br);
+            gyroData.direction.z = MyBitConverter.ReadInt16(br);//航向
+            gyroData.direction.y = MyBitConverter.ReadInt16(br);//俯仰
+            gyroData.direction.x = MyBitConverter.ReadInt16(br);//横滚
             /*gyroData.acceleration.x = MyBitConverter.ReadUInt16(br);
             gyroData.acceleration.y = MyBitConverter.ReadUInt16(br);
             gyroData.acceleration.z = MyBitConverter.ReadUInt16(br);*/
             /*gyroData.gyro.x = MyBitConverter.ReadUInt16(br);
             gyroData.gyro.y = MyBitConverter.ReadUInt16(br);
             gyroData.gyro.z = MyBitConverter.ReadUInt16(br);*/
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+        }
+    }
+}
+
+
+public class ReadSpeakerDataMsgAck : CBaseMsg
+{
+    public SpeakerInfoData data;
+    int len;
+
+    public ReadSpeakerDataMsgAck(int len)
+    {
+        data = new SpeakerInfoData();
+        this.len = len;
+    }
+
+    public override void Read(BinaryReader br)
+    {
+
+        try
+        {
+            base.Read(br);
+            data.speakerMac = PublicFunction.BytesToHexString(br.ReadBytes(6));
+            data.speakerName = Encoding.ASCII.GetString(br.ReadBytes(len - 6));
         }
         catch (System.Exception ex)
         {
@@ -2113,6 +2157,37 @@ public class SendSensorDataMsg : CBaseMsg
         {
             base.Write(bw);
             sensorData.Write(bw);
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+        }
+    }
+}
+
+
+public class SendSensorDataMsgAck : CBaseMsg
+{
+    public SensorBaseData sensorData;
+    public byte result;
+
+    public SendSensorDataMsgAck()
+    {
+        sensorData = new SensorBaseData();
+    }
+
+    public override void Read(BinaryReader br)
+    {
+        
+        try
+        {
+            base.Read(br);
+            sensorData.Read(br);
+            result = br.ReadByte();
         }
         catch (System.Exception ex)
         {

@@ -35,46 +35,7 @@ public class GyroData : ReadSensorDataBase
         }
     }
 
-    public override object GetReadResult()
-    {
-        List<Dictionary<string, object>> dict = new List<Dictionary<string, object>>();
-        if (readIds[0] == 0)
-        {
-            foreach (KeyValuePair<byte, GyroBackData> kvp in dataDict)
-            {
-                Dictionary<string, object> tmp = new Dictionary<string, object>();
-                tmp["id"] = kvp.Key;
-                tmp["x"] = kvp.Value.direction.x;
-                tmp["y"] = kvp.Value.direction.y;
-                tmp["z"] = kvp.Value.direction.z;
-                dict.Add(tmp);
-            }
-        }
-        else
-        {
-            for (int i = 0, imax = readIds.Count; i < imax; ++i)
-            {
-                Dictionary<string, object> tmp = new Dictionary<string, object>();
-                tmp["id"] = readIds[i];
-                if (dataDict.ContainsKey(readIds[i]))
-                {
-                    tmp["x"] = dataDict[readIds[i]].direction.x;
-                    tmp["y"] = dataDict[readIds[i]].direction.y;
-                    tmp["z"] = dataDict[readIds[i]].direction.z;
-                }
-                else
-                {
-                    tmp["x"] = -1;
-                    tmp["y"] = -1;
-                    tmp["z"] = -1;
-                }
-                dict.Add(tmp);
-            }
-        }
-        return dict;
-    }
-
-    public override string GetOnlyTypeReadResult()
+    public override string GetReadResult()
     {
         List<Dictionary<string, object>> dict = new List<Dictionary<string, object>>();
         if (readIds[0] == 0)
@@ -113,11 +74,54 @@ public class GyroData : ReadSensorDataBase
         return Json.Serialize(dict);
     }
 
-    public override void ReadCallBackMsg(BinaryReader br)
+    public override object GetReadAllResult()
+    {
+        List<Dictionary<string, object>> dict = new List<Dictionary<string, object>>();
+        if (null != readAllIds && readAllIds.Count > 0)
+        {
+            if (readAllIds[0] == 0)
+            {
+                foreach (KeyValuePair<byte, GyroBackData> kvp in dataDict)
+                {
+                    Dictionary<string, object> tmp = new Dictionary<string, object>();
+                    tmp["id"] = kvp.Key;
+                    tmp["x"] = kvp.Value.direction.x;
+                    tmp["y"] = kvp.Value.direction.y;
+                    tmp["z"] = kvp.Value.direction.z;
+                    dict.Add(tmp);
+                }
+            }
+            else
+            {
+                for (int i = 0, imax = readAllIds.Count; i < imax; ++i)
+                {
+                    Dictionary<string, object> tmp = new Dictionary<string, object>();
+                    tmp["id"] = readAllIds[i];
+                    if (dataDict.ContainsKey(readAllIds[i]))
+                    {
+                        tmp["x"] = dataDict[readAllIds[i]].direction.x;
+                        tmp["y"] = dataDict[readAllIds[i]].direction.y;
+                        tmp["z"] = dataDict[readAllIds[i]].direction.z;
+                    }
+                    else
+                    {
+                        tmp["x"] = -1;
+                        tmp["y"] = -1;
+                        tmp["z"] = -1;
+                    }
+                    dict.Add(tmp);
+                }
+            }
+        }
+        
+        return dict;
+    }
+
+    public override void ReadCallBackMsg(BinaryReader br, int len)
     {
         try
         {
-            base.ReadCallBackMsg(br);
+            base.ReadCallBackMsg(br, len);
             if (null != backIds)
             {
                 for (int i = 0, imax = backIds.Count; i < imax; ++i)
@@ -130,7 +134,7 @@ public class GyroData : ReadSensorDataBase
                     }
                 }
             }
-            if (null != errIds)
+            if (null != errIds && errIds.Count > 0)
             {
                 for (int i = 0, imax = errIds.Count; i < imax; ++i)
                 {
@@ -143,7 +147,11 @@ public class GyroData : ReadSensorDataBase
         }
         catch (System.Exception ex)
         {
-        	
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
         }
         
     }

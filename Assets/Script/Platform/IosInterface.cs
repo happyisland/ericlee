@@ -443,7 +443,7 @@ public class IosInterface : PlatformInterface
     {
         try
         {
-            base.ConnectSpeaker(speaker);
+            connectSpeaker(speaker);
         }
         catch (System.Exception ex)
         {
@@ -515,6 +515,8 @@ public class IosInterface : PlatformInterface
     private static extern void IosSetSendXTState(int state);
     [DllImport("__Internal")]
     private static extern string IosGetUserData(string dataType);
+    [DllImport("__Internal")]
+    private static extern void connectSpeaker(string speakerMac);
     #endregion
 #endif
 }

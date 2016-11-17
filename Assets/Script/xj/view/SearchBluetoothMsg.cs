@@ -80,6 +80,10 @@ public class SearchBluetoothMsg : BasePopWin
 
     public static void ShowMsg()
     {
+        if (PlatformMgr.Instance.GetBluetoothState())
+        {
+            PlatformMgr.Instance.DisConnenctBuletooth();
+        }
         if (null == mInst)
         {
             PopWinManager.GetInst().ShowPopWin(typeof(SearchBluetoothMsg));
@@ -612,7 +616,7 @@ public class SearchBluetoothMsg : BasePopWin
         {
             DeviceInfo info = arg[0] as DeviceInfo;
             if (info == null) return;
-            if (info.Name.StartsWith("Jimu_spk_"))
+            if (info.Name.StartsWith("Jimuspk_"))
             {
                 return;
             }

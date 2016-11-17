@@ -284,6 +284,7 @@ public enum ExtendCMDCode : byte
     ReadGravityData,
     ReadUltrasonicData,
     ReadDigitalTubeData,
+    ReadSpeakerData,
     SendEmojiData,
     SendDigitalTubeData,
 }

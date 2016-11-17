@@ -697,7 +697,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 76, y: 340, z: 0}
+  m_Size: {x: 90, y: 340, z: 0}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!65 &6500002
 BoxCollider:
@@ -820,7 +820,7 @@ MonoBehaviour:
   alwaysOnScreen: 0
   anchorOffset: 0
   renderQueue: 0
-  startingRenderQueue: 3009
+  startingRenderQueue: 3006
   mAlpha: 1
   mClipping: 3
   mClipRange: {x: 0, y: 38.5, z: 1200, w: 213}
@@ -1021,13 +1021,13 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 76
+  mWidth: 90
   mHeight: 340
   mDepth: 4
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
-  aspectRatio: .223529413
+  aspectRatio: .264705896
   mType: 0
   mFillDirection: 4
   mFillAmount: 1
@@ -1038,8 +1038,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
-  mSpriteName: vslider_shader@3x
+  mAtlas: {fileID: 11400000, guid: 80cffdb59d2e419459cc679c12a75efa, type: 2}
+  mSpriteName: Clean
   mFillCenter: 1
 --- !u!114 &11400014
 MonoBehaviour:
@@ -1055,6 +1055,7 @@ MonoBehaviour:
   isRunInEditor: 0
   joystickName: NguiJoystick
   height: 340
+  width: 90
   minAlpha: .300000012
   bg: {fileID: 11400016}
   thumb: {fileID: 11400038}
@@ -1088,13 +1089,13 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 76
+  mWidth: 90
   mHeight: 340
   mDepth: 5
   autoResizeBoxCollider: 1
   hideIfOffScreen: 0
   keepAspectRatio: 0
-  aspectRatio: .223529413
+  aspectRatio: .264705896
   mType: 1
   mFillDirection: 4
   mFillAmount: 1
@@ -1106,7 +1107,7 @@ MonoBehaviour:
   bottomType: 1
   topType: 1
   mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
-  mSpriteName: vslider3x
+  mSpriteName: vsliderSprite@2x
   mFillCenter: 1
 --- !u!114 &11400018
 MonoBehaviour:
@@ -1565,14 +1566,14 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 74
-  mHeight: 74
+  mWidth: 88
+  mHeight: 88
   mDepth: 6
   autoResizeBoxCollider: 1
   hideIfOffScreen: 0
   keepAspectRatio: 0
   aspectRatio: 1
-  mType: 0
+  mType: 1
   mFillDirection: 4
   mFillAmount: 1
   mInvert: 0
@@ -1583,7 +1584,7 @@ MonoBehaviour:
   bottomType: 1
   topType: 1
   mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
-  mSpriteName: vsliderThumb@3x
+  mSpriteName: vsliderThumb@2x
   mFillCenter: 1
 --- !u!114 &11400040
 MonoBehaviour:

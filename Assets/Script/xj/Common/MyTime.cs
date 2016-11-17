@@ -40,6 +40,7 @@ public class MyTime : SingletonObject<MyTime>
                 {
                     callBack(args);
                 }
+				isPlaying = false;
                 return true;
             }
             return false;
@@ -48,6 +49,8 @@ public class MyTime : SingletonObject<MyTime>
 
     List<TimeData> mTimeList = null;
     List<TimeData> mDelList = null;
+    List<TimeData> mAddList = null;
+
     public MyTime()
     {
         mDelList = new List<TimeData>();
@@ -55,14 +58,27 @@ public class MyTime : SingletonObject<MyTime>
 
     public void Update()
     {
-        if (null != mTimeList)
+        if (null != mAddList)
+        {
+            for (int i = 0, imax = mAddList.Count; i < imax; ++i)
+            {
+                if (null == mTimeList)
+                {
+                    mTimeList = new List<TimeData>();
+                }
+                mTimeList.Add(mAddList[i]);
+            }
+            mAddList = null;
+        }
+        if (null != mDelList && null != mTimeList && mDelList.Count > 0)
         {
             for (int i = 0, imax = mDelList.Count; i < imax; ++i)
             {
                 mTimeList.Remove(mDelList[i]);
             }
+            mDelList = null;
         }
-        if (null != mTimeList)
+        if (null != mTimeList && mTimeList.Count > 0)
         {
             for (int i = 0, imax = mTimeList.Count; i < imax; ++i)
             {
@@ -71,15 +87,12 @@ public class MyTime : SingletonObject<MyTime>
                     mTimeList[i].time += Time.fixedDeltaTime;
                     if (mTimeList[i].TryCall())
                     {
-                        mDelList.Add(mTimeList[i]);
-                        /*if (mTimeList.Count != imax)
-                        {
-                            break;
-                        }
-                        mTimeList.RemoveAt(i);
-                        --imax;
-                        --i;*/
+                        Remove(mTimeList[i]);
                     }
+                }
+                if (imax != mTimeList.Count)
+                {
+                    Debug.LogError("数量不一致");
                 }
             }
         }
@@ -114,7 +127,7 @@ public class MyTime : SingletonObject<MyTime>
         {
             for (int i = 0, imax = mTimeList.Count; i < imax; ++i)
             {
-                mDelList.Add(mTimeList[i]);
+                Remove(mTimeList[i]);
             }
         }
     }
@@ -124,10 +137,22 @@ public class MyTime : SingletonObject<MyTime>
     public void Add(float start, TimeCallBack ack, params object [] args)
     {
         TimeData data = new TimeData(start, ack, args);
-        if (null == mTimeList)
+        if (null == mAddList)
         {
-            mTimeList = new List<TimeData>();
+            mAddList = new List<TimeData>();
         }
-        mTimeList.Add(data);
+        mAddList.Add(data);
+    }
+
+    void Remove(TimeData data)
+    {
+        if (null == mDelList)
+        {
+            mDelList = new List<TimeData>();
+        }
+        if (!mDelList.Contains(data))
+        {
+            mDelList.Add(data);
+        }
     }
 }

@@ -15,6 +15,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
 {
     public delegate void ExceptionDelegate(bool confirmFlag);
 
+    public delegate void LogicCmdCallBack(string result);
+
     delegate void CallUnityCmdDelegate(string[] args);
 
     class WaitCmdData
@@ -40,6 +42,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         }
     }
 
+    public LogicCmdCallBack logicCmdCallBack = null;
+
     /// <summary>
     /// 是否是处于逻辑编程通讯
     /// </summary>
@@ -53,7 +57,11 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     /// 由逻辑编程打开了蓝牙连接
     /// </summary>
     bool isLogicOpenSearchFlag = false;
-
+    public bool IsLogicOpenSearchFlag
+    {
+        get { return isLogicOpenSearchFlag; }
+        set { isLogicOpenSearchFlag = value; }
+    }
     Dictionary<string, CallUnityCmdDelegate> mCallCmdDict;
 #if UNITY_ANDROID
     public readonly string Logic_Cmd_Start = "jimu://";
@@ -91,6 +99,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     int mSetLEDCount = 0;
     int mSetEmojiCount = 0;
     int mSetDigitalTubeCount = 0;
+    
     public LogicCtrl()
     {
         mCallCmdDict = new Dictionary<string, CallUnityCmdDelegate>();
@@ -146,7 +155,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                             }
                             else if (cmd.Equals(LogicCmd.queryAllSensor.ToString()) || cmd.Equals(LogicCmd.queryTouchStatus.ToString()) || cmd.Equals(LogicCmd.queryInfrared.ToString()) || cmd.Equals(LogicCmd.queryGyroscope.ToString()))
                             {
-                                waitTime = 200;
+                                waitTime = 1000;
                             }
                             WaitCmdData waitData = new WaitCmdData(waitTime, args);
                             mWaitCmdDict[cmd] = waitData;
@@ -280,7 +289,10 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
 
     public void CloseBlueSearch()
     {
-        EventMgr.Inst.Fire(EventID.Exit_Blue_Connect);
+        if (!PopWinManager.GetInst().IsExist(typeof(TopologyBaseMsg)) && !PopWinManager.GetInst().IsExist(typeof(SearchBluetoothMsg)))
+        {
+            EventMgr.Inst.Fire(EventID.Exit_Blue_Connect);
+        }
         if (isLogicOpenSearchFlag)
         {
             isLogicOpenSearchFlag = false;
@@ -290,6 +302,10 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             AddSensorData(ref dict);
             string jsonbill = Json.Serialize(dict);
             PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.ConnectBLECallBack, jsonbill);
+            if (PlatformMgr.Instance.IsChargeProtected)
+            {
+                LogicCtrl.GetInst().ChargeProtectedCallBack();
+            }
         }
     }
 
@@ -310,9 +326,26 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         if (IsLogicProgramming && !mExceptionTipsFlag)
         {
             mExceptionTipsFlag = true;
-            mWaitExceptionRepairFlag = false;
+            mWaitExceptionRepairFlag = true;
             mExceptionCallBack = exDlgt;
             PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.JsShowException, exceptionString);
+            if (!SingletonBehaviour<ClientMain>.GetInst().useThirdAppFlag)
+            {
+                PromptMsg.ShowDoublePrompt(exceptionString, SelfCheckErrorOnClick);
+            }
+        }
+    }
+
+    void SelfCheckErrorOnClick(GameObject obj)
+    {
+        string btnName = obj.name;
+        if (btnName.Equals(PromptMsg.LeftBtnName))
+        {
+            JsExceptionOnClick(false);
+        }
+        else if (btnName.Equals(PromptMsg.RightBtnName))
+        {
+            JsExceptionOnClick(true);
         }
     }
 
@@ -321,9 +354,9 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         mExceptionTipsFlag = false;
         if (null != mExceptionCallBack)
         {
-            if (confirmFlag)
+            if (!confirmFlag)
             {
-                mWaitExceptionRepairFlag = true;
+                mWaitExceptionRepairFlag = false;
             }
             mExceptionCallBack(confirmFlag);
             mExceptionCallBack = null;
@@ -691,7 +724,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                                 time = int.Parse(dict["ms"].ToString());
                             }
                             byte servo = byte.Parse(dict["servo"].ToString());
-                            int angle = int.Parse(dict["degree"].ToString()) + 120;
+                            int angle = int.Parse(dict["degree"].ToString()) + PublicFunction.DuoJi_Start_Rota;
                             if (angle < PublicFunction.DuoJi_Min_Show_Rota)
                             {
                                 angle = PublicFunction.DuoJi_Min_Show_Rota;
@@ -751,7 +784,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                                 time = int.Parse(dict["ms"].ToString());
                             }
                             byte servo = byte.Parse(dict["servo"].ToString());
-                            int angle = int.Parse(dict["degree"].ToString()) + 120;
+                            int angle = int.Parse(dict["degree"].ToString()) + PublicFunction.DuoJi_Start_Rota;
                             if (angle < PublicFunction.DuoJi_Min_Show_Rota)
                             {
                                 angle = PublicFunction.DuoJi_Min_Show_Rota;
@@ -938,7 +971,27 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         {
             if (PlatformMgr.Instance.GetBluetoothState())
             {
-                mRobot.ReadBack(ExtendCMDCode.LogicGetPosture);
+                bool isPowerFlag = false;
+                List<byte> angleList = mRobot.GetAllDjData().GetAngleList();
+                for (int i = 0, imax = angleList.Count; i < imax; ++i)
+                {
+                    DuoJiData data = mRobot.GetAnDjData(angleList[i]);
+                    if (null != data && data.modelType == ServoModel.Servo_Model_Angle && data.isPowerDown)
+                    {
+                        isPowerFlag = true;
+                        break;
+                    }
+                }
+                if (isPowerFlag)
+                {
+                    mRobot.ReadBack(ExtendCMDCode.LogicGetPosture);
+                }
+                else
+                {
+                    Action ac = new Action();
+                    mRobot.GetNowAction(ac);
+                    GetPostureCallBack(CallUnityResult.success, ac);
+                }
                 /*Action ac = new Action();
                 ac.UpdateRota(1, 20);
                 ac.UpdateRota(2, 30);
@@ -967,20 +1020,30 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     {
         try
         {
+            if (null != mRuningCmdDict)
+            {
+                mRuningCmdDict.Clear();
+            }
+            if (null != mWaitCmdDict)
+            {
+                mWaitCmdDict.Clear();
+            }
+            NetWork.GetInst().ClearAllMsg();
             if (PlatformMgr.Instance.GetBluetoothState())
             {
                 mRobot.StopNowPlayActions();
                 mRobot.StopAllTurn();
-                RunCmdFinished(args[0]);
+                //RunCmdFinished(args[0]);
+                
             }
-            else
+            /*else
             {
                 RunCmdFinished(args[0]);
-            }
+            }*/
         }
         catch (System.Exception ex)
         {
-            RunCmdFinished(args[0]);
+            //RunCmdFinished(args[0]);
             if (ClientMain.Exception_Log_Flag)
             {
                 System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
@@ -1016,11 +1079,11 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             if (PlatformMgr.Instance.GetBluetoothState())
             {
 
-                if (null != mRobot.GetReadSensorData(TopologyPartType.Gyro) && null != mRobot.MotherboardData && null != mRobot.MotherboardData.GetSensorData(TopologyPartType.Gyro))
+                if (null != mRobot.GetReadSensorData(TopologyPartType.Gyro) && null != mRobot.GetReadSensorData(TopologyPartType.Gyro).ids && mRobot.GetReadSensorData(TopologyPartType.Gyro).ids.Count > 0)
                 {
                     mNeedWaitSensorCallBack = 2;
                     mRobot.ReadAllSensorData();
-                    mRobot.ReadSensorData(mRobot.MotherboardData.GetSensorData(TopologyPartType.Gyro).ids, TopologyPartType.Gyro, true);
+                    mRobot.ReadSensorData(mRobot.GetReadSensorData(TopologyPartType.Gyro).ids, TopologyPartType.Gyro, true);
                 }
                 else
                 {
@@ -1484,11 +1547,12 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             if (result == CallUnityResult.success && null != action)
             {
                 List<Dictionary<string, int>> list = new List<Dictionary<string, int>>();
-                foreach (KeyValuePair<byte, short> kvp in action.rotas)
+                List<byte> angleList = mRobot.GetAllDjData().GetAngleList();
+                for (int i = 0, imax = angleList.Count; i < imax; ++i)
                 {
                     Dictionary<string, int> dict = new Dictionary<string, int>();
-                    dict["servo"] = kvp.Key;
-                    dict["degree"] = (int)kvp.Value - 120;
+                    dict["servo"] = angleList[i];
+                    dict["degree"] = action.GetRota(angleList[i]) - PublicFunction.DuoJi_Start_Rota;
                     list.Add(dict);
                 }
                 string jsonbill = CallUnityResult.success.ToString() + PublicFunction.Separator_Or + Json.Serialize(list);
@@ -1532,12 +1596,12 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                 {
                     if (null != mRobot.GetReadSensorData(sensorTypes[i]))
                     {
-                        dict[sensorTypes[i].ToString()] = mRobot.GetReadSensorData(sensorTypes[i]).GetReadResult();
+                        dict[sensorTypes[i].ToString()] = mRobot.GetReadSensorData(sensorTypes[i]).GetReadAllResult();
                     }
                 }
                 if (null != mRobot.GetReadSensorData(TopologyPartType.Gyro))
                 {
-                    dict[TopologyPartType.Gyro.ToString()] = mRobot.GetReadSensorData(TopologyPartType.Gyro).GetReadResult();
+                    dict[TopologyPartType.Gyro.ToString()] = mRobot.GetReadSensorData(TopologyPartType.Gyro).GetReadAllResult();
                 }
                 jsonbill = result.ToString() + PublicFunction.Separator_Or + Json.Serialize(dict);
                 CmdMoreCallBack(LogicCmd.queryAllSensor.ToString(), jsonbill);
@@ -1556,7 +1620,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             string jsonbill = string.Empty;
             if (result == CallUnityResult.success && null != mRobot.GetReadSensorData(TopologyPartType.Infrared))
             {
-                jsonbill = CallUnityResult.success.ToString() + PublicFunction.Separator_Or + mRobot.GetReadSensorData(TopologyPartType.Infrared).GetOnlyTypeReadResult();
+                jsonbill = CallUnityResult.success.ToString() + PublicFunction.Separator_Or + mRobot.GetReadSensorData(TopologyPartType.Infrared).GetReadResult();
             }
             else
             {
@@ -1576,7 +1640,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             string jsonbill = string.Empty;
             if (result == CallUnityResult.success && null != mRobot.GetReadSensorData(TopologyPartType.Touch))
             {
-                jsonbill = CallUnityResult.success.ToString() + PublicFunction.Separator_Or + mRobot.GetReadSensorData(TopologyPartType.Touch).GetOnlyTypeReadResult();
+                jsonbill = CallUnityResult.success.ToString() + PublicFunction.Separator_Or + mRobot.GetReadSensorData(TopologyPartType.Touch).GetReadResult();
             }
             else
             {
@@ -1596,7 +1660,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             string jsonbill = string.Empty;
             if (result == CallUnityResult.success && null != mRobot.GetReadSensorData(TopologyPartType.Gyro))
             {
-                jsonbill = CallUnityResult.success.ToString() + PublicFunction.Separator_Or + mRobot.GetReadSensorData(TopologyPartType.Gyro).GetOnlyTypeReadResult();
+                jsonbill = CallUnityResult.success.ToString() + PublicFunction.Separator_Or + mRobot.GetReadSensorData(TopologyPartType.Gyro).GetReadResult();
             }
             else
             {
@@ -1644,6 +1708,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
 
     public void ExceptionRepairResult()
     {
+        PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.JsExceptionWaitResult, string.Empty);
         mWaitExceptionRepairFlag = false;
     }
 #endregion
@@ -1704,6 +1769,10 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         string jsonbill = Json.Serialize(dict);
         Debuger.Log(string.Format("LogicCMDResult = {0}", jsonbill));
         PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.LogicCMDResult, jsonbill);
+        if (null != logicCmdCallBack)
+        {
+            logicCmdCallBack(jsonbill);
+        }
         RunCmdFinished(cmd);
     }
 

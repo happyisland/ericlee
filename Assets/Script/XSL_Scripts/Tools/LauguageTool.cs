@@ -99,6 +99,11 @@ public class LauguageTool
         return lauguageConfig.AddToTypes(text);
     }
 
+    public void AddLanguageForChinese(TextCell text, string chineseValue)
+    {
+        lauguageConfig.AddForChinese(text, chineseValue);
+    }
+
     public bool DelLauguage(TextCell text)
     {
         return lauguageConfig.DelLauguage(text);
@@ -201,6 +206,10 @@ public class LauguageTool
                     else if (inst == "Russian")   //俄语
                     {
                         CurLauguage = LauguageType.Russian;
+                    }
+                    else if (inst.Equals("Polski"))//波兰语
+                    {
+                        CurLauguage = LauguageType.Polaic;
                     }
                     else
                     {
@@ -606,6 +615,29 @@ public class LauguageConfig
         return true;
     }
 
+    public void AddForChinese(TextCell language, string chineseValue)
+    {
+        for (int i = 0, imax = TextCells.Count; i < imax; ++i)
+        {
+            List<Lauguage> list = TextCells[i].lauguages;
+            if (null != list)
+            {
+                for (int index = 0, indexMax = list.Count; index < indexMax; ++index)
+                {
+                    if (list[index].lauType == LauguageType.Chinese)
+                    {
+                        if (list[index].value.TrimEnd(' ').Replace("。", "").Replace(".", "").Replace("！", "").Replace("!", "").Replace("？", "").Replace("?", "") == chineseValue.TrimEnd(' ').Replace("。", "").Replace(".", "").Replace("！", "").Replace("!", "").Replace("？", "").Replace("?", ""))
+                        {
+                            TextCells[i] = language;
+                        }
+                        break;
+                    }
+                }
+            }
+            
+        }
+    }
+
     public bool DelLauguage(TextCell text)
     {
         for (int i = 0, imax = TextCells.Count; i < imax; ++i)
@@ -657,9 +689,12 @@ public class LauguageConfig
         for (int i = 0, imax = TextCells.Count; i < imax; ++i)
         {
             string text = TextCells[i].GetText(lauguage.lauType);
-            if (!string.IsNullOrEmpty(text) && text.Equals(lauguage.value))
+            if (!string.IsNullOrEmpty(text))
             {
-                return TextCells[i];
+                if (lauguage.value.TrimEnd(' ').Replace("。", "").Replace(".", "").Replace("！", "").Replace("!", "").Replace("？", "").Replace("?", "") == text.TrimEnd(' ').Replace("。", "").Replace(".", "").Replace("！", "").Replace("!", "").Replace("？", "").Replace("?", ""))
+                {
+                    return TextCells[i];
+                }
             }
         }
         return null;
@@ -795,18 +830,19 @@ public class Lauguage
 
 public enum LauguageType
 {
-    Chinese,
-    English,
-    Japanese,
-    Korean,
-    German,
-    Italy,
-    French,
-    Spanish,
-    Portugal,
-    HokongChinese,
-    Arab,
-    Russian,
+    Chinese,//中文
+    English,//英文
+    Japanese,//日语
+    Korean,//韩语
+    German,//德语
+    Italy,//意大利
+    French,//法语
+    Spanish,//西班牙语
+    Portugal,//葡萄牙
+    HokongChinese,//繁体
+    Arab,//阿拉伯
+    Russian,//俄语
+    Polaic,//波兰
     Ohter,
 }
 

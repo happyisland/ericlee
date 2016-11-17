@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System.Threading;
+using System.Text;
 
 /// <summary>
 /// Author:xj
@@ -20,7 +21,8 @@ public class NetWork
     #region 私有属性
     static NetWork mInst = null;
     //static UnityEngine.Object mLock = new UnityEngine.Object();
-    Queue<SendMsgData> mSendMsgList = null;
+    //Queue<SendMsgData> mSendMsgList = null;
+    List<SendMsgData> mSendMsgList = null;
 
     Dictionary<CMDCode, ExtendCMDCode> mLastSendExCmdDict;
     //Thread mSendThread;
@@ -33,7 +35,7 @@ public class NetWork
     /// <summary>
     /// 禁止边充边玩时可以发送的指令
     /// </summary>
-    CMDCode[] mChargeCanSendCmd = new CMDCode[] { CMDCode.Hand_Shake, CMDCode.Read_System_Power, CMDCode.Read_Device_Type, CMDCode.Self_Check, CMDCode.Read_Motherboard_Data, CMDCode.Read_System_Version, CMDCode.Read_IC_Flash, CMDCode.Write_IC_Flash, CMDCode.Read_MCU_ID, CMDCode.Change_Name, CMDCode.Robot_Update_Start, CMDCode.Robot_Update_Finish, CMDCode.Robot_Update_Write, CMDCode.Robot_Restart_Update_Start_Ack, CMDCode.Robot_Restart_Update_Finish_Ack, CMDCode.Servo_Update_Start, CMDCode.Servo_Update_Write, CMDCode.Servo_Update_Finish, CMDCode.Change_ID, CMDCode.Change_Sensor_ID };
+    CMDCode[] mChargeCanSendCmd = new CMDCode[] { CMDCode.Hand_Shake, CMDCode.Read_System_Power, CMDCode.Read_Device_Type, CMDCode.Self_Check, CMDCode.Read_Motherboard_Data, CMDCode.Read_System_Version, CMDCode.Read_IC_Flash, CMDCode.Write_IC_Flash, CMDCode.Read_MCU_ID, CMDCode.Change_Name, CMDCode.Robot_Update_Start, CMDCode.Robot_Update_Finish, CMDCode.Robot_Update_Write, CMDCode.Robot_Restart_Update_Start_Ack, CMDCode.Robot_Restart_Update_Finish_Ack, CMDCode.Servo_Update_Start, CMDCode.Servo_Update_Write, CMDCode.Servo_Update_Finish, CMDCode.Change_ID, CMDCode.Change_Sensor_ID, CMDCode.Read_Sensor_Data, CMDCode.Read_Sensor_Data_Other };
     bool mChargePromptFlag = false;
 
     SendMsgData mSendedMsgData;
@@ -102,7 +104,20 @@ public class NetWork
         {
             //MyLog.Log("SendMsg start 1");
             SendMsgData data = new SendMsgData(cmd, msg, mac, exCmd);
-            mSendMsgList.Enqueue(data);
+            AddSendMsg(data);
+            if (mSendMsgList.Count > 1)
+            {
+                StringBuilder sb = new StringBuilder();
+                for (int i = 0, imax = mSendMsgList.Count; i < imax; ++i)
+                {
+                    if (sb.Length > 0)
+                    {
+                        sb.Append(PublicFunction.Separator_Comma);
+                    }
+                    sb.Append(string.Format("cmd= {0} exCmd = {1}", mSendMsgList[i].cmd, mSendMsgList[i].extendCmd));
+                }
+                Debug.LogError(string.Format("等待的命令数量={0},  {1}", mSendMsgList.Count, sb.ToString()));
+            }
             if (mLastSendTime < 0.1f)
             {
                 SendMsg();
@@ -115,10 +130,9 @@ public class NetWork
 
     public void ReceiveMsg(CMDCode cmd, int len, string mac, BinaryReader br)
     {
-        if (mSendMsgList.Count > 0)
+        if (null != mSendedMsgData)
         {
-            SendMsgData data = mSendMsgList.Dequeue();
-            ProtocolClient.GetInst().OnMsgDelegate(cmd, len, mac, br, data.extendCmd);
+            ProtocolClient.GetInst().OnMsgDelegate(cmd, len, mac, br, mSendedMsgData.extendCmd);
         }
         else
         {
@@ -142,14 +156,18 @@ public class NetWork
     public void Update()
     {
 #if !Test
-        if (mLastSendTime > 0.1f && Time.time - mLastSendTime >= Wait_Msg_Out_Time)
+        if (mLastSendTime > 0.1f)
         {
-            if (mSendMsgList.Count > 0)
+            float time = Time.time;
+            if (null != mSendedMsgData)
             {
-                SendMsgData sendData = mSendMsgList.Peek();
-                ReceiveMsg(sendData.cmd, 0, sendData.mac, null);
+                //读取传感器的超时时间设为1秒，防止逻辑编程发送速度太快出现数据丢失等待时间过长
+                bool outTime = (mSendedMsgData.cmd == CMDCode.Hand_Shake || mSendedMsgData.cmd == CMDCode.Read_Motherboard_Data) ? time - mLastSendTime >= Wait_Msg_Out_Time : time - mLastSendTime >= 1;
+                if (outTime)
+                {
+                    ReceiveMsg(mSendedMsgData.cmd, 0, mSendedMsgData.mac, null);
+                }
             }
-            
         }
 #endif
 
@@ -172,7 +190,7 @@ public class NetWork
     #region 私有函数
     NetWork()
     {
-        mSendMsgList = new Queue<SendMsgData>();
+        mSendMsgList = new List<SendMsgData>();
         mLastSendTime = 0;
         mLastSendExCmdDict = new Dictionary<CMDCode, ExtendCMDCode>();
         /*mSendThread = new Thread(new ThreadStart(Test));
@@ -191,12 +209,43 @@ public class NetWork
         }
     }*/
 
+    void AddSendMsg(SendMsgData msg)
+    {
+        if (msg.cmd == CMDCode.Ctrl_Action && msg.extendCmd != ExtendCMDCode.CtrlAction || msg.cmd == CMDCode.Read_Sensor_Data || msg.cmd == CMDCode.Read_Sensor_Data_Other)
+        {
+            for (int i = 0, imax = mSendMsgList.Count; i < imax; ++i)
+            {
+                if (msg.cmd == mSendMsgList[i].cmd && msg.extendCmd == mSendMsgList[i].extendCmd)
+                {
+                    //mSendMsgList[i] = msg;
+                    mSendMsgList.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+        mSendMsgList.Add(msg);
+    }
+
+    SendMsgData GetSendMsg()
+    {
+        if (mSendMsgList.Count > 0)
+        {
+            SendMsgData msg = mSendMsgList[0];
+            mSendMsgList.RemoveAt(0);
+            return msg;
+        }
+        return null;
+    }
+
     void SendMsg()
     {
         try
         {
-            //MyLog.Log("private SendMsg start 1");
-            SendMsgData sendData = mSendMsgList.Peek();
+            SendMsgData sendData = GetSendMsg();
+            if (null == sendData)
+            {
+                return;
+            }
             if (mSendedMsgData == sendData)
             {//防止回包里面发了包引起同一个包重复发送
                 return;

@@ -1,15 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <Root>
   <Parts>C1-GRY</Parts>
+  <Parts>C1-RED</Parts>
   <Parts>C10-GRN2</Parts>
   <Parts>C10-GRY</Parts>
   <Parts>C10-RED</Parts>
   <Parts>C11-GRN2</Parts>
   <Parts>C11-GRY</Parts>
+  <Parts>C11-RED</Parts>
   <Parts>C11-ORG1</Parts>
   <Parts>C12-GRY</Parts>
   <Parts>C13-GRY</Parts>
   <Parts>C14-GRY</Parts>
+  <Parts>C14-RED</Parts>
   <Parts>C14-ORG1</Parts>
   <Parts>C15-GRN2</Parts>
   <Parts>C15-GRY</Parts>
@@ -17,12 +20,14 @@
   <Parts>C16-GRY</Parts>
   <Parts>C19-GRY</Parts>
   <Parts>C2-GRY</Parts>
+  <Parts>C2-RED</Parts>
   <Parts>C2-ORG1</Parts>
   <Parts>C20-ORG1</Parts>
   <Parts>C3-GRY</Parts>
   <Parts>C4-BLU2</Parts>
   <Parts>C4-GRN2</Parts>
   <Parts>C4-GRY</Parts>
+  <Parts>C4-RED</Parts>
   <Parts>C4-ORG1</Parts>
   <Parts>C4-ORG2</Parts>
   <Parts>C4-PUR</Parts>
@@ -34,21 +39,34 @@
   <Parts>C7-GRN2</Parts>
   <Parts>C7-GRY</Parts>
   <Parts>C8-GRY</Parts>
+  <Parts>C8-YLW</Parts>
   <Parts>C8-ORG1</Parts>
   <Parts>C9-GRN2</Parts>
   <Parts>C9-GRY</Parts>
+ <Parts>L01-RED</Parts>
+ <Parts>L02-RED</Parts>
+ <Parts>L03-YLW</Parts>
+ <Parts>L04-YLW</Parts>
+ <Parts>L05-RED</Parts>
+ <Parts>L06-RED</Parts>
+ <Parts>L07-GRY</Parts>
+  <Parts>L08-GRY</Parts>
+  <Parts>L14-YLW</Parts>
   <Parts>LP-GRY</Parts>
   <Parts>MC-GRN2</Parts>
   <Parts>MC-GRY</Parts>
+  <Parts>MC-RED</Parts>
   <Parts>MC-ORG1</Parts>
   <Parts>P01-BLK</Parts>
   <Parts>P01-GRN</Parts>
+  <Parts>P01-RED</Parts>
   <Parts>P01-GRN3</Parts>
   <Parts>P01-ORG</Parts>
   <Parts>P01-WHT</Parts>
   <Parts>P01-YLW2</Parts>
   <Parts>P02-BLK</Parts>
   <Parts>P02-GRN</Parts>
+  <Parts>P02-RED</Parts>
   <Parts>P02-GRN3</Parts>
   <Parts>P02-ORG</Parts>
   <Parts>P02-WHT</Parts>
@@ -56,8 +74,10 @@
   <Parts>P03-BLK</Parts>
   <Parts>P03-GRN</Parts>
   <Parts>P03-WHT</Parts>
+  <Parts>P03-RED</Parts>
   <Parts>P03-YLW2</Parts>
   <Parts>P04-BLK</Parts>
+  <Parts>P04-RED</Parts>
   <Parts>P04-GRN</Parts>
   <Parts>P04-WHT</Parts>
   <Parts>P04-YLW2</Parts>
@@ -66,6 +86,7 @@
   <Parts>P06-BLU</Parts>
   <Parts>P06-GRN</Parts>
   <Parts>P07-BLK</Parts>
+  <Parts>P07-RED</Parts>
   <Parts>P07-ORG</Parts>
   <Parts>P07-WHT</Parts>
   <Parts>P08-BLK</Parts>
@@ -77,6 +98,18 @@
   <Parts>P09-GRN2</Parts>
   <Parts>P09-ORG</Parts>
   <Parts>P09-WHT</Parts>
+  <Parts>P20-RED</Parts>
+  <Parts>P21-YLW</Parts>
+  <Parts>P22-RED</Parts>
+  <Parts>P22-WHT</Parts>
+  <Parts>P22-YLW</Parts>
+  <Parts>P24-RED</Parts>
+  <Parts>P25-RED</Parts>
+  <Parts>P25-WHT</Parts>
+  <Parts>P27-RED</Parts>
+  <Parts>P34-RED</Parts>
+  <Parts>P36-RED</Parts>
+  <Parts>P54-RED</Parts>
   <Parts>P100-RED</Parts>
   <Parts>P103-BLK</Parts>
   <Parts>P106-BLK</Parts>
@@ -193,6 +226,7 @@
   <Parts>P51-RED</Parts>
   <Parts>P53-GRY</Parts>
   <Parts>P54-GRY</Parts>
+  <Parts>P54-YLW</Parts>
   <Parts>P67-BLU2</Parts>
   <Parts>P67-ORG1</Parts>
   <Parts>P67-ORG2</Parts>
@@ -259,7 +293,9 @@
   <Parts>W2-BLK1</Parts>
   <Parts>W2-GRY</Parts>
   <Parts>W3-BLK1</Parts>
+  <Parts>W3-COLOR</Parts>
   <Parts>W4-BLK1</Parts>
+  <Parts>W4-COLOR</Parts>
   <Parts>WIRE1-BLU</Parts>
   <Parts>WIRE1</Parts>
   <Parts>WIRE2-GRY</Parts>

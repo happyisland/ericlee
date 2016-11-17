@@ -29,3 +29,15 @@ public class DJLianDong
     public float difB;//操作角度(defaultAngle +/-/*// difB)
 }
 
+public class LianDongGOs
+{
+    public Dictionary<int,ldgo> ldgos=new Dictionary<int,ldgo>();//(id,联动物体信息)
+}
+public class ldgo
+{
+    public float start;   //x轴大于start角度
+    public float end;     //x轴小于end角度
+    public Dictionary<string, Vector3> ldangle = new Dictionary<string, Vector3>();//(名称，角度)
+
+    public Dictionary<string, Vector3> ldpos = new Dictionary<string, Vector3>();//(名称，坐标)
+}

@@ -41,11 +41,15 @@ public class VsliderControl : MonoBehaviour
     private bool isLimitInCircle = true;
     public bool IsLimitInCircle { get { return this.isLimitInCircle; } }
     [SerializeField]
-    private int height = 340;
+    private int height = 400;
     public int Height { get { return this.height; } }
-    private int width = 76;
+    private int moveheight = 340;
+    public int MoveHeight { get { return this.moveheight; } }
+    [SerializeField]
+    private int width = 124;
     public int Width { get { return this.width; } }
-    private int thumbRadio = 37;
+
+    private int thumbRadio = 44;
     public int ThumbRadio { get { return this.thumbRadio; } }
 
     [SerializeField]
@@ -156,14 +160,14 @@ public class VsliderControl : MonoBehaviour
             if (sliderControl.isReady)
             {
                 GetComponent<WheelCheck_slider>().enabled = true;
-                sliderControl.TurnWheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, (int)(height / 2.0f));
+                sliderControl.TurnWheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, (int)(moveheight / 2.0f));
             }
         }
         else
         {
             if (sliderControl != null && sliderControl.isReady)
             {
-                sliderControl.TurnWheelSpeed(0, 0, (int)(height / 2.0f));
+                sliderControl.TurnWheelSpeed(0, 0, (int)(moveheight / 2.0f));
             }
             CalculateJoystickAxis();
             if (On_JoystickMoveEnd != null)
@@ -205,7 +209,7 @@ public class VsliderControl : MonoBehaviour
 
         if (sliderControl != null && sliderControl.isReady)
         {
-            sliderControl.TurnWheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, (int)(height / 2.0f));
+            sliderControl.TurnWheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, (int)(moveheight / 2.0f));
         }
         if (On_JoystickMoveStart != null)
         {
@@ -243,9 +247,9 @@ public class VsliderControl : MonoBehaviour
         offset -= transform.localPosition;
         if (isLimitInCircle)
         {
-            if (offset.magnitude > height*0.5f)
+            if (offset.magnitude > moveheight * 0.5f)
             {
-                offset = offset.normalized * height*0.5f;
+                offset = offset.normalized * moveheight * 0.5f;
             }
         }
       //  thumb.transform.localPosition = offset;
@@ -253,7 +257,7 @@ public class VsliderControl : MonoBehaviour
             thumb.transform.localPosition = new Vector3(thumb.transform.localPosition.x, offset.y, thumb.transform.localPosition.z);
 
         lastJoystickAxis = joystickAxis;
-        joystickAxis = new Vector2(joystickAxis.x, offset.y / height);
+        joystickAxis = new Vector2(joystickAxis.x, offset.y / moveheight);
 
     }
 

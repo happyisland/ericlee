@@ -355,15 +355,15 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100006}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c041f61e4a9fbf4e830210f5d933ece, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tweenTarget: {fileID: 400004}
-  hover: {x: 1.04999995, y: 1.04999995, z: 1.04999995}
-  pressed: {x: 1.10000002, y: 1.10000002, z: 1.10000002}
-  duration: .200000003
+  tweenTarget: {fileID: 400006}
+  hover: {x: 1, y: 1, z: 1}
+  pressed: {x: .899999976, y: .899999976, z: .899999976}
+  duration: .100000001
 --- !u!114 &11400012
 MonoBehaviour:
   m_ObjectHideFlags: 1

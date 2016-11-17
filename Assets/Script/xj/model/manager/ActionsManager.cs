@@ -434,6 +434,20 @@ public class ActionsManager
                 }
             }
         }
+        else
+        {
+            if (mAllDefaultActions.ContainsKey(robotId))
+            {
+                if (list.Count > 0)
+                {
+                    list.Insert(0, mAllDefaultActions[robotId].Id);
+                }
+                else
+                {
+                    list.Add(mAllDefaultActions[robotId].Id);
+                }
+            }
+        }
         return list;
     }
     /// <summary>

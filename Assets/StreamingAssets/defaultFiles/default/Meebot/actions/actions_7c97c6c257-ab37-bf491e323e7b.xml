@@ -1,0 +1,15 @@
+<Roots>
+  <Root nodeType="head" name="前进" showName="0$前进;1$Move Forward;6$Avancer;4$Vorwärts bewegen;5$Muovi in avanti;7$Avanzar;2$前に進む;8$Andar para a frente;9$前進;10$تحرك للأمام" robotID="robot_e59a8c0f-d4a1-4c18-bd91-ddb14e213fb4" id="actions_7c97c6c257-ab37-bf491e323e7b" icon="icon_1" createTime="635999377723563784" />
+  <Root nodeType="body" index="1" sportTime="200" waitTime="0" idMin="1" idMinRota="122" rotas="1$122;2$121;3$117;4$118;5$120;6$119" turns="" show="1;2;3;4;6" />
+  <Root nodeType="body" index="2" sportTime="400" waitTime="0" idMin="1" idMinRota="121" rotas="1$121;2$65;3$92;4$123;5$219;6$61" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="3" sportTime="400" waitTime="0" idMin="1" idMinRota="151" rotas="1$151;2$17;3$117;4$153;5$176;6$119" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="4" sportTime="400" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$93;3$177;4$124;5$218;6$145" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="5" sportTime="400" waitTime="0" idMin="1" idMinRota="71" rotas="1$71;2$18;3$122;4$72;5$166;6$124" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="6" sportTime="400" waitTime="0" idMin="1" idMinRota="121" rotas="1$121;2$65;3$92;4$123;5$219;6$61" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="7" sportTime="400" waitTime="0" idMin="1" idMinRota="151" rotas="1$151;2$17;3$117;4$153;5$176;6$119" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="8" sportTime="400" waitTime="0" idMin="1" idMinRota="120" rotas="1$120;2$93;3$177;4$124;5$218;6$145" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="9" sportTime="400" waitTime="0" idMin="1" idMinRota="71" rotas="1$71;2$18;3$122;4$72;5$166;6$124" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="10" sportTime="400" waitTime="0" idMin="1" idMinRota="121" rotas="1$121;2$65;3$92;4$123;5$219;6$61" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="11" sportTime="400" waitTime="0" idMin="1" idMinRota="151" rotas="1$151;2$17;3$117;4$153;5$176;6$119" turns="" show="1;2;3;4;5;6" />
+  <Root nodeType="body" index="12" sportTime="400" waitTime="0" idMin="1" idMinRota="122" rotas="1$122;2$121;3$117;4$118;5$120;6$119" turns="" show="1;2;4;5" />
+</Roots>

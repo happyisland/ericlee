@@ -115,7 +115,7 @@ public class Robot
     float mNowPlayTime;//上一帧播放的时间
     float mNextPlayTime;//下一帧播放的时间
     float mPauseTime;//暂停的时间
-    long mPlayCallBackIndex;//计时器函数返回值
+    //long mPlayCallBackIndex;//计时器函数返回值
     long mReadPowerIndex = -1;//读取电量计时器函数返回值
     string mErrorRotaDjStr;
     bool mSelfCheckFlag;//自检
@@ -953,13 +953,14 @@ public class Robot
         mReadBackNum = mDjData.Count;
         mErrorRotaDjStr = string.Empty;
         ReadBack(0, false, exCmd);
-        if (PlatformMgr.Instance.GetBluetoothState() && !PlatformMgr.Instance.IsChargeProtected)
+        if ((exCmd ==  ExtendCMDCode.LogicGetPosture || exCmd == ExtendCMDCode.ReadBack) && PlatformMgr.Instance.GetBluetoothState() && !PlatformMgr.Instance.IsChargeProtected)
         {
             if (-1 != mReadBackOutTimeIndex)
             {
                 Timer.Cancel(mReadBackOutTimeIndex);
             }
             mReadBackOutTimeIndex = Timer.Add(5, 1, 1, ReadBackOutTime);
+            //ClientMain.GetInst().WaitTimeInvoke(8, ReadBackOutTime);
         }
         //ServoPowerOn(mDjData.GetIDList());
         /*foreach (KeyValuePair<byte, DuoJiData> kvp in data)
@@ -1409,24 +1410,13 @@ public class Robot
     public void StopNowPlayActions()
     {
         mNowPlayIndex = 0;
+        MyTime.GetInst().StopTime();
         if (null != mNowPlayActions)
         {
-            if (SceneMgr.GetCurrentSceneType() == SceneType.ActionPlay || SceneMgr.GetCurrentSceneType() == SceneType.Assemble)
-            {
-                Debuger.Log("stop action");
-                if (null != ActionLogic.GetIns())
-                {
-                 //   ActionLogic.GetIns().DoStop(string.Empty);
-                }
-                else
-                {
-                    Debuger.Log("ActionLogic is null");
-                }
-            }
             EventMgr.Inst.Fire(EventID.Stop_Robot_Actions, new EventArg(mNowPlayActions));
             mNowPlayActions = null;
         }
-        Timer.Cancel(mPlayCallBackIndex);
+        //Timer.Cancel(mPlayCallBackIndex);
         if (null != mPlayActions && mPlayActions.Count > 0)
         {
             mPlayActions.Clear();
@@ -1457,7 +1447,7 @@ public class Robot
         DjTurnMsg turnMsg = null;
         foreach (KeyValuePair<byte, DuoJiData> kvp in datas)
         {
-            if (kvp.Value.isTurn)
+            if (kvp.Value.modelType == ServoModel.Servo_Model_Turn && kvp.Value.isTurn)
             {
                 if (null == turnMsg)
                 {
@@ -2120,16 +2110,27 @@ public class Robot
                 msg.sensorData.sensorType = (byte)partType;
                 msg.sensorData.ids = ids;
                 msg.arg = 1;
-                mReadSensorDataDict[partType].ReadDataMsg(ids);
                 ExtendCMDCode exCmd;
                 if (readAllFlag)
                 {
                     exCmd = ExtendCMDCode.ReadAllSensorData;
+                    mReadSensorDataDict[partType].ReadAllDataMsg(ids);
                 }
                 else
                 {
                     exCmd = ExtendCMDCode.ReadInfraredData + (partType - TopologyPartType.Infrared);
+                    mReadSensorDataDict[partType].ReadDataMsg(ids);
                 }
+                NetWork.GetInst().SendMsg(CMDCode.Read_Sensor_Data, msg, mac, exCmd);
+            }
+            else if (partType == TopologyPartType.Speaker)
+            {
+                ReadSensorDataMsg msg = new ReadSensorDataMsg();
+                msg.sensorData.sensorType = (byte)partType;
+                msg.sensorData.ids = ids;
+                mReadSensorDataDict[partType].ReadDataMsg(ids);
+                ExtendCMDCode exCmd;
+                exCmd = ExtendCMDCode.ReadInfraredData + (partType - TopologyPartType.Infrared);
                 NetWork.GetInst().SendMsg(CMDCode.Read_Sensor_Data, msg, mac, exCmd);
             }
             else
@@ -2177,12 +2178,12 @@ public class Robot
         ReadSensorDataOtherMsg msg = new ReadSensorDataOtherMsg();
         for (int i = 0, imax = sensorTypes.Length; i < imax; ++i)
         {
-            if (null != mReadSensorDataDict && mReadSensorDataDict.ContainsKey(sensorTypes[i]) && null != MotherboardData && null != MotherboardData.GetSensorData(sensorTypes[i]))
+            if (null != mReadSensorDataDict && mReadSensorDataDict.ContainsKey(sensorTypes[i]) && null != mReadSensorDataDict[sensorTypes[i]].ids)
             {
-                List<byte> ids = MotherboardData.GetSensorData(sensorTypes[i]).ids;
+                List<byte> ids = mReadSensorDataDict[sensorTypes[i]].ids;
                 SensorBaseData tmp = new SensorBaseData();
                 tmp.ids = ids;
-                mReadSensorDataDict[sensorTypes[i]].ReadDataMsg(ids);
+                mReadSensorDataDict[sensorTypes[i]].ReadAllDataMsg(ids);
                 tmp.sensorType = (byte)sensorTypes[i];
                 msg.sensorList.Add(tmp);
             }
@@ -2222,6 +2223,10 @@ public class Robot
                 case TopologyPartType.Light:
                     LightData lightData = new LightData(ids);
                     mReadSensorDataDict[TopologyPartType.Light] = lightData;
+                    break;
+                case TopologyPartType.Speaker:
+                    SpeakerData speakerData = new SpeakerData(ids);
+                    mReadSensorDataDict[TopologyPartType.Speaker] = speakerData;
                     break;
             }
         }
@@ -2453,7 +2458,7 @@ public class Robot
                 {
                     if (mReadBackRotas.Count != mDjData.Count)
                     {//回读失败
-                        string str = string.Empty;
+                        /*string str = string.Empty;
                         List<byte> ids = mDjData.GetIDList();
                         for (int i = 0, imax = ids.Count; i < imax; ++i)
                         {
@@ -2466,15 +2471,19 @@ public class Robot
                                 str += ids[i];
                             }
                         }
-                        str = "[ff0000]" + str + "[-]";
-                        PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("HuiDuShuLiangBuYiZhi"), str), ReadFailOnClick);
+                        str = "[ff0000]" + str + "[-]";*/
+                        if (PlatformMgr.Instance.GetBluetoothState())
+                        {
+                            PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("HuiDuShuLiangBuYiZhi"), ReadFailOnClick);
+                        }
                     }
                     else if (!string.IsNullOrEmpty(mErrorRotaDjStr))
                     {// 有舵机处于死区
                         Dictionary<byte, short> errorRotas = new Dictionary<byte, short>();
                         foreach (KeyValuePair<byte, ushort> kvp in mReadBackRotas)
                         {
-                            if (!PublicFunction.IsNormalRota(kvp.Value))
+                            DuoJiData data = mDjData.GetDjData(kvp.Key);
+                            if (!PublicFunction.IsNormalRota(kvp.Value) && (null == data || data.modelType == ServoModel.Servo_Model_Angle))
                             {
                                 errorRotas[kvp.Key] = (short)kvp.Value;
                             }
@@ -2651,285 +2660,6 @@ public class Robot
         }
     }
 
-    void CreateRobotFailOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(PromptMsg.LeftBtnName))
-        {//断开蓝牙
-            PlatformMgr.Instance.DisConnenctBuletooth();
-        }
-        else if (btnName.Equals(PromptMsg.RightBtnName))
-        {//重新回读
-            HandShake();
-            NetWaitMsg.ShowWait();
-            //2秒以后读取初始角度
-            Timer.Add(2, 0, 1, ReadMotherboardData);
-            //ClientMain.GetInst().WaitTimeInvoke(2, ReadMotherboardData);
-        }
-    }
-
-    /*void PromptRobotUpdateOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(PromptMsg.RightBtnName))
-        {//确定升级
-            / *if (!PlatformMgr.Instance.PowerData.isAdapter && PlatformMgr.Instance.PowerData.power < PublicFunction.Update_System_Power_Min)
-            {//电量太低，不更新
-                PromptMsg.ShowSinglePrompt("电量过低不能升级", PromptUpdataButPowerOnClick);
-                return;
-            }* /
-            RobotBlueUpdate();
-        }
-        else if (btnName.Equals(PromptMsg.LeftBtnName) && !RobotManager.GetInst().IsSetDeviceIDFlag)
-        {
-            if (PlatformMgr.Instance.GetBluetoothState())
-            {
-                ReadMCUInfo();
-                SelfCheck(true);
-            }
-            if (null != MotherboardData)
-            {
-                MotherboardDataMsg.ShowMotherboardMsg(MotherboardData);
-                MotherboardData = null;
-            }
-        }
-    }
-    /// <summary>
-    /// 电量过低不升级的按钮
-    /// </summary>
-    /// <param name="obj"></param>
-    void PromptUpdataButPowerOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(PromptMsg.RightBtnName) && !RobotManager.GetInst().IsSetDeviceIDFlag)
-        {
-            if (PlatformMgr.Instance.GetBluetoothState())
-            {
-                ReadMCUInfo();
-                SelfCheck(true);
-            }
-            if (null != MotherboardData)
-            {
-                MotherboardDataMsg.ShowMotherboardMsg(MotherboardData);
-                MotherboardData = null;
-            }
-        }
-    }
-
-    void RobotUpdateOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(WaitPromptMsg.RightBtnName))
-        {//取消升级
-            RobotBlueUpdateStop();
-            if (!RobotManager.GetInst().IsSetDeviceIDFlag)
-            {
-                if (PlatformMgr.Instance.GetBluetoothState())
-                {
-                    ReadMCUInfo();
-                    SelfCheck(true);
-                }
-                if (null != motherboardMsg)
-                {
-                    MotherboardDataMsg.ShowMotherboardMsg(motherboardMsg);
-                    motherboardMsg = null;
-                }
-            }
-        }
-    }*/
-
-    void ReadMCUAndCheck()
-    {
-        ReadMCUInfo();
-        SelfCheck(true);
-    }
-    void RobotUpdateEndShowMotherOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(WaitPromptMsg.RightBtnName))
-        {//显示主板信息
-            if (PlatformMgr.Instance.GetBluetoothState() && !restartFlag && !RobotManager.GetInst().IsSetDeviceIDFlag)
-            {
-                Timer.Add(3, 0, 1, ReadMCUAndCheck);
-            }
-            if (null != MotherboardData && !restartFlag && !RobotManager.GetInst().IsSetDeviceIDFlag)
-            {
-                if (updataSuccessFlag)
-                {
-                    MotherboardData.mbVersion = PlatformMgr.Instance.Robot_System_Version;
-                }
-                TopologyBaseMsg.ShowMsg(MotherboardData);
-                //motherboardMsg = null;
-            }
-            if (restartFlag)
-            {
-                HandShake();
-                NetWaitMsg.ShowWait();
-                Timer.Add(2, 0, 1, ReadMotherboardData);
-            }
-        }
-    }
-
-    private void ConnectFail()
-    {
-        if (null != mConnectCallBack)
-        {
-            mConnectCallBack(false);
-            HUDTextTips.ShowTextTip("ConnectFail");
-        }
-    }
-
-    void ServoUpdateCannel()
-    {
-        NetWaitMsg.CloseWait();
-        if (RobotManager.GetInst().IsCreateRobotFlag)
-        {//创建模型
-            if (null != MotherboardData)
-            {
-                PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("DuoJiBanBenBuYiZhi"), PublicFunction.ListToString(MotherboardData.errorVerIds)), CreateRobotFailOnClick);
-                //motherboardMsg = null;
-            }
-            else
-            {
-                PlatformMgr.Instance.DisConnenctBuletooth();
-            }
-        }
-        else if (mSelfCheckErrorFlag)
-        {//自检
-            if (null != MotherboardData)
-            {
-                string str1 = PublicFunction.ListToString(MotherboardData.errorVerIds);
-                str1 = "[ff0000]" + str1 + "[-]";
-                PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("DuoJiBanBenBuYiZhi"), str1), SelfCheckErrorOnClick);
-                //motherboardMsg = null;
-            }
-            else
-            {
-                mSelfCheckErrorFlag = false;
-            }
-
-        }
-        else
-        {//正常连接
-            if (null != MotherboardData)
-            {
-                HUDTextTips.ShowTextTip(string.Format(LauguageTool.GetIns().GetText("DuoJiBanBenBuYiZhi"), PublicFunction.ListToString(MotherboardData.errorVerIds)));
-                PlatformMgr.Instance.DisConnenctBuletooth();
-                TopologyBaseMsg.ShowMsg(MotherboardData);
-                //motherboardMsg = null;
-            }
-            else
-            {
-                PlatformMgr.Instance.DisConnenctBuletooth();
-            }
-        }
-    }
-    /// <summary>
-    /// 舵机升级电量过低
-    /// </summary>
-    /// <param name="obj"></param>
-    private void PromptServoUpdatePowerLowOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(PromptMsg.RightBtnName))
-        {
-            ServoUpdateCannel();
-        }
-    }
-    /*/// <summary>
-    /// 是否升级舵机版本的弹框
-    /// </summary>
-    /// <param name="obj"></param>
-    private void PromptServoUpdateOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(PromptMsg.RightBtnName))
-        {//确定升级
-            / *if (!PlatformMgr.Instance.PowerData.isAdapter && PlatformMgr.Instance.PowerData.power < PublicFunction.Update_System_Power_Min)
-            {//电量太低，不更新
-                PromptMsg.ShowSinglePrompt("电量过低不能升级", PromptServoUpdatePowerLowOnClick);
-                return;
-            }* /
-            byte needUpdateId = 0;
-            if (motherboardMsg.errorVerIds.Count == 1 && motherboardMsg.djVersion.Equals(PlatformMgr.Instance.Robot_Servo_Version))
-            {
-                needUpdateId = motherboardMsg.errorVerIds[0];
-            }
-            ServoUpdate(needUpdateId);
-        }
-        else if (btnName.Equals(PromptMsg.LeftBtnName))
-        {
-            ServoUpdateCannel();
-        }
-    }*/
-
-    private void CannelServoUpdateOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(PromptMsg.RightBtnName))
-        {//取消升级
-            StopServoUpdate();
-            NetWaitMsg.ShowWait();
-            Timer.Add(0.5f, 1, 1, ServoUpdateCannel);
-        }
-    }
-
-    private void ServoUpdateSuccessOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(PromptMsg.RightBtnName))
-        {//升级成功
-            HandShake();
-            NetWaitMsg.ShowWait();
-            Timer.Add(2, 0, 1, ReadMotherboardData);
-        }
-    }
-
-    /*private void ServoUpdateFailOnClick(GameObject obj)
-    {
-        string btnName = obj.name;
-        if (btnName.Equals(PromptMsg.RightBtnName))
-        {//升级失败
-            if (RobotManager.GetInst().IsCreateRobotFlag)
-            {//创建模型
-                if (null != motherboardMsg)
-                {
-                    CreateRobotFailOnClick(obj);
-                    motherboardMsg = null;
-                }
-                else
-                {
-                    PlatformMgr.Instance.DisConnenctBuletooth();
-                }
-            }
-            else if (mSelfCheckErrorFlag)
-            {//自检
-                if (null != motherboardMsg)
-                {
-                    SelfCheckErrorOnClick(obj);
-                    motherboardMsg = null;
-                }
-                else
-                {
-                    mSelfCheckErrorFlag = false;
-                }
-
-            }
-            else
-            {//正常连接
-                if (null != motherboardMsg)
-                {
-                    PlatformMgr.Instance.DisConnenctBuletooth();
-                    MotherboardDataMsg.ShowMotherboardMsg(motherboardMsg);
-                    motherboardMsg = null;
-                }
-                else
-                {
-                    PlatformMgr.Instance.DisConnenctBuletooth();
-                }
-            }
-        }
-    }*/
     
     void PlayActionsCallBack(object[] obj)
     {
@@ -2952,7 +2682,6 @@ public class Robot
             }
             else if (!mNowPlayActions.IsTurnModel())
             {
-                SingletonObject<LogicCtrl>.GetInst().PlayActionCallBack(CallUnityResult.success);
                 if (null != mPlayActions && mPlayActions.Count > 0)
                 {
                     mPlayActions.RemoveAt(0);
@@ -2974,7 +2703,7 @@ public class Robot
                 {
                     mPlayActionDlgt(index, true);
                 }
-                
+                SingletonObject<LogicCtrl>.GetInst().PlayActionCallBack(CallUnityResult.success);
             }
             else
             {
@@ -3111,6 +2840,17 @@ public class Robot
                         {
                             str += string.Format(GetPromptText("舵机其他异常"), ("[ff0000]" + PublicFunction.ListToString(msg.otherProtect) + "[-]"));
                         }
+                        if (msg.encryptProtect.Count > 0)
+                        {//熔丝位或加密错误保护
+                            if (SingletonObject<LogicCtrl>.GetInst().IsLogicProgramming)
+                            {
+                                str += string.Format(LogicLanguage.GetText("舵机已损坏，请更换该舵机"), "[ff0000]" + PublicFunction.ListToString(msg.encryptProtect) + "[-]");
+                            }
+                            else
+                            {
+                                str += string.Format(LauguageTool.GetIns().GetText("舵机已损坏，请更换该舵机"), "[ff0000]" + PublicFunction.ListToString(msg.encryptProtect) + "[-]");
+                            }
+                        }
                         if (LogicCtrl.GetInst().IsLogicProgramming)
                         {
                             /*this.StopNowPlayActions();
@@ -3152,24 +2892,24 @@ public class Robot
                 break;
             case 4://红外异常
                 {
-                    mSelfCheckErrorFlag = true;
+                    /*mSelfCheckErrorFlag = true;
                     if (!PopWinManager.GetInst().IsExist(typeof(PromptMsg)))
                     {
                         if (LogicCtrl.GetInst().IsLogicProgramming)
                         {
-                            /*this.StopNowPlayActions();
-                            this.StopAllTurn();*/
+                            / *this.StopNowPlayActions();
+                            this.StopAllTurn();* /
                             LogicCtrl.GetInst().ExceptionCallBack(string.Format(LogicLanguage.GetText("红外传感器连接异常"), string.Empty), SelfExceptionOnClick);
                         }
                         else
                         {
                             PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("红外传感器连接异常"), string.Empty), SelfCheckErrorOnClick);
                         }
-                    }
+                    }*/
                 }
                 break;
             case 5://陀螺仪模块异常
-                mSelfCheckErrorFlag = true;
+                /*mSelfCheckErrorFlag = true;
                 if (!PopWinManager.GetInst().IsExist(typeof(PromptMsg)))
                 {
                     if (LogicCtrl.GetInst().IsLogicProgramming)
@@ -3180,10 +2920,10 @@ public class Robot
                     {
                         PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("陀螺仪传感器连接异常"), string.Empty), SelfCheckErrorOnClick);
                     }
-                }
+                }*/
                 break;
             case 6://触碰异常
-                mSelfCheckErrorFlag = true;
+                /*mSelfCheckErrorFlag = true;
                 if (!PopWinManager.GetInst().IsExist(typeof(PromptMsg)))
                 {
                     if (LogicCtrl.GetInst().IsLogicProgramming)
@@ -3194,7 +2934,7 @@ public class Robot
                     {
                         PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("触碰传感器连接异常"), string.Empty), SelfCheckErrorOnClick);
                     }
-                }
+                }*/
                 break;
         }
     }
@@ -3323,6 +3063,7 @@ public class Robot
         }
         else if (mSelfCheckErrorFlag)
         {//自检错误
+            SingletonObject<LogicCtrl>.GetInst().ExceptionRepairResult();
             if (msg.errorVerIds.Count > 0)
             {//舵机版本不一致
                 /*if (!CheckServoVersion(msg))
@@ -3331,7 +3072,10 @@ public class Robot
                     str1 = "[ff0000]" + str1 + "[-]";
                     PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("DuoJiBanBenBuYiZhi"), str1), SelfCheckErrorOnClick);
                 }*/
-                TopologyBaseMsg.ShowMsg(msg);
+                if (!LogicCtrl.GetInst().IsLogicProgramming)
+                {
+                    TopologyBaseMsg.ShowMsg(msg);
+                }
                 //ServosConStateMsg.ShowMsg(msg);
                 return;
             }
@@ -3391,18 +3135,33 @@ public class Robot
                     SensorInit(sensorData.ids, partType[i]);
                 }
             }
-            
-            SingletonObject<LogicCtrl>.GetInst().ExceptionRepairResult();
             return;
         }
         else if (mRetrieveMotherboardFlag)
         {
+            SensorData sensorData = MotherboardData.GetSensorData(TopologyPartType.Speaker);
+            if (null != sensorData && sensorData.ids.Count == 1 && sensorData.errorIds.Count == 0)
+            {
+                SensorInit(sensorData.ids, TopologyPartType.Speaker);
+                ReadSensorData(sensorData.ids, TopologyPartType.Speaker, false);
+            }
             mRetrieveMotherboardFlag = false;
             TopologyBaseMsg.ShowMsg(msg);
             //ServosConStateMsg.ShowMsg(msg);
         }
         else
         {
+            if (SingletonObject<LogicCtrl>.GetInst().IsLogicProgramming && !SingletonObject<LogicCtrl>.GetInst().IsLogicOpenSearchFlag)
+            {//防止重复发包
+                return;
+            }
+            SensorData sensorData = MotherboardData.GetSensorData(TopologyPartType.Speaker);
+            if (null != sensorData && sensorData.ids.Count == 1 && sensorData.errorIds.Count == 0)
+            {
+                SensorInit(sensorData.ids, TopologyPartType.Speaker);
+                ReadSensorData(sensorData.ids, TopologyPartType.Speaker, false);
+            }
+            
             SearchBluetoothMsg.CloseMsg();
             TopologyBaseMsg.ShowMsg(msg);
             //ServosConStateMsg.ShowMsg(msg);
@@ -3650,6 +3409,14 @@ public class Robot
                         {
                             StopNowPlayActions();
                             SingletonObject<LogicCtrl>.GetInst().PlayActionCallBack(CallUnityResult.failure);
+                            if (LogicCtrl.GetInst().IsLogicProgramming)
+                            {
+                                SingletonObject<LogicCtrl>.GetInst().ExceptionCallBack(string.Format(LogicLanguage.GetText("舵机其他异常"), string.Empty), SelfExceptionOnClick);
+                            }
+                            else
+                            {
+                                PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("舵机其他异常"), string.Empty), SelfCheckErrorOnClick);
+                            }
                         }
                     }
                 }
@@ -4594,19 +4361,30 @@ public class Robot
     {
         try
         {
-            TopologyPartType partType = TopologyPartType.Infrared + (exCmd - ExtendCMDCode.ReadInfraredData);
             if (null == br)
             {
                 if (!SingletonObject<LogicCtrl>.GetInst().IsLogicProgramming)
                 {
                     HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("连接超时"));
                 }
-                ReadSensorDataFinished(exCmd, CallUnityResult.failure);
+                if (exCmd == ExtendCMDCode.ReadSpeakerData)
+                {
+                }
+                else
+                {
+                    ReadSensorDataFinished(exCmd, CallUnityResult.failure);
+                }
                 return;
             }
             else if (len <= 1)
             {
-                ReadSensorDataFinished(exCmd, CallUnityResult.failure);
+                if (exCmd == ExtendCMDCode.ReadSpeakerData)
+                {
+                }
+                else
+                {
+                    ReadSensorDataFinished(exCmd, CallUnityResult.failure);
+                }
                 return;
             }
             ReadSensorDataMsgAck msg = new ReadSensorDataMsgAck();
@@ -4614,8 +4392,40 @@ public class Robot
             TopologyPartType sensorType = (TopologyPartType)msg.sensorType;
             if (null != mReadSensorDataDict && mReadSensorDataDict.ContainsKey(sensorType))
             {
-                mReadSensorDataDict[sensorType].ReadCallBackMsg(br);
-                ReadSensorDataFinished(exCmd, CallUnityResult.success);
+                mReadSensorDataDict[sensorType].ReadCallBackMsg(br, len - 1);
+                if (exCmd == ExtendCMDCode.ReadSpeakerData)
+                {
+                    SpeakerData speakerData = (SpeakerData)GetReadSensorData(TopologyPartType.Speaker);
+                    if (null != speakerData)
+                    {
+                        SpeakerInfoData infoData = speakerData.GetSpeakerData();
+                        if (null != infoData)
+                        {
+#if UNITY_ANDROID
+                            if (!PlatformMgr.Instance.IsConnectedSpeaker(infoData.speakerMac))
+                            {
+                                PlatformMgr.Instance.ConnectSpeaker(infoData.speakerMac);
+                            }
+#else
+                    PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("检测到蓝牙音响需要连接"), infoData.speakerName), PopSpeakerOnClick);
+#endif
+                        }
+                    }
+                }
+                else
+                {
+                    string error = mReadSensorDataDict[sensorType].GetErrorID();
+                    if (string.IsNullOrEmpty(error))
+                    {
+                        ReadSensorDataFinished(exCmd, CallUnityResult.success);
+                    }
+                    else
+                    {
+                        ReadSensorDataFinished(exCmd, CallUnityResult.failure);
+                        SensorErrorPrompt(sensorType, error);
+                    }
+                }
+                
             }
         }
         catch (System.Exception ex)
@@ -4625,6 +4435,14 @@ public class Robot
                 System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
                 Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
+        }
+    }
+
+    void PopSpeakerOnClick(GameObject obj)
+    {
+        if (PromptMsg.RightBtnName.Equals(obj.name))
+        {
+            PlatformMgr.Instance.ConnectSpeaker(string.Empty);
         }
     }
 
@@ -4661,7 +4479,28 @@ public class Robot
                 LogicSetSensorDataCallBack(exCmd, CallUnityResult.failure);
                 return;
             }
-            LogicSetSensorDataCallBack(exCmd, CallUnityResult.success);
+            else if (len < 3)
+            {
+                LogicSetSensorDataCallBack(exCmd, CallUnityResult.failure);
+                return;
+            }
+            else
+            {
+                SendSensorDataMsgAck msg = new SendSensorDataMsgAck();
+                msg.Read(br);
+                if (msg.result == 0)
+                {
+                    LogicSetSensorDataCallBack(exCmd, CallUnityResult.success);
+                }
+                else
+                {
+                    
+                    LogicSetSensorDataCallBack(exCmd, CallUnityResult.failure);
+                    TopologyPartType partType = (TopologyPartType)msg.sensorData.sensorType;
+                    SensorErrorPrompt(partType, PublicFunction.ListToString(msg.sensorData.ids));
+
+                }
+            }
         }
         catch (System.Exception ex)
         {
@@ -4698,7 +4537,23 @@ public class Robot
                 SingletonObject<LogicCtrl>.GetInst().SetLEDsCallBack(CallUnityResult.failure);
                 return;
             }
-            SingletonObject<LogicCtrl>.GetInst().SetLEDsCallBack(CallUnityResult.success);
+            else if (len < 3)
+            {
+                SingletonObject<LogicCtrl>.GetInst().SetLEDsCallBack(CallUnityResult.failure);
+                return;
+            }
+            SendSensorDataMsgAck msg = new SendSensorDataMsgAck();
+            msg.Read(br);
+            if (msg.result == 0)
+            {
+                SingletonObject<LogicCtrl>.GetInst().SetLEDsCallBack(CallUnityResult.success);
+            }
+            else
+            {
+                SingletonObject<LogicCtrl>.GetInst().SetLEDsCallBack(CallUnityResult.failure);
+                TopologyPartType partType = (TopologyPartType)msg.sensorData.sensorType;
+                SensorErrorPrompt(partType, PublicFunction.ListToString(msg.sensorData.ids));
+            }
         }
         catch (System.Exception ex)
         {
@@ -4757,18 +4612,25 @@ public class Robot
                 BinaryReader reader = new BinaryReader(ms);
 
                 byte sensorNum = reader.ReadByte();
+                CallUnityResult result = CallUnityResult.success;
                 for (int i = 0; i < sensorNum; ++i)
                 {
                     TopologyPartType sensorType = (TopologyPartType)reader.ReadByte();
                     if (null != mReadSensorDataDict && mReadSensorDataDict.ContainsKey(sensorType))
                     {
-                        mReadSensorDataDict[sensorType].ReadCallBackMsg(reader);
+                        mReadSensorDataDict[sensorType].ReadCallBackMsg(reader, 0);
+                        string error = mReadSensorDataDict[sensorType].GetErrorID();
+                        if (!string.IsNullOrEmpty(error))
+                        {
+                            result = CallUnityResult.failure;
+                            SensorErrorPrompt(sensorType, error);
+                        }
                     }
                 }
                 ms.Dispose();
                 ms.Close();
                 reader.Close();
-                ReadSensorDataFinished(exCmd, CallUnityResult.success);
+                ReadSensorDataFinished(exCmd, result);
             }
         }
         catch (System.Exception ex)
@@ -4778,6 +4640,74 @@ public class Robot
                 System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
                 Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
+        }
+    }
+
+    void SensorErrorPrompt(TopologyPartType partType, string error)
+    {
+        switch (partType)
+        {
+            case TopologyPartType.Infrared:
+                mSelfCheckErrorFlag = true;
+                if (LogicCtrl.GetInst().IsLogicProgramming)
+                {
+                    LogicCtrl.GetInst().ExceptionCallBack(string.Format(LogicLanguage.GetText("红外传感器连接异常"), error), SelfExceptionOnClick);
+                }
+                else
+                {
+                    PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("红外传感器连接异常"), error), SelfCheckErrorOnClick);
+                }
+                break;
+            case TopologyPartType.Gyro:
+                mSelfCheckErrorFlag = true;
+                if (LogicCtrl.GetInst().IsLogicProgramming)
+                {
+                    LogicCtrl.GetInst().ExceptionCallBack(string.Format(LogicLanguage.GetText("陀螺仪传感器连接异常"), error), SelfExceptionOnClick);
+                }
+                else
+                {
+                    PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("陀螺仪传感器连接异常"), error), SelfCheckErrorOnClick);
+                }
+                break;
+            case TopologyPartType.Touch:
+                mSelfCheckErrorFlag = true;
+                if (LogicCtrl.GetInst().IsLogicProgramming)
+                {
+                    LogicCtrl.GetInst().ExceptionCallBack(string.Format(LogicLanguage.GetText("触碰传感器连接异常"), error), SelfExceptionOnClick);
+                }
+                else
+                {
+                    PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("触碰传感器连接异常"), error), SelfCheckErrorOnClick);
+                }
+                break;
+            case TopologyPartType.DigitalTube:
+                mSelfCheckErrorFlag = true;
+                if (LogicCtrl.GetInst().IsLogicProgramming)
+                {
+                    LogicCtrl.GetInst().ExceptionCallBack(string.Format(LogicLanguage.GetText("数码管传感器连接异常"), error), SelfExceptionOnClick);
+                }
+                else
+                {
+                    PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("数码管传感器连接异常"), error), SelfCheckErrorOnClick);
+                }
+                break;
+            case TopologyPartType.Gravity:
+                break;
+            case TopologyPartType.Light:
+                mSelfCheckErrorFlag = true;
+                if (LogicCtrl.GetInst().IsLogicProgramming)
+                {
+                    LogicCtrl.GetInst().ExceptionCallBack(string.Format(LogicLanguage.GetText("灯光传感器连接异常"), error), SelfExceptionOnClick);
+                }
+                else
+                {
+                    PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("灯光传感器连接异常"), error), SelfCheckErrorOnClick);
+                }
+                break;
+            case TopologyPartType.Speaker:
+                break;
+            case TopologyPartType.Ultrasonic:
+                break;
         }
     }
     #endregion

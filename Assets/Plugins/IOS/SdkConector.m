@@ -162,6 +162,16 @@ extern "C"{
 		}
 		return MakeStringCopy("");
 	}
+    
+    /** 连接蓝牙音箱 */
+    void connectSpeaker(char * mac)
+    {
+        NSURL *url = [NSURL URLWithString:@"prefs:root=Bluetooth"];
+        if ([[UIApplication sharedApplication] canOpenURL:url])
+        {
+            [[UIApplication sharedApplication] openURL:url];
+        }
+    }
 #if defined(__cplusplus)
 }
 #endif

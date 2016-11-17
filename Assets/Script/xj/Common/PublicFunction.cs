@@ -1,9 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
+#if UNITY_EDITOR
+using System.Diagnostics;
+using UnityEditor;
+#endif
 
 /// <summary>
 /// Author:xj
@@ -53,7 +58,7 @@ public class PublicFunction
     /// <summary>
     /// 默认动作的名字
     /// </summary>
-    public const string Default_Actions_Name = "";
+    public const string Default_Actions_Name = "Default";
     /// <summary>
     /// 复位动作的中文名字
     /// </summary>
@@ -79,7 +84,7 @@ public class PublicFunction
     /// <summary>
     /// 需要读取数据的传感器
     /// </summary>
-    public static TopologyPartType[] Read_All_Sensor_Type = new TopologyPartType[] { TopologyPartType.Infrared, TopologyPartType.Touch};
+    public static TopologyPartType[] Read_All_Sensor_Type = new TopologyPartType[] { TopologyPartType.Infrared};
 /// <summary>
 /// 获取uiroot的manualHeight用于适配
 /// </summary>
@@ -836,7 +841,108 @@ public static int RootManualHeight
         return DateTime.Now.Ticks / 10000;
     }
 
-    #endregion
+    /// <summary>  
+    /// GET请求与获取结果  
+    /// </summary>  
+    public static string HttpGet(string Url, string postDataStr)
+    {
+        try
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url + (postDataStr == "" ? "" : "?") + postDataStr);
+            request.Method = "GET";
+            request.ContentType = "text/html;charset=UTF-8";
+
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            Stream myResponseStream = response.GetResponseStream();
+            StreamReader myStreamReader = new StreamReader(myResponseStream, Encoding.UTF8);
+            string retString = myStreamReader.ReadToEnd();
+            myStreamReader.Close();
+            myResponseStream.Close();
+
+            return retString;
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+        }
+        return string.Empty;
+    }
+
+    /// </summary>  
+    public static string HttpPost(string Url, string postDataStr)
+    {
+        try
+        {
+            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(Url);
+            request.Method = "POST";
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentLength = postDataStr.Length;
+            StreamWriter writer = new StreamWriter(request.GetRequestStream(), Encoding.ASCII);
+            writer.Write(postDataStr);
+            writer.Flush();
+            HttpWebResponse response = (HttpWebResponse)request.GetResponse();
+            string encoding = response.ContentEncoding;
+            if (encoding == null || encoding.Length < 1)
+            {
+                encoding = "UTF-8"; //默认编码  
+            }
+            StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.GetEncoding(encoding));
+            string retString = reader.ReadToEnd();
+            return retString;
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+        }
+        return string.Empty;
+    }
+
+#if UNITY_EDITOR
+    public static void OpenProcess(string path, string processName, string suffix)
+    {
+        Process[] process = Process.GetProcesses();//获取所有启动进程
+        if (null != process)
+        {
+            for (int i = 0, size = process.Length; i < size; ++i)
+            {
+                try
+                {
+                    if (process[i].ProcessName.Equals(processName))
+                    {
+                        EditorUtility.DisplayDialog("提示", string.Format("{0}正在运行中！", processName), "OK");
+                        return;
+                    }
+                }
+                catch (System.Exception ex)
+                {
+
+                }
+            }
+        }
+        try
+        {
+            Process.Start(Path.Combine(path, (processName + "." + suffix)));
+        }
+        catch (System.IO.FileNotFoundException)
+        {//文件不存在
+            EditorUtility.DisplayDialog("提示", string.Format("{0}不存在", processName), "OK");
+        }
+        catch (System.Exception ex)
+        {
+
+        }
+    }
+#endif
+
+#endregion
     #region 私有函数
     #endregion
 }

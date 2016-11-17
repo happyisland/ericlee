@@ -5,6 +5,7 @@ using Game.UI;
 using Game.Scene;
 using System;
 using Game.Platform;
+using Game.Event;
 /// <summary>
 /// author: 孙宇
 /// describe:遥控器主界面
@@ -30,9 +31,12 @@ public class UserdefControllerUI : BaseUI
 
     private SmartPlace smartPlace;  // 
 
+    private Transform selectActionState;
+
     private int isExitCollision = 0; //是否碰撞，当拖动时 没有碰撞的情况下绘制可拖动面积
     public static bool isTotalDataChange = false;  // 检测数据是否发生改变
     private bool isActionDataChange = false;
+    private bool isFirstController = false;
     public bool isFirstSetting = false; //默认进入设置界面
     private bool _isSetting;
     private bool isZeroArea;
@@ -78,6 +82,7 @@ public class UserdefControllerUI : BaseUI
         isActionDataChange = false;
         isFirstEdit = isFirstEnter;
         //editTitle.enabled = true;
+        //Debug.Log("ReEnter is Controller");
 
         smartPlace = new SmartPlace();
     }
@@ -97,6 +102,7 @@ public class UserdefControllerUI : BaseUI
         }
         
         mTrans.gameObject.SetActive(false);
+        
         SceneMgr.EnterScene(SceneType.MainWindow);
     }
     /// <summary>
@@ -166,8 +172,14 @@ public class UserdefControllerUI : BaseUI
 
         isZeroArea = false;
 
+        // 充电保护
+        /*if (ActionLogic.GetIns().IsConnect) //
+        {
+            EventMgr.Inst.Fire(EventID.Read_Power_Msg_Ack);
+        }*/
+
         smartPlace.Clear();
-        smartPlace.SetBgBoard(new Vector4(-gridPanel.GetComponent<UIWidget>().width / 2.0f + (UserdefControllerScene.leftSpace * Screen.width / 1334.0f), gridPanel.GetComponent<UIWidget>().height / 2.0f, gridPanel.GetComponent<UIWidget>().width / 2.0f - (UserdefControllerScene.leftSpace * Screen.width / 1334.0f), -gridPanel.GetComponent<UIWidget>().height / 2.0f));
+        smartPlace.SetBgBoard(new Vector4(-gridPanel.GetComponent<UIWidget>().width / 2.0f + (UserdefControllerScene.leftSpace * PublicFunction.GetWidth() / 1334.0f), gridPanel.GetComponent<UIWidget>().height / 2.0f, gridPanel.GetComponent<UIWidget>().width / 2.0f - (UserdefControllerScene.leftSpace * PublicFunction.GetWidth() / 1334.0f), -gridPanel.GetComponent<UIWidget>().height / 2.0f));
         //Debug.Log((-Screen.width / 2.0f + (UserdefControllerScene.leftSpace * Screen.width / 1334.0f) + " " + (Screen.height / 2.0f) + " " + (Screen.width / 2.0f - (UserdefControllerScene.leftSpace * Screen.width / 1334.0f)) + " " + (-Screen.height / 2.0f)));
 
         GameObject actionWidget = Resources.Load("Prefabs/actionWidget") as GameObject;
@@ -183,6 +195,7 @@ public class UserdefControllerUI : BaseUI
             leftItems.GetChild(0).GetChild(4).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = false;
+            leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled = false;
         }
         
         //Debug.Log("isTotalDataChange is " + isTotalDataChange);
@@ -208,11 +221,24 @@ public class UserdefControllerUI : BaseUI
                 oo = GameObject.Instantiate(actionWidget) as GameObject;
                 oo.tag = "widget_action"; // 遥控面板的tag跟动作列表里的tag 响应的点击事件不一样
                 oo.transform.GetChild(4).GetComponent<UISprite>().enabled = false;
+                if(!IsSetting)
+                    oo.transform.GetComponent<UIButtonScale>().enabled = true;
+                else
+                    oo.transform.GetComponent<UIButtonScale>().enabled = false;
             }
             else if (tem.type == ControllerManager.WidgetShowType.widgetType.vSlider)
             {
                 oo = GameObject.Instantiate(vsliderWidget) as GameObject;
                 oo.transform.GetChild(3).GetComponent<UISprite>().enabled = false;
+                oo.transform.GetChild(4).GetComponent<UILabel>().enabled = true;
+                Debug.Log("obj name is "+oo.tag);
+                /*if (!((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).isOK)
+                    oo.transform.GetChild(4).GetComponent<UILabel>().text = "";
+                else
+                {
+                    int servoIDs = ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).servoID;
+                    oo.transform.GetChild(4).GetComponent<UILabel>().text = LauguageTool.GetIns().GetText("舵机") + " " + servoIDs.ToString();
+                }*/
             }
             else if (tem.type == ControllerManager.WidgetShowType.widgetType.joystick)
             {
@@ -264,11 +290,33 @@ public class UserdefControllerUI : BaseUI
                         }*/
                     }
                 }
+
+                if (tem.type == ControllerManager.WidgetShowType.widgetType.vSlider)
+                {
+                    Debug.Log("obj name is " + oo.tag);
+                    if (!((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).isOK)
+                        oo.transform.GetChild(4).GetComponent<UILabel>().text = "";
+                    else
+                    {
+                        int servoIDs = ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).servoID;
+                        oo.transform.GetChild(4).GetComponent<UILabel>().text = LauguageTool.GetIns().GetText("舵机") + " " + servoIDs.ToString();
+                    }
+                }
                 //Debug.Log("DataToWidget Add Board");
                 smartPlace.AddBoard(new SmartPlace.RectBoard(oo.name, TurnWidgetRect(oo.GetComponentInChildren<UIWidget>())));
             }
         }
         ControllerManager.GetInst().ControllerReady();
+
+        if (isFirstController)
+        {
+            isFirstController = false;
+            IsSetting = false;
+            //ControllerManager.GetInst().CancelCurController();
+            //UICamera.current.allowMultiTouch = true;
+            //Debug.Log("第一次进入遥控器更新数据！！" + UICamera.current.allowMultiTouch);
+        }
+        Debug.Log("Controller is Ready!!");
     }
     Vector4 TurnWidgetRect(UIWidget widget)
     {
@@ -403,6 +451,12 @@ public class UserdefControllerUI : BaseUI
         if (isshow && isLeftShow)
             ShowOrHideLeftboard(false);
         HideOrShowTrans(isshow, bottomTrans, directType.bottom, 0.7f, OverHide);
+        if (!isshow && selectActionState != null)
+        {
+                selectActionState.GetComponent<UISprite>().enabled = false;
+                selectActionState.gameObject.SetActive(false);
+        }
+        
         if (!isshow && curSettingAction != null)  //下弹出框消失时 取消动作选中状态
         {
             //Debug.Log("取消动作选中");
@@ -715,6 +769,7 @@ public class UserdefControllerUI : BaseUI
             leftItems.GetChild(0).GetChild(4).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = false;
+            leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled = false;
 
             // 设置长按反应时间
             leftItems.GetChild(0).GetComponent<UIDragDropItem>().pressAndHoldDelay = 0.1f;
@@ -722,10 +777,44 @@ public class UserdefControllerUI : BaseUI
             leftItems.GetChild(2).GetComponent<UIDragDropItem>().pressAndHoldDelay = 0.1f;
         }
 
+        isFirstController = true;
+
         InitActionList();
         bottomTrans.gameObject.SetActive(false);
+
+        Debug.Log("注册充电保护中！！");
+        EventMgr.Inst.Regist(EventID.Read_Power_Msg_Ack, GetPowerState);
+
         #endregion
     }
+
+    public override void Release()
+    {
+        base.Release();
+
+        EventMgr.Inst.UnRegist(EventID.Read_Power_Msg_Ack, GetPowerState);
+    }
+
+    void GetPowerState(EventArg arg)
+    {
+        try
+        {
+            if (PlatformMgr.Instance.IsChargeProtected)  //充电保护 11 => 10
+            {
+                // PublicPrompt.ShowChargePrompt(AutoSaveActions);
+                // Game.Scene.SceneMgr.EnterScene(Game.Scene.SceneType.MainWindow);
+                PublicPrompt.ShowChargePrompt(GoHome);
+            }
+        }
+        catch (System.Exception ex)
+        { }
+    }
+
+    void GoHome()
+    {
+        Game.Scene.SceneMgr.EnterScene(Game.Scene.SceneType.MainWindow);
+    }
+
     protected override void OnButtonPress(GameObject obj, bool press)
     {
         if (!IsSetting)
@@ -749,23 +838,29 @@ public class UserdefControllerUI : BaseUI
                     if (!PlatformMgr.Instance.GetBluetoothState())  //未连接的情况 模型运动 
                     {
                         HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
-                    }
-                             
-                    else if (actionName != "")
+                    }     
+                    else
                     {
-                        if (press)
+                        if (actionName == "")
                         {
-                            if (!ControlLogic.actionTouch) //动作被按下时 不响应其它动作
-                            {
-                                ControlLogic.actionTouch = true;
-                                ControlLogic.GetIns().PlayAction(actionName);
-                            }
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
                         }
                         else
                         {
-                            ControlLogic.actionTouch = false;
-                            ControlLogic.GetIns().CancelRePlay();
-                        }
+                            if (press)
+                            {
+                                if (!ControlLogic.actionTouch) //动作被按下时 不响应其它动作
+                                {
+                                    ControlLogic.actionTouch = true;
+                                    ControlLogic.GetIns().PlayAction(actionName);
+                                }
+                            }
+                            else
+                            {
+                                ControlLogic.actionTouch = false;
+                                ControlLogic.GetIns().CancelRePlay();
+                            }
+                        }                        
                     }
                 }
                 if (obj.tag.Contains("widget_vslider") && (!IsSetting)) //动作之间互斥 ，不可同时按下两个动作
@@ -775,6 +870,11 @@ public class UserdefControllerUI : BaseUI
                     {
                         HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
                     }
+                    else if (!((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).isOK)
+                    {
+                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
+                    }
+                    
                 }
                 if (obj.tag.Contains("widget_joystick") && (!IsSetting)) //动作之间互斥 ，不可同时按下两个动作
                 {
@@ -782,6 +882,10 @@ public class UserdefControllerUI : BaseUI
                     if (!PlatformMgr.Instance.GetBluetoothState())  //未连接的情况 模型运动 
                     {
                         HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
+                    }
+                    else if (!((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).isOK)
+                    {
+                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
                     }
                 }
 
@@ -825,6 +929,21 @@ public class UserdefControllerUI : BaseUI
             }
             else if(name.Equals("secBack")) //设置返回
             {
+                if (selectActionState != null)
+                {
+                    selectActionState.GetComponent<UISprite>().enabled = false;
+                    selectActionState.gameObject.SetActive(false);
+                }
+                if (gridPanel.childCount > 1)
+                {
+                    for (int i = 1; i < gridPanel.childCount; i++)
+                    {
+                        if (gridPanel.GetChild(i).tag.Contains("widget_action"))
+                        {
+                            gridPanel.GetChild(i).GetComponent<UIButtonScale>().enabled = true;
+                        }
+                    }
+                }
                 editTitle.enabled = false;
                 ShowOrHideLines(false);
                 editDescribe.enabled = false; 
@@ -859,10 +978,35 @@ public class UserdefControllerUI : BaseUI
                 centerTip.gameObject.SetActive(false);
                 centerStartTip.gameObject.SetActive(false);
                 stopNowBtn.gameObject.SetActive(false);
+                if (gridPanel.childCount > 1)
+                {
+                    for (int i = 1; i < gridPanel.childCount; i++)
+                    {
+                        if (gridPanel.GetChild(i).tag.Contains("widget_action"))
+                        {
+                            gridPanel.GetChild(i).GetComponent<UIButtonScale>().enabled = false;
+                        }
+                    }
+                }  
                 OnSettingbtnClicked();
             }
             else if (name.Equals("confirm")) //确认修改
             {
+                if (selectActionState != null)
+                {
+                    selectActionState.GetComponent<UISprite>().enabled = false;
+                    selectActionState.gameObject.SetActive(false);
+                }
+                if (gridPanel.childCount > 1)
+                {
+                    for (int i = 1; i < gridPanel.childCount; i++)
+                    {
+                        if (gridPanel.GetChild(i).tag.Contains("widget_action"))
+                        {
+                            gridPanel.GetChild(i).GetComponent<UIButtonScale>().enabled = true;
+                        }
+                    }
+                }
                 editTitle.enabled = false;
                 editDescribe.enabled = false;
                 ShowOrHideLines(false);
@@ -934,22 +1078,35 @@ public class UserdefControllerUI : BaseUI
                         if (showActionList.Contains(name1))
                             showActionList.Remove(name1);
                     }*/
-                }
+                }                
                 ShowOrHideBottmBoard(false);
             }
             else if (obj.tag.Contains("widget_action")) //动作被点击
             {
+                if (selectActionState != null)
+                {
+                    selectActionState.GetComponent<UISprite>().enabled = false;
+                    selectActionState.gameObject.SetActive(false);
+                }
                 //Debug.Log("IsSetting is "+IsSetting);
                 if (IsSetting && obj.transform.parent.name == "gridPanel")
                 {
                     editTitle.enabled = false;
                     editDescribe.enabled = false;
+                    selectActionState = obj.transform.GetChild(4);
+                    selectActionState.gameObject.SetActive(true);
+                    selectActionState.GetComponent<UISprite>().enabled = true;
                     //ShowOrHideLines(false);
                     OnActionSetting(obj);
                 }
             }
             else if (obj.tag.Contains("widget_vslider")) //竖杆被点击
-            {  
+            {
+                if (selectActionState != null)
+                {
+                    selectActionState.GetComponent<UISprite>().enabled = false;
+                    selectActionState.gameObject.SetActive(false);
+                }
                 if (IsSetting && obj.transform.parent.name == "gridPanel")
                 {
                     editTitle.enabled = true;
@@ -974,6 +1131,11 @@ public class UserdefControllerUI : BaseUI
             }
             else if (obj.tag.Contains("widget_joystick"))   //摇杆被点击
             {
+                if (selectActionState != null)
+                {
+                    selectActionState.GetComponent<UISprite>().enabled = false;
+                    selectActionState.gameObject.SetActive(false);
+                }
                 if (IsSetting && obj.transform.parent.name == "gridPanel")
                 {
                     editTitle.enabled = true;
@@ -1076,6 +1238,7 @@ public class UserdefControllerUI : BaseUI
                     {
                         obj.transform.GetChild(3).GetComponent<UISprite>().enabled = true;
                         leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = true;
+                        leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled = false;
                     }       
 
                     if (obj.GetComponent<UIDragScrollView>() != null)
@@ -1148,6 +1311,8 @@ public class UserdefControllerUI : BaseUI
             leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = false;
         if (leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled)
             leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = false;
+        if (leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled)
+            leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled = false;
         
         
         bottomTrans.parent.GetChild(1).gameObject.SetActive(false);  //拖动时垃圾桶出现
@@ -1221,12 +1386,15 @@ public class UserdefControllerUI : BaseUI
             {
                 ControllerManager.GetInst().NewSliderBar(obj.name, obj.transform.localPosition);
                 obj.transform.GetChild(3).GetComponent<UISprite>().enabled = false;
+                obj.transform.GetChild(4).GetComponent<UILabel>().enabled = true;
+                obj.transform.GetChild(4).GetComponent<UILabel>().text = "";
                 //leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = false;
             }
             else if (obj.tag.Contains("widget_joystick"))
             {
                 if (ControllerManager.GetInst().widgetManager.joyStickManager.JoystickNum() > 0)
                 {
+                    //Debug.Log("摇杆数量上限！！");
                     placedArea.enabled = false;
                     GameObject.Destroy(obj);                        
                     ControllerManager.GetInst().RemoveJoystick(obj.name);
@@ -1234,6 +1402,7 @@ public class UserdefControllerUI : BaseUI
                     isTotalDataChange = true;
                     dragging = false;
                     dragingTransform = null;
+                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("无法增加摇杆"));
                     //leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = false;
                     return;
                 }
@@ -1332,7 +1501,7 @@ public class UserdefControllerUI : BaseUI
             if (smartPlace.IsEmptyBgboard())
             {
                 smartPlace.Clear();
-                smartPlace.SetBgBoard(new Vector4(-gridPanel.GetComponent<UIWidget>().width / 2.0f + (UserdefControllerScene.leftSpace * Screen.width / 1334.0f), gridPanel.GetComponent<UIWidget>().height / 2.0f, gridPanel.GetComponent<UIWidget>().width / 2.0f - (UserdefControllerScene.leftSpace * Screen.width / 1334.0f), -gridPanel.GetComponent<UIWidget>().height / 2.0f));
+                smartPlace.SetBgBoard(new Vector4(-gridPanel.GetComponent<UIWidget>().width / 2.0f + (UserdefControllerScene.leftSpace * PublicFunction.GetWidth() / 1334.0f), gridPanel.GetComponent<UIWidget>().height / 2.0f, gridPanel.GetComponent<UIWidget>().width / 2.0f - (UserdefControllerScene.leftSpace * PublicFunction.GetWidth() / 1334.0f), -gridPanel.GetComponent<UIWidget>().height / 2.0f));
             }
             
             //Debug.Log(TurnWidgetRect(obj.GetComponentInChildren<UIWidget>()).x);

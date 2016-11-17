@@ -38,6 +38,9 @@ public class GO
     public string color;   //模型的颜色
 
     public string hidego;   //模型是否隐藏
+    public string shape;//舵盘插入花形
+
+    public float oriDJAngleX;  //舵机默认初始角度
 
     public GoPosAngle posAngle;    //go的pos和angle
 

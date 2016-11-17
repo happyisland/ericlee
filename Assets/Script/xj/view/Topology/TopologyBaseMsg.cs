@@ -134,6 +134,7 @@ public class TopologyBaseMsg : BasePopWin
             EventMgr.Inst.Regist(EventID.Update_Fail, UpdateFailCallBack);
             EventMgr.Inst.Regist(EventID.BLUETOOTH_MATCH_RESULT, OnConnenctResult);
             EventMgr.Inst.Regist(EventID.Update_Progress, UpdateProgressResult);
+            EventMgr.Inst.Regist(EventID.Read_Speaker_Data_Ack, ReadSpeakerCallBack);
             mTopologyUI.SetDepth(mDepth);
             mTopologyUI.Open();
             if (RobotManager.GetInst().IsCreateRobotFlag)
@@ -372,6 +373,7 @@ public class TopologyBaseMsg : BasePopWin
         EventMgr.Inst.UnRegist(EventID.Update_Fail, UpdateFailCallBack);
         EventMgr.Inst.UnRegist(EventID.BLUETOOTH_MATCH_RESULT, OnConnenctResult);
         EventMgr.Inst.UnRegist(EventID.Update_Progress, UpdateProgressResult);
+        EventMgr.Inst.UnRegist(EventID.Read_Speaker_Data_Ack, ReadSpeakerCallBack);
         mInst = null;
         if (isConnecting)
         {
@@ -389,10 +391,17 @@ public class TopologyBaseMsg : BasePopWin
                         TopologyPartType[] partType = PublicFunction.Open_Topology_Part_Type;
                         for (int i = 0, imax = partType.Length; i < imax; ++i)
                         {
-                            SensorData sensorData = robot.MotherboardData.GetSensorData(partType[i]);
-                            if (null != sensorData && sensorData.ids.Count > 0)
+                            if (partType[i] == TopologyPartType.Speaker)
                             {
-                                robot.SensorInit(sensorData.ids, partType[i]);
+                                continue;
+                            }
+                            if (null != robot.MotherboardData)
+                            {
+                                SensorData sensorData = robot.MotherboardData.GetSensorData(partType[i]);
+                                if (null != sensorData && sensorData.ids.Count > 0)
+                                {
+                                    robot.SensorInit(sensorData.ids, partType[i]);
+                                }
                             }
                         }
                         robot.ReadConnectedAngle();
@@ -407,6 +416,10 @@ public class TopologyBaseMsg : BasePopWin
                         SingletonObject<LogicCtrl>.GetInst().CloseBlueSearch();
                     }
                 }
+                else
+                {
+                    SingletonObject<LogicCtrl>.GetInst().CloseBlueSearch();
+                }
                 PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionSucceeded);
                 /*if (SceneMgr.GetCurrentSceneType() == SceneType.MainWindow)
                 {
@@ -419,7 +432,6 @@ public class TopologyBaseMsg : BasePopWin
                 PlatformMgr.Instance.DisConnenctBuletooth();
                 SingletonObject<LogicCtrl>.GetInst().CloseBlueSearch();
             }
-
         }
     }
 
@@ -475,6 +487,10 @@ public class TopologyBaseMsg : BasePopWin
                         mTopologyUI.RecoverTopology();
                         //SetMsgType(TopologyMsgType.Topology_ShowInfo);
                         mTopologyUI.SaveTopologyData();
+                        if (!isConnecting)
+                        {
+                            EventMgr.Inst.Fire(EventID.Exit_Blue_Connect);
+                        }
                         OnClose();
                     }
                     else if (mMsgType == TopologyMsgType.Topology_Confirm)
@@ -485,6 +501,7 @@ public class TopologyBaseMsg : BasePopWin
                     else
                     {
                         OnClose();
+                        SingletonObject<LogicCtrl>.GetInst().CloseBlueSearch();
                     }
                 }
             }
@@ -547,6 +564,10 @@ public class TopologyBaseMsg : BasePopWin
                 {//设置完成
                     //mTopologyUI.HideChoicePartPanel(true);
                     mTopologyUI.SaveTopologyData();
+                    if (!isConnecting)
+                    {
+                        EventMgr.Inst.Fire(EventID.Exit_Blue_Connect);
+                    }
                     OnClose();
                     //SetMsgType(TopologyMsgType.Topology_ShowInfo);
                 }
@@ -564,7 +585,7 @@ public class TopologyBaseMsg : BasePopWin
                 }
                 else
                 {
-                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("QingLianJieSheBei"), Color.red);
+                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("QingLianJieSheBei"));
                 }
             }
             else if (name.Equals("btnDisconnect"))
@@ -684,8 +705,8 @@ public class TopologyBaseMsg : BasePopWin
                         }
                         else
                         {
-                            if (data.errorIds.Contains(id))
-                            {//重复id
+                            if (data.errorIds.Contains(id) || TopologyPartType.Speaker == partType && data.ids.Count > 1)
+                            {//重复id,或者有多个蓝牙喇叭
                                 PromptMsg msg = PromptMsg.ShowDoublePrompt(GetSensorRepeatTips(partType, id.ToString()), PopRetrieveMotherboardDataOnClick);
                                 msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
                             }
@@ -693,21 +714,28 @@ public class TopologyBaseMsg : BasePopWin
                             {//版本不一致
                                PromptMsg.ShowSinglePrompt(GetSensorVersionTips(partType, id));
                             }
-                            else if (!data.ids.Contains(id))
+                            else if (TopologyPartType.Speaker != partType && !data.ids.Contains(id) || TopologyPartType.Speaker == partType && data.ids.Count < 1)
                             {//传感器不存在，检查连接
                                 PromptMsg msg = PromptMsg.ShowDoublePrompt(GetSensorLinkTips(partType, id), PopRetrieveMotherboardDataOnClick);
                                 msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
                             }
                             else if (TopologyPartType.Speaker == partType)
                             {//喇叭
-                                if (null != mMainBoardData)
+                                SpeakerData speakerData = (SpeakerData)mRobot.GetReadSensorData(TopologyPartType.Speaker);
+                                if (null != speakerData)
                                 {
-                                    if (!PlatformMgr.Instance.IsConnectedSpeaker(mMainBoardData.speakerMac))
+                                    SpeakerInfoData infoData = speakerData.GetSpeakerData(id);
+                                    if (null != infoData)
                                     {
+
 #if UNITY_ANDROID
-                                        PlatformMgr.Instance.ConnectSpeaker(mMainBoardData.speakerMac);
+                                        if (!PlatformMgr.Instance.IsConnectedSpeaker(infoData.speakerMac))
+                                        {
+                                            PlatformMgr.Instance.ConnectSpeaker(infoData.speakerMac);
+                                        }
 #else
-                                        PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText(string.Format("外设蓝牙需要通过手机系统设置进行连接", mMainBoardData.speakerMac)), PopSpeakerOnClick);
+                                        PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("外设蓝牙需要通过手机系统设置进行连接"), infoData.speakerName), PopSpeakerOnClick);
+
 #endif
                                     }
                                 }
@@ -717,7 +745,11 @@ public class TopologyBaseMsg : BasePopWin
                 }
                 catch (System.Exception ex)
                 {
-                	
+                    if (ClientMain.Exception_Log_Flag)
+                    {
+                        System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                        Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+                    }
                 }
                 
             }
@@ -750,6 +782,7 @@ public class TopologyBaseMsg : BasePopWin
                 tips = string.Format(LauguageTool.GetIns().GetText("数码管传感器ID重复，请修改ID"), id);
                 break;
             case TopologyPartType.Speaker:
+                tips = LauguageTool.GetIns().GetText("只能接一个蓝牙喇叭");
                 break;
         }
         return tips;
@@ -780,6 +813,7 @@ public class TopologyBaseMsg : BasePopWin
                 tips = string.Format(LauguageTool.GetIns().GetText("数码管传感器连接异常"), id);
                 break;
             case TopologyPartType.Speaker:
+                tips = LauguageTool.GetIns().GetText("蓝牙喇叭连接异常");
                 break;
         }
         return tips;
@@ -850,7 +884,7 @@ public class TopologyBaseMsg : BasePopWin
                         return;
                     }
                     string oldName = PlatformMgr.Instance.GetNameForMac(mac);
-                    if (!string.IsNullOrEmpty(name) && !name.Equals(oldName) && !name.StartsWith("Jimu_spk_"))
+                    if (!string.IsNullOrEmpty(name) && !name.Equals(oldName) && !name.StartsWith("Jimuspk_"))
                     {
                         PlatformMgr.Instance.SaveMacAnotherName(mac, name);
                         HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("修改成功"), HUDTextTips.Color_Green);
@@ -940,6 +974,7 @@ public class TopologyBaseMsg : BasePopWin
             {
                 if (null != mMainBoardData && mMainBoardData.ids.Count < 1)
                 {
+                    mCompareResult = ErrorCode.Result_Servo_Num_Inconsistent;
                     PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("WuDuoJi"), PopRetrieveMotherboardDataOnClick);
                     msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
                 }
@@ -1168,21 +1203,21 @@ public class TopologyBaseMsg : BasePopWin
             {
                 mCheckSensorTypeIndex = i;
                 SensorData data = mMainBoardData.GetSensorData(partType[i]);
-                if (null != data && data.errorIds.Count > 0)
+                if (null != data)
                 {
-                    PromptMsg.ShowSinglePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
-                    return;
-                }
-            }
-            if (!string.IsNullOrEmpty(mMainBoardData.speakerMac))
-            {
-                if (!PlatformMgr.Instance.IsConnectedSpeaker(mMainBoardData.speakerMac))
-                {
-#if UNITY_ANDROID
-                    PlatformMgr.Instance.ConnectSpeaker(mMainBoardData.speakerMac);
-#else
-                    PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText(string.Format("检测到蓝牙音响需要连接", mMainBoardData.speakerMac)), PopSpeakerOnClick);
-#endif
+                    if (TopologyPartType.Speaker == partType[i])
+                    {
+                        if (data.ids.Count > 1 || data.errorIds.Count > 0)
+                        {
+                            PromptMsg msg = PromptMsg.ShowDoublePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
+                            msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
+                        }
+                    }
+                    else if (data.errorIds.Count > 0)
+                    {
+                        PromptMsg.ShowSinglePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
+                        return;
+                    }
                 }
             }
         }
@@ -1194,16 +1229,45 @@ public class TopologyBaseMsg : BasePopWin
         if (null != mMainBoardData)
         {
             TopologyPartType[] partType = PublicFunction.Open_Topology_Part_Type;
-            for (int i = mCheckSensorTypeIndex + 1, imax = partType.Length; i < imax; ++i)
+            if (partType[mCheckSensorTypeIndex] == TopologyPartType.Speaker && PromptMsg.RightBtnName.Equals(obj.name))
             {
-                mCheckSensorTypeIndex = i;
-                SensorData data = mMainBoardData.GetSensorData(partType[i]);
-                if (null != data && data.errorIds.Count > 0)
+                if (null != mRobot)
                 {
-                    PromptMsg.ShowSinglePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
-                    break;
+                    if (PlatformMgr.Instance.GetBluetoothState())
+                    {
+                        mRobot.RetrieveMotherboardData();
+                    }
+                    else
+                    {
+                        PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("蓝牙断开"));
+                    }
                 }
             }
+            else
+            {
+                for (int i = mCheckSensorTypeIndex + 1, imax = partType.Length; i < imax; ++i)
+                {
+                    mCheckSensorTypeIndex = i;
+                    SensorData data = mMainBoardData.GetSensorData(partType[i]);
+                    if (null != data)
+                    {
+                        if (TopologyPartType.Speaker == partType[i])
+                        {
+                            if (data.ids.Count > 1 || data.errorIds.Count > 0)
+                            {
+                                PromptMsg msg = PromptMsg.ShowDoublePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
+                                msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
+                            }
+                        }
+                        else if (data.errorIds.Count > 0)
+                        {
+                            PromptMsg.ShowSinglePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
+                            return;
+                        }
+                    }
+                }
+            }
+            
         }
     }
 
@@ -1211,10 +1275,7 @@ public class TopologyBaseMsg : BasePopWin
     {
         if (PromptMsg.RightBtnName.Equals(obj.name))
         {
-            if (null != mMainBoardData)
-            {
-                PlatformMgr.Instance.ConnectSpeaker(mMainBoardData.speakerMac);
-            }
+            PlatformMgr.Instance.ConnectSpeaker(string.Empty);
         }
     }
 
@@ -1842,6 +1903,41 @@ public class TopologyBaseMsg : BasePopWin
             int progress = (int)arg[0];
             mTopologyUI.UpdateProgress(progress);
             mUpdateTime = Time.time;
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+        }
+    }
+    /// <summary>
+    /// 读取speaker数据返回
+    /// </summary>
+    /// <param name="arg"></param>
+    void ReadSpeakerCallBack(EventArg args)
+    {
+        try
+        {
+            byte id = (byte)args[0];
+            SpeakerData speakerData = (SpeakerData)mRobot.GetReadSensorData(TopologyPartType.Speaker);
+            if (null != speakerData)
+            {
+                SpeakerInfoData infoData = speakerData.GetSpeakerData(id);
+                if (null != infoData)
+                {
+#if UNITY_ANDROID
+                    if (!PlatformMgr.Instance.IsConnectedSpeaker(infoData.speakerMac))
+                    {
+                        PlatformMgr.Instance.ConnectSpeaker(infoData.speakerMac);
+                    }
+#else
+                    PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("检测到蓝牙音响需要连接"), infoData.speakerName), PopSpeakerOnClick);
+#endif
+                }
+            }
         }
         catch (System.Exception ex)
         {

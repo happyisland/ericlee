@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Game.Platform;
+using Game.Event;
 
 /// <summary>
 /// Author:xj
@@ -126,6 +127,7 @@ public class PublicPrompt
                 PlatformMgr.Instance.DisConnenctBuletooth();
                 if (SingletonObject<PopWinManager>.GetInst().IsExist(typeof(TopologyBaseMsg)))
                 {
+                    EventMgr.Inst.Fire(EventID.Exit_Blue_Connect);
                     SingletonObject<PopWinManager>.GetInst().ClosePopWin(typeof(TopologyBaseMsg));
                 }
             }

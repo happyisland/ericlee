@@ -86,10 +86,11 @@ public class CopyFilesEditor : EditorWindow
         string fileName = Path.GetFileNameWithoutExtension(src);
         if (null != bytes)
         {
-            Stream sw = new FileStream(dest + "/" + fileName + ".txt", FileMode.OpenOrCreate, FileAccess.Write);
+            File.WriteAllBytes(dest + "/" + fileName + ".txt", bytes);
+            /*Stream sw = new FileStream(dest + "/" + fileName + ".txt", FileMode.OpenOrCreate, FileAccess.Write);
             sw.Write(bytes, 0, bytes.Length);
             sw.Dispose();
-            sw.Close();
+            sw.Close();*/
         }
     }
 

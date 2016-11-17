@@ -93,7 +93,8 @@
   <part>m22</part>
   <part>lnA</part>
   <part>m70</part>
-  <part>s06</part>
+  <part>s06</part> 
+  <part>mcRed</part>
   <part>m24</part>
   <part>c5</part>
   <part>m25</part>
@@ -137,4 +138,17 @@
   <part>pt16</part>
   <part>pt17</part>
   <part>pt18</part>
+
+  <part>L01</part>
+  <part>L02</part>
+  <part>L03</part>
+  <part>L04</part>
+  <part>L05</part>
+  <part>L06</part>
+  <part>L07</part>
+  <part>L08</part>
+  <part>L11</part>
+  <part>L12</part>
+  <part>L13</part>
+  <part>L14</part>
 </root>

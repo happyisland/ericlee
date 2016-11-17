@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LitJson;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -33,7 +34,7 @@ public class TouchData : ReadSensorDataBase
         }
     }
 
-    public override object GetReadResult()
+    public override string GetReadResult()
     {
         List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
         if (readIds[0] == 0)
@@ -59,50 +60,48 @@ public class TouchData : ReadSensorDataBase
                 }
             }
         }
+        return Json.Serialize(result);
+    }
+
+    public override object GetReadAllResult()
+    {
+        List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
+        if (null != readAllIds && readAllIds.Count > 0)
+        {
+            if (readAllIds[0] == 0)
+            {
+                foreach (KeyValuePair<byte, byte> kvp in dataDict)
+                {
+                    Dictionary<string, object> dict = new Dictionary<string, object>();
+                    dict["id"] = kvp.Key;
+                    dict["result"] = kvp.Value;
+                    result.Add(dict);
+                }
+            }
+            else
+            {
+                for (int i = 0, imax = readAllIds.Count; i < imax; ++i)
+                {
+                    if (dataDict.ContainsKey(readAllIds[i]))
+                    {
+                        Dictionary<string, object> dict = new Dictionary<string, object>();
+                        dict["id"] = readAllIds[i];
+                        dict["result"] = dataDict[readAllIds[i]];
+                        result.Add(dict);
+                    }
+                }
+            }
+        }
+        
         return result;
     }
 
-    public override string GetOnlyTypeReadResult()
-    {
-        StringBuilder sb = new StringBuilder();
-        if (readIds[0] == 0)
-        {
-            foreach (KeyValuePair<byte, byte> kvp in dataDict)
-            {
-                if (sb.Length > 0)
-                {
-                    sb.Append(PublicFunction.Separator_Comma);
-                }
-                sb.Append(kvp.Value);
-            }
-        }
-        else
-        {
-            for (int i = 0, imax = readIds.Count; i < imax; ++i)
-            {
-                if (sb.Length > 0)
-                {
-                    sb.Append(PublicFunction.Separator_Comma);
-                }
-                if (dataDict.ContainsKey(readIds[i]))
-                {
-                    sb.Append(dataDict[readIds[i]]);
-                }
-                else
-                {
-                    sb.Append(0);
-                }
-            }
-        }
-        return sb.ToString();
-    }
-
-    public override void ReadCallBackMsg(BinaryReader br)
+    public override void ReadCallBackMsg(BinaryReader br, int len)
     {
 
         try
         {
-            base.ReadCallBackMsg(br);
+            base.ReadCallBackMsg(br, len);
             if (null != backIds)
             {
                 for (int i = 0, imax = backIds.Count; i < imax; ++i)
