@@ -28,10 +28,14 @@ public class TopologyBaseMsg : BasePopWin
     bool isSuccess;//模型匹配成功了
     bool isUpdateSuccess;//升级成功了
     bool isConnecting;//是否处于连接流程中
+    BlueConnectFailReason mFailReason = BlueConnectFailReason.unknow;
     ErrorCode mSystemUpdateResult;//主板更新结果
     ErrorCode mServoUpdateResult;//舵机更新结果
     ErrorCode mCompareResult;//比较模型的结果
     bool mCheckUpdateFlag;//检查升级的时候检测到升级是否升级
+
+    Dictionary<TopologyPartType, ErrorCode> mSensorUpdateResult;//传感器更新结果
+    Dictionary<TopologyPartType, List<byte>> mSensorNeedUpdateList;//需要升级的传感器id
 
     protected UIInput mNameInput;
     Vector3 mBottomBtnTargetPos;
@@ -49,9 +53,10 @@ public class TopologyBaseMsg : BasePopWin
 
     Transform mBtnRefreshTrans;
     Transform mBtnFinishedTrans;
-    Transform mBtnDeviceTrans;
+    //Transform mBtnDeviceTrans;
     Transform mBtnSettingTrans;
     Transform mBtnHelpTrans;
+    Transform mBtnSetServoTrans;
 
     TopologyUI mTopologyUI;
 
@@ -59,8 +64,24 @@ public class TopologyBaseMsg : BasePopWin
 
     float mUpdateTime = 0;
 
+    bool isSpeakerPromptFlag = false;
+
+    byte UpdateOutTime = 30;
 
 
+#if UNITY_EDITOR
+
+    GameObject mAddSensorGameObject = null;
+
+    public static TopologyUI GetTopologyUI()
+    {
+        if (null == mInst)
+        {
+            return null;
+        }
+        return mInst.mTopologyUI;
+    }
+#endif
 
     public TopologyBaseMsg(TopologyMsgType msgType)
     {
@@ -69,6 +90,7 @@ public class TopologyBaseMsg : BasePopWin
         isSingle = true;
         isCoverAddPanel = true;
         mNeedUpdateServoList = new List<byte>();
+        mSensorNeedUpdateList = new Dictionary<TopologyPartType, List<byte>>();
         isUpdating = false;
         isSuccess = false;
         mCheckUpdateFlag = false;
@@ -83,6 +105,8 @@ public class TopologyBaseMsg : BasePopWin
         {
             isConnecting = false;
         }
+        //永不待机
+        Screen.sleepTimeout = SleepTimeout.NeverSleep;
     }
 
     public static void ShowMsg(ReadMotherboardDataMsgAck data)
@@ -98,15 +122,49 @@ public class TopologyBaseMsg : BasePopWin
             mInst.mMainBoardData = data;
             if (TopologyMsgType.Topology_Confirm == mInst.mMsgType)
             {
-                if (RobotManager.GetInst().IsCreateRobotFlag)
+                mInst.mTopologyUI.RefreshIndependent();
+                mInst.mNeedUpdateServoList.Clear();
+                mInst.mSensorNeedUpdateList.Clear();
+                mInst.CheckSystemUpdate();
+                if (ErrorCode.Result_OK != mInst.mServoUpdateResult)
                 {
-                    mInst.mTopologyUI.RefreshIndependent();
+                    mInst.GetNeedUpdateServo();
                 }
-                mInst.CheckModelData();
-                if (mInst.isUpdateSuccess && mInst.isSuccess)
+                mInst.GetNeedUpdateSensor();
+                mInst.mTopologyUI.SetPartState(mInst.mSystemUpdateResult, mInst.mNeedUpdateServoList, mInst.mSensorNeedUpdateList);
+                if (SingletonObject<UpdateManager>.GetInst().IsSystemUpdateSucces())
                 {
-                    mInst.ConfirmFinished();
+                    mInst.isUpdating = false;
+                    mInst.UpdateFinishedAnim(true);
+                    Timer.Add(0.6f, 1, 1, delegate () {
+                        mInst.mCheckUpdateFlag = true;
+                        mInst.CheckModelData();
+                    });
                 }
+                else if (mInst.isUpdateSuccess && mInst.isSuccess)
+                {
+                    if (!SingletonObject<UpdateManager>.GetInst().IsSystemUpdateSucces())
+                    {//防止重复调用
+                        mInst.isUpdating = false;
+                        mInst.SetCheckUpdateInfo();
+                        mInst.UpdateFinishedAnim(true);
+                    }
+                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("设备升级成功"), HUDTextTips.Color_Green);
+                    Timer.Add(0.6f, 1, 1, delegate ()
+                    {
+                        if (null != mInst)
+                        {
+                            mInst.ConfirmFinished();
+                        }
+                    });
+
+                }
+                else
+                {
+                    mInst.mCheckUpdateFlag = false;
+                    mInst.CheckModelData();
+                }
+                
             }
         }
     }
@@ -135,6 +193,8 @@ public class TopologyBaseMsg : BasePopWin
             EventMgr.Inst.Regist(EventID.BLUETOOTH_MATCH_RESULT, OnConnenctResult);
             EventMgr.Inst.Regist(EventID.Update_Progress, UpdateProgressResult);
             EventMgr.Inst.Regist(EventID.Read_Speaker_Data_Ack, ReadSpeakerCallBack);
+            EventMgr.Inst.Regist(EventID.Update_Cannel, UpdateCannelCallBack);
+            EventMgr.Inst.Regist(EventID.Save_Topology_Data, SaveTopologyCallBack);
             mTopologyUI.SetDepth(mDepth);
             mTopologyUI.Open();
             if (RobotManager.GetInst().IsCreateRobotFlag)
@@ -175,12 +235,19 @@ public class TopologyBaseMsg : BasePopWin
                         }
                     }
 
-                    Transform btnDevice = top.Find("btnDevice");
+                    /*Transform btnDevice = top.Find("btnDevice");
                     if (null != btnDevice)
                     {
                         mBtnDeviceTrans = btnDevice;
                         mBtnDeviceTrans.localPosition = UIManager.GetWinPos(mBtnDeviceTrans, UIWidget.Pivot.TopRight, PublicFunction.Back_Btn_Pos.x, PublicFunction.Back_Btn_Pos.y) + new Vector3(300, 0);
                         mBtnDeviceTrans.gameObject.SetActive(false);
+                    }*///20161209注释
+
+                    mBtnSetServoTrans = top.Find("btnSetServo");
+                    if (null != mBtnSetServoTrans)
+                    {
+                        mBtnSetServoTrans.localPosition = UIManager.GetWinPos(mBtnSetServoTrans, UIWidget.Pivot.TopRight, PublicFunction.Back_Btn_Pos.x, PublicFunction.Back_Btn_Pos.y) + new Vector3(300, 0);
+                        mBtnSetServoTrans.gameObject.SetActive(false);
                     }
 
                     Transform btnFinished = top.Find("btnFinished");
@@ -212,7 +279,7 @@ public class TopologyBaseMsg : BasePopWin
                         mConfirmTitleTrans = title.Find("normal");
                         if (null != mConfirmTitleTrans)
                         {
-                            mNameInput = GameHelper.FindChildComponent<UIInput>(mConfirmTitleTrans, "Input");
+                            /*mNameInput = GameHelper.FindChildComponent<UIInput>(mConfirmTitleTrans, "Input");
                             if (null != mNameInput)
                             {
                                 mNameInput.defaultText = LauguageTool.GetIns().GetText("请输入名字");
@@ -240,7 +307,16 @@ public class TopologyBaseMsg : BasePopWin
                                 //mNameInput.value = mNameInput.value.PadRight(10, ' ');
                                 mNameInput.onSelect = OnInputSelect;
                                 mNameInput.onValidate = OnValidate;
+                            }*/
+                            if (null != mRobot)
+                            {
+                                GameHelper.SetLabelText(mConfirmTitleTrans.Find("maintitle"), mRobot.ShowName);
                             }
+                            else
+                            {
+                                GameHelper.SetLabelText(mConfirmTitleTrans.Find("maintitle"), string.Empty);
+                            }
+                            GameHelper.SetLabelText(mConfirmTitleTrans.Find("subtitle"), LauguageTool.GetIns().GetText("请勿让Jimu远离手机"));
                         }
                         mSettingTitleTrans = title.Find("setting");
                         if (null != mSettingTitleTrans)
@@ -340,6 +416,7 @@ public class TopologyBaseMsg : BasePopWin
                         {
                             btnRefresh.localPosition = pos;
                         }
+                        mBtnRefreshTrans.gameObject.SetActive(false);
                     }
 
                 }
@@ -349,19 +426,23 @@ public class TopologyBaseMsg : BasePopWin
             ShowBottomBtn();
             if (mMsgType == TopologyMsgType.Topology_Confirm)
             {
-                CheckModelData();
+                mCheckUpdateFlag = false;
+                Timer.Add(0.1f, 1, 1, CheckModelData);
                 mTopologyUI.SetOnClickDelegate(ConfirmTopologyUIOnClick);
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
 
+    }
+
+    public override void Init()
+    {
+        base.Init();
+        mCoverAlpha = 1;
     }
 
     public override void Release()
@@ -374,45 +455,43 @@ public class TopologyBaseMsg : BasePopWin
         EventMgr.Inst.UnRegist(EventID.BLUETOOTH_MATCH_RESULT, OnConnenctResult);
         EventMgr.Inst.UnRegist(EventID.Update_Progress, UpdateProgressResult);
         EventMgr.Inst.UnRegist(EventID.Read_Speaker_Data_Ack, ReadSpeakerCallBack);
+        EventMgr.Inst.UnRegist(EventID.Update_Cannel, UpdateCannelCallBack);
+        EventMgr.Inst.UnRegist(EventID.Save_Topology_Data, SaveTopologyCallBack);
         mInst = null;
+#if UNITY_EDITOR
+        if (null != mAddSensorGameObject)
+        {
+            GameObject.Destroy(mAddSensorGameObject);
+            mAddSensorGameObject = null;
+        }
+#endif
         if (isConnecting)
         {
             if (isSuccess)
             {
+                
                 if (PlatformMgr.Instance.GetBluetoothState())
                 {
-                    EventMgr.Inst.Fire(EventID.BLUETOOTH_MATCH_RESULT, new EventArg(true));
+                    if (null != mMainBoardData && mMainBoardData.power <= PublicFunction.Robot_Power_Empty)
+                    {//没电了,断开蓝牙
+                        PlatformMgr.Instance.DisConnenctBuletooth();
+                        PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("电量低，请充电"), delegate (GameObject obj)
+                        {
+                            SingletonObject<LogicCtrl>.GetInst().CloseBlueSearch();
+                        });
+                        PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionFailed, BlueConnectFailReason.LowPower.ToString());
+                        return;
+                    }
                     Robot robot = RobotManager.GetInst().GetCurrentRobot();
                     if (null != robot)
                     {
-                        robot.ReadMCUInfo();
-                        robot.SelfCheck(true);
-                        robot.canShowPowerFlag = true;
-                        TopologyPartType[] partType = PublicFunction.Open_Topology_Part_Type;
-                        for (int i = 0, imax = partType.Length; i < imax; ++i)
-                        {
-                            if (partType[i] == TopologyPartType.Speaker)
-                            {
-                                continue;
-                            }
-                            if (null != robot.MotherboardData)
-                            {
-                                SensorData sensorData = robot.MotherboardData.GetSensorData(partType[i]);
-                                if (null != sensorData && sensorData.ids.Count > 0)
-                                {
-                                    robot.SensorInit(sensorData.ids, partType[i]);
-                                }
-                            }
-                        }
-                        robot.ReadConnectedAngle();
-                        if (PlatformMgr.Instance.IsChargeProtected)
-                        {
-                            SingletonObject<LogicCtrl>.GetInst().CloseBlueSearch();
-                            EventMgr.Inst.Fire(EventID.Blue_Connect_Finished);
-                        }
+                        SingletonObject<ConnectManager>.GetInst().ConnectFinished(robot);
+                        mTopologyUI.SaveTopologySensorData();
+                        PlatformMgr.Instance.SaveLastConnectedData(mRobot.Mac);
                     }
                     else
                     {
+                        PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionSucceeded);
                         SingletonObject<LogicCtrl>.GetInst().CloseBlueSearch();
                     }
                 }
@@ -420,7 +499,6 @@ public class TopologyBaseMsg : BasePopWin
                 {
                     SingletonObject<LogicCtrl>.GetInst().CloseBlueSearch();
                 }
-                PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionSucceeded);
                 /*if (SceneMgr.GetCurrentSceneType() == SceneType.MainWindow)
                 {
                     PowerMsg.OpenPower();
@@ -428,7 +506,7 @@ public class TopologyBaseMsg : BasePopWin
             }
             else
             {
-                PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionFailed);
+                PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionFailed, mFailReason.ToString());
                 PlatformMgr.Instance.DisConnenctBuletooth();
                 SingletonObject<LogicCtrl>.GetInst().CloseBlueSearch();
             }
@@ -440,18 +518,11 @@ public class TopologyBaseMsg : BasePopWin
         base.Update();
         if (isUpdating)
         {
-            if (Time.time - mUpdateTime > 30.0f)
+            if (Time.time - mUpdateTime > UpdateOutTime)
             {
                 isUpdating = false;
                 NetWaitMsg.ShowWait(1);
-                if (mServoUpdateResult == ErrorCode.Result_OK)
-                {
-                    EventMgr.Inst.Fire(EventID.Update_Error, new EventArg(false));
-                }
-                else
-                {
-                    EventMgr.Inst.Fire(EventID.Update_Error, new EventArg(true));
-                }
+                EventMgr.Inst.Fire(EventID.Update_Error, new EventArg(SingletonObject<UpdateManager>.GetInst().GetUpdateDeviceType()));
             }
         }
     }
@@ -467,10 +538,14 @@ public class TopologyBaseMsg : BasePopWin
         base.OnButtonClick(obj);
         try
         {
+            if (isUpdating)
+            {
+                return;
+            }
             string name = obj.name;
             if (name.Equals("btnRefresh"))
             {
-                mTopologyUI.HideChoicePartPanel(false);
+                //mTopologyUI.HideChoicePartPanel(false);
                 mTopologyUI.ResetTopology();
             }
             else if (name.Equals("btnBack"))
@@ -484,9 +559,9 @@ public class TopologyBaseMsg : BasePopWin
                     if (mMsgType == TopologyMsgType.Topology_Setting)
                     {
                         //mTopologyUI.HideChoicePartPanel(true);
-                        mTopologyUI.RecoverTopology();
+                        //mTopologyUI.RecoverTopology();
                         //SetMsgType(TopologyMsgType.Topology_ShowInfo);
-                        mTopologyUI.SaveTopologyData();
+                        //mTopologyUI.SaveTopologyData();
                         if (!isConnecting)
                         {
                             EventMgr.Inst.Fire(EventID.Exit_Blue_Connect);
@@ -495,6 +570,10 @@ public class TopologyBaseMsg : BasePopWin
                     }
                     else if (mMsgType == TopologyMsgType.Topology_Confirm)
                     {
+                        if (BlueConnectFailReason.unknow != mFailReason)
+                        {
+                            mFailReason = BlueConnectFailReason.Cancel;
+                        }
                         PlatformMgr.Instance.DisConnenctBuletooth();
                         OnClose();
                     }
@@ -531,7 +610,6 @@ public class TopologyBaseMsg : BasePopWin
                     PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("升级中，请稍后！"));
                     return;
                 }
-                PlatformMgr.Instance.SaveLastConnectedData(mRobot.Mac);
                 if (RobotManager.GetInst().IsCreateRobotFlag)
                 {
                     if (ClientMain.Use_Third_App_Flag || ClientMain.Simulation_Use_Third_App_Flag)
@@ -548,7 +626,6 @@ public class TopologyBaseMsg : BasePopWin
                     mRobot = RobotManager.GetInst().GetCurrentRobot();
                     mTopologyUI.UpdateRobot(mRobot);
                 }
-                PlatformMgr.Instance.SaveRobotLastConnectedData(mRobot.ID, mRobot.Mac);
                 if (isSuccess)
                 {
                     ConfirmFinished();
@@ -556,6 +633,7 @@ public class TopologyBaseMsg : BasePopWin
                 else
                 {
                     CheckUpdateData(true);
+                    SetCheckUpdateInfo();
                 }
             }
             else if (name.Equals("btnFinished"))
@@ -573,9 +651,15 @@ public class TopologyBaseMsg : BasePopWin
                 }
                 else
                 {
-                    mTopologyUI.HideChoicePartPanel(false);
+                    //mTopologyUI.HideChoicePartPanel(false);
                     mTopologyUI.RemoveDisContinuousPart();
                 }
+            }
+            else if (name.Equals("btnSetServo"))
+            {//设置舵机模式
+                OnHide();
+                mTopologyUI.OnHide();
+                SetServoTypeMsg.ShowMsg(SetServoModelOnClose);
             }
             else if (name.Equals("btnDevice"))
             {//显示设备硬件信息
@@ -598,7 +682,8 @@ public class TopologyBaseMsg : BasePopWin
                 else
                 {
                     OnClose();
-                    SearchBluetoothMsg.ShowMsg();
+                    //SearchBluetoothMsg.ShowMsg();
+                    ConnectBluetoothMsg.ShowMsg();
                 }
             }
             else if (name.Equals("btnSetting"))
@@ -609,29 +694,35 @@ public class TopologyBaseMsg : BasePopWin
             {
                 PopWinManager.GetInst().ShowPopWin(typeof(TopologyGuideMsg));
             }
-            Debuger.Log(name);
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
+    }
+
+    void SetServoModelOnClose()
+    {
+        EventMgr.Inst.Fire(EventID.Exit_Blue_Connect);
+        OnClose();
     }
 
 
     void ConfirmTopologyUIOnClick(GameObject obj)
     {
+        if (isUpdating)
+        {
+            return;
+        }
         string btnName = obj.name;
         if (btnName.Equals("MotherBox"))
         {//点击了主板
-            if (null != mMainBoardData && !PlatformMgr.Instance.Robot_System_Version.Equals(mMainBoardData.mbVersion))
+            if (null != mMainBoardData && !string.IsNullOrEmpty(SingletonObject<UpdateManager>.GetInst().Robot_System_Version) && !SingletonObject<UpdateManager>.GetInst().Robot_System_Version.Equals(mMainBoardData.mbVersion))
             {
                 if (isUpdating)
                 {
-                    PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("升级中，请稍后！"));
+                    //PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("升级中，请稍后！"));
                 }
                 else
                 {
@@ -644,14 +735,14 @@ public class TopologyBaseMsg : BasePopWin
             byte id = byte.Parse(btnName.Substring("servo_".Length));
             if (null != mMainBoardData && mMainBoardData.errorIds.Contains(id))
             {//重复舵机id
-                PromptMsg msg = PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("舵机ID重复，请修改舵机ID"), id), PopRetrieveMotherboardDataOnClick);
+                PromptMsg msg = PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("舵机ID重复，请修改舵机ID"), id), PopRetrieveMotherboardDataOnClick, PopServoRepeatHelpOnClick);
                 msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
             }
             else if (mNeedUpdateServoList.Contains(id))
             {//需要升级的舵机
                 if (isUpdating)
                 {
-                    PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("舵机升级中，请稍后！"));
+                    //PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("舵机升级中，请稍后！"));
                 }
                 else
                 {
@@ -662,7 +753,7 @@ public class TopologyBaseMsg : BasePopWin
             {//舵机版本不一致
                 if (isUpdating)
                 {
-                    PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("舵机升级中，请稍后！"));
+                    //PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("舵机升级中，请稍后！"));
                 }
                 else
                 {
@@ -671,14 +762,14 @@ public class TopologyBaseMsg : BasePopWin
             }
             else if (null != mMainBoardData && !mMainBoardData.ids.Contains(id))
             {//舵机不存在，检查连接
-                PromptMsg msg = PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("舵机连接异常"), id), PopRetrieveMotherboardDataOnClick);
+                PromptMsg msg = PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("舵机连接异常"), id), PopRetrieveMotherboardDataOnClick, PopServoConnectionExceptionHelpOnClick);
                 msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
             }
-            else if (null != mMainBoardData && !string.IsNullOrEmpty(PlatformMgr.Instance.Robot_Servo_Version) && !PlatformMgr.Instance.Robot_Servo_Version.Equals(mMainBoardData.djVersion))
+            else if (null != mMainBoardData && !string.IsNullOrEmpty(SingletonObject<UpdateManager>.GetInst().Robot_Servo_Version) && !SingletonObject<UpdateManager>.GetInst().Robot_Servo_Version.Equals(mMainBoardData.djVersion))
             {
                 if (isUpdating)
                 {
-                    PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("舵机升级中，请稍后！"));
+                    //PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("舵机升级中，请稍后！"));
                 }
                 else
                 {
@@ -710,6 +801,13 @@ public class TopologyBaseMsg : BasePopWin
                                 PromptMsg msg = PromptMsg.ShowDoublePrompt(GetSensorRepeatTips(partType, id.ToString()), PopRetrieveMotherboardDataOnClick);
                                 msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
                             }
+                            else if (mSensorNeedUpdateList.ContainsKey(partType) && mSensorNeedUpdateList[partType].Contains(id))
+                            {
+                                if (!isUpdating)
+                                {
+                                    PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("需要升级"));
+                                }
+                            }
                             else if (data.errorVerIds.Contains(id))
                             {//版本不一致
                                PromptMsg.ShowSinglePrompt(GetSensorVersionTips(partType, id));
@@ -740,19 +838,74 @@ public class TopologyBaseMsg : BasePopWin
                                     }
                                 }
                             }
+                            else if (!string.IsNullOrEmpty(SingletonObject<UpdateManager>.GetInst().GetSensorVersion(partType)) && !SingletonObject<UpdateManager>.GetInst().GetSensorVersion(partType).Equals(data.version))
+                            {
+                                if (!isUpdating)
+                                {
+                                    PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("需要升级"));
+                                }
+                            }
                         }
                     }
                 }
                 catch (System.Exception ex)
                 {
-                    if (ClientMain.Exception_Log_Flag)
-                    {
-                        System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                        Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                    }
+                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
                 }
                 
             }
+        }
+    }
+
+    void ShowInfoOnClick(GameObject obj)
+    {
+        try
+        {
+            if (!PlatformMgr.Instance.GetBluetoothState() || null == mRobot || null == mMainBoardData)
+            {
+                return;
+            }
+            string btnName = obj.name;
+            if (btnName.Equals("MotherBox"))
+            {//点击了主板
+                PromptDevice.ShowMainboardInfo(mMainBoardData);
+            }
+            else if (btnName.StartsWith("servo_"))
+            {//点击了某个舵机
+                byte id = byte.Parse(btnName.Substring("servo_".Length));
+                DuoJiData data = mRobot.GetAnDjData(id);
+                if (null != data)
+                {
+                    if (data.modelType == ServoModel.Servo_Model_Angle)
+                    {
+                        PromptDevice.ShowAngleServoInfo(id, mMainBoardData.djVersion);
+                    }
+                    else
+                    {
+                        PromptDevice.ShowTurnServoInfo(id, mMainBoardData.djVersion);
+                    }
+                }
+            }
+            else if (btnName.StartsWith("sensor_"))
+            {//点中了传感器
+                string[] arys = btnName.Split('_');
+                if (arys.Length == 3)
+                {
+                    TopologyPartType partType = (TopologyPartType)Enum.Parse(typeof(TopologyPartType), arys[1]);
+                    byte id = byte.Parse(arys[2]);
+                    SensorData data = mMainBoardData.GetSensorData(partType);
+                    if (null != data)
+                    {
+                        PromptDevice.ShowSensorInfo(partType, id, data.version);
+                    }
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -900,11 +1053,8 @@ public class TopologyBaseMsg : BasePopWin
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     byte tmpLenght = 0;
@@ -943,29 +1093,28 @@ public class TopologyBaseMsg : BasePopWin
     {
         isUpdating = false;
         isSuccess = false;
-        mCheckUpdateFlag = false;
         mCompareResult = ErrorCode.Result_OK;
         if (null != mMainBoardData)
         {
-            mServoUpdateResult = Robot.CheckServoUpdate(mMainBoardData);
-            mSystemUpdateResult = Robot.CheckSystemUpdate(mMainBoardData.mbVersion);
+            CheckUpdateResult();
         }
         else
         {
-            mSystemUpdateResult = ErrorCode.Do_Not_Upgrade;
-            mServoUpdateResult = ErrorCode.Do_Not_Upgrade;
+            mSystemUpdateResult = ErrorCode.Result_OK;
+            mServoUpdateResult = ErrorCode.Result_OK;
         }
         
 
-        bool defaultFlag = false;
+        /*bool defaultFlag = false;
         if (RecordContactInfo.Instance.openType == "default")
         {
             defaultFlag = true;
-        }
+        }*/
         if (null != mMainBoardData && mMainBoardData.errorIds.Count > 0)
         {//舵机id重复
             mCompareResult = ErrorCode.Result_DJ_ID_Repeat;
-            PromptMsg msg = PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("舵机ID重复，请修改舵机ID"), PublicFunction.ListToString(mMainBoardData.errorIds)), PopRetrieveMotherboardDataOnClick);
+            mFailReason = BlueConnectFailReason.ModelInfoIncorrect_repeatedID;
+            PromptMsg msg = PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("舵机ID重复，请修改舵机ID"), PublicFunction.ListToString(mMainBoardData.errorIds)), PopRetrieveMotherboardDataOnClick, PopServoRepeatHelpOnClick);
             msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
         }
         else
@@ -975,220 +1124,378 @@ public class TopologyBaseMsg : BasePopWin
                 if (null != mMainBoardData && mMainBoardData.ids.Count < 1)
                 {
                     mCompareResult = ErrorCode.Result_Servo_Num_Inconsistent;
+                    mFailReason = BlueConnectFailReason.ModelInfoIncorrect_differentID;
                     PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("WuDuoJi"), PopRetrieveMotherboardDataOnClick);
                     msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
                 }
                 else
                 {
-                    CheckUpdateData(false);
+                    CheckUpdateData(mCheckUpdateFlag);
                 }
             }
             else
             {
                 if (null != mRobot)
                 {
-                    mCompareResult = CompareServoData();
+                    mCompareResult = SingletonObject<ConnectManager>.GetInst().CompareServoData(mRobot, mMainBoardData);
                     if (ErrorCode.Result_Servo_Num_Inconsistent == mCompareResult)
                     {//舵机数量不一致
-                        string str = string.Empty;
-                        if (defaultFlag)
-                        {
-                            str = LauguageTool.GetIns().GetText("舵机数量跟拓扑图不一致，请检查后重试！");
-                        }
-                        else
-                        {
-                            str = LauguageTool.GetIns().GetText("舵机数量跟个人模型不一致，请检查后重试！");
-                        }
-                        PromptMsg msg = PromptMsg.ShowDoublePrompt(str, PopRetrieveMotherboardDataOnClick);
+                        mFailReason = BlueConnectFailReason.ModelInfoIncorrect_servoAmount;
+                        PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("舵机数量跟拓扑图不一致，请检查后重试！"), PopRetrieveMotherboardDataOnClick, PopServoNumDoNotMatchHelpOnClick);
                         msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
                     }
                     else if (ErrorCode.Result_Servo_ID_Inconsistent == mCompareResult)
                     {//舵机id不匹配
-                        string str = string.Empty;
-                        if (defaultFlag)
-                        {
-                            str = LauguageTool.GetIns().GetText("舵机ID跟拓扑图不一致，请检查后重试！");
-                        }
-                        else
-                        {
-                            str = LauguageTool.GetIns().GetText("舵机ID跟个人模型不匹配，请检查后重试！");
-                        }
-                        PromptMsg msg = PromptMsg.ShowDoublePrompt(str, PopRetrieveMotherboardDataOnClick);
+                        mFailReason = BlueConnectFailReason.ModelInfoIncorrect_differentID;
+                        PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("舵机ID跟拓扑图不一致，请检查后重试！"), PopRetrieveMotherboardDataOnClick, PopServoIDDoNotMatchHelpOnClick);
                         msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
                     }
                     else
                     {//模型已匹配
-                        CheckUpdateData(false);
+                        CheckUpdateData(mCheckUpdateFlag);
                     }
                 }
             }
         }
-        mTopologyUI.SetPartState(mSystemUpdateResult, mNeedUpdateServoList);
+        if (!isUpdating)
+        {
+            mTopologyUI.SetPartState(mSystemUpdateResult, mNeedUpdateServoList, mSensorNeedUpdateList);
+        }
         SetConfirmBtnState();
+        SetCheckUpdateInfo();
+    }
+
+    void SetCheckUpdateInfo()
+    {
+        if (isSuccess && !isUpdateSuccess)
+        {
+            SetNormalTitle(LauguageTool.GetIns().GetText("请确认你的Jimu信息"), false);
+            UpdateBtnOnAwake();
+        }
+        else if (isUpdating)
+        {
+            SetNormalTitle(LauguageTool.GetIns().GetText("固件升级中..."), true);
+            UpdateBtnOnSleep();
+        }
+        else
+        {
+            string name = string.Empty;
+            if (null != mRobot)
+            {
+                name = mRobot.ShowName;
+            }
+            SetNormalTitle(name, false);
+            UpdateBtnOnAwake();
+        }
     }
     /// <summary>
     /// 检查升级
     /// </summary>
     void CheckUpdateData(bool updateFlag)
     {
+        if (!PlatformMgr.Instance.GetBluetoothState())
+        {
+            PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("蓝牙断开"));
+            return;
+        }
         mCheckUpdateFlag = updateFlag;
         isSuccess = false;
         isUpdating = false;
-        PlatformMgr.Instance.NeedUpdateFlag = false;
+        //PlatformMgr.Instance.NeedUpdateFlag = false;
         mNeedUpdateServoList.Clear();
+        mSensorNeedUpdateList.Clear();
         if (null == mMainBoardData)
         {//用于模拟器上
             isSuccess = true;
             return;
         }
-        if (ErrorCode.Do_Not_Upgrade == mServoUpdateResult)
-        {//一切正常
+        CheckSystemUpdate();
+        if (ErrorCode.Result_OK != mServoUpdateResult)
+        {
+            GetNeedUpdateServo();
+        }
+        GetNeedUpdateSensor();
+        if (ErrorCode.Result_OK == mSystemUpdateResult)
+        {
+            CheckServoUpdate();
+        }
+        if (ErrorCode.Result_OK == mSystemUpdateResult && ErrorCode.Result_OK == mServoUpdateResult)
+        {
+            if (!mCheckUpdateFlag)
+            {
+                CheckSensorData();
+            }
+            else
+            {
+                CheckSensorUpdate();
+            }
+            if (CheckDeviceUpdateFinished())
+            {
+                isSuccess = true;
+            }
+        }
+        else if (ErrorCode.Robot_Adapter_Open_Protect == mSystemUpdateResult || ErrorCode.Robot_Adapter_Open_Protect == mServoUpdateResult)
+        {
+            if (mCheckUpdateFlag)
+            {
+                isSuccess = true;
+            }
+        }
+        
+
+        if (mCheckUpdateFlag && isUpdating)
+        {
+            isUpdateSuccess = false;
+            if (ErrorCode.Can_Upgraded == mSystemUpdateResult)
+            {
+                UpdateOutTime = 30;
+                mTopologyUI.OpenMainBoardUpdateAnim();
+            }
+            else if (ErrorCode.Can_Upgraded == mServoUpdateResult)
+            {
+                UpdateOutTime = 30;
+                mTopologyUI.OpenServoUpdateAnim(mNeedUpdateServoList);
+            }
+            else
+            {
+                if (null != mSensorUpdateResult)
+                {
+                    foreach (var kvp in mSensorUpdateResult)
+                    {
+                        if (ErrorCode.Can_Upgraded == kvp.Value && mSensorNeedUpdateList.ContainsKey(kvp.Key))
+                        {
+                            UpdateOutTime = (byte)(GetSensorUpdateTime(kvp.Key) * mSensorNeedUpdateList[kvp.Key].Count * 2 + 10);
+                            mTopologyUI.OpenSensorUpdateAnim(kvp.Key, mSensorNeedUpdateList[kvp.Key]);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    byte GetSensorUpdateTime(TopologyPartType sensorType)
+    {
+        byte sec = 5;
+        switch (sensorType)
+        {
+            case TopologyPartType.Infrared:
+                sec = 5;
+                break;
+            case TopologyPartType.Touch:
+                sec = 4;
+                break;
+            case TopologyPartType.Gyro:
+                sec = 10;
+                break;
+            case TopologyPartType.Light:
+                sec = 9;
+                break;
+            case TopologyPartType.Gravity:
+                break;
+            case TopologyPartType.Speaker:
+                sec = 4;
+                break;
+            case TopologyPartType.Ultrasonic:
+                break;
+            case TopologyPartType.DigitalTube:
+                sec = 5;
+                break;
+        }
+        return sec;
+    }
+
+    void GetNeedUpdateServo()
+    {
+        byte needUpdateId = 0;
+        if (null != mMainBoardData && mMainBoardData.errorVerIds.Count == 1 && mMainBoardData.djVersion.Equals(SingletonObject<UpdateManager>.GetInst().Robot_Servo_Version))
+        {
+            needUpdateId = mMainBoardData.errorVerIds[0];
+        }
+        if (0 == needUpdateId)
+        {
+            if (null == mMainBoardData)
+            {//PC端模拟才会为空
+                mNeedUpdateServoList.AddRange(mRobot.GetAllDjData().GetIDList());
+            }
+            else
+            {
+                for (int i = 0, imax = mMainBoardData.ids.Count; i < imax; ++i)
+                {
+                    mNeedUpdateServoList.Add(mMainBoardData.ids[i]);
+                }
+            }
         }
         else
         {
-            byte needUpdateId = 0;
-            if (null != mMainBoardData && mMainBoardData.errorVerIds.Count == 1 && mMainBoardData.djVersion.Equals(PlatformMgr.Instance.Robot_Servo_Version))
+            mNeedUpdateServoList.Add(needUpdateId);
+        }
+    }
+
+    void GetNeedUpdateSensor()
+    {
+        TopologyPartType[] partAry = PublicFunction.Open_Topology_Part_Type;
+        for (int i = 0, imax = partAry.Length; i < imax; ++i)
+        {
+            if (!mSensorUpdateResult.ContainsKey(partAry[i]) || mSensorUpdateResult[partAry[i]] != ErrorCode.Result_OK)
             {
-                needUpdateId = mMainBoardData.errorVerIds[0];
-            }
-            if (0 == needUpdateId)
-            {
-                if (null == mMainBoardData)
-                {//PC端模拟才会为空
-                    mNeedUpdateServoList.AddRange(mRobot.GetAllDjData().GetIDList());
-                }
-                else
+                if (null != mMainBoardData)
                 {
-                    for (int i = 0, imax = mMainBoardData.ids.Count; i < imax; ++i)
+                    SensorData data = mMainBoardData.GetSensorData(partAry[i]);
+                    if (null != data)
                     {
-                        mNeedUpdateServoList.Add(mMainBoardData.ids[i]);
+                        byte needUpdateId = 0;
+                        if (data.errorVerIds.Count == 1 && data.version.Equals(SingletonObject<UpdateManager>.GetInst().GetSensorVersion(partAry[i])))
+                        {
+                            needUpdateId = data.errorVerIds[0];
+                        }
+                        List<byte> needUpdateList = new List<byte>();
+                        if (0 == needUpdateId)
+                        {
+                            for (int sensorIndex = 0, indexMax = data.ids.Count; sensorIndex < indexMax; ++sensorIndex)
+                            {
+                                needUpdateList.Add(data.ids[sensorIndex]);
+                            }
+                            for (int sensorIndex = 0, indexMax = data.errorIds.Count; sensorIndex < indexMax; ++sensorIndex)
+                            {
+                                needUpdateList.Add(data.errorIds[sensorIndex]);
+                            }
+                        }
+                        else
+                        {
+                            needUpdateList.Add(needUpdateId);
+                        }
+                        mSensorNeedUpdateList[partAry[i]] = needUpdateList;
                     }
                 }
             }
+        }
+    }
+
+    /// <summary>
+    /// 检查升级结果
+    /// </summary>
+    void CheckUpdateResult()
+    {
+        mServoUpdateResult = SingletonObject<UpdateManager>.GetInst().CheckUpdate(TopologyPartType.Servo, mMainBoardData);
+        mSystemUpdateResult = SingletonObject<UpdateManager>.GetInst().CheckUpdate(TopologyPartType.MainBoard, mMainBoardData);
+        TopologyPartType[] partAry = PublicFunction.Open_Topology_Part_Type;
+        if (null == mSensorUpdateResult)
+        {
+            mSensorUpdateResult = new Dictionary<TopologyPartType, ErrorCode>();
+        }
+        for (int i = 0, imax = partAry.Length; i < imax; ++i)
+        {
+            mSensorUpdateResult[partAry[i]] = SingletonObject<UpdateManager>.GetInst().CheckUpdate(partAry[i], mMainBoardData);
+        }
+    }
+
+    void CheckServoUpdate()
+    {
+        /*if (ErrorCode.Robot_Adapter_Open_Protect == mServoUpdateResult)
+        {//有升级，且开启了充电保护，不断开
+            if (mCheckUpdateFlag)
+            {
+                //PlatformMgr.Instance.NeedUpdateFlag = true;
+                PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("充电状态下不能升级"), PopPowerAdapterOnClick);
+            }
+        }
+        else if (ErrorCode.Robot_Adapter_Close_Protect == mServoUpdateResult)
+        {//有升级，未开充电保护，断开
+            if (mCheckUpdateFlag)
+            {
+                PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("充电状态下不能升级"), PopPowerAdapterOnClick);
+            }
+        }*/
+        if (ErrorCode.Result_OK == mServoUpdateResult)
+        {//一切正常
+
+        }
+        else if (ErrorCode.Robot_Power_Low == mServoUpdateResult)
+        {//电量过低，不升级
+            if (mCheckUpdateFlag)
+            {
+                mFailReason = BlueConnectFailReason.UnableUpgrade;
+                PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("固件需要升级，但是电量过低"), PopPowerLowOnClick);
+            }
+        }
+        else
+        {//需要升级
+            byte needUpdateId = (mNeedUpdateServoList.Count == 1) ? mNeedUpdateServoList[0] : (byte)0;
+            if (null != mRobot && (!mCheckUpdateFlag || SingletonObject<UpdateManager>.GetInst().UpdateStart(TopologyPartType.Servo, mRobot, needUpdateId)/* mRobot.ServoUpdate(needUpdateId)*/))
+            {
+                if (mCheckUpdateFlag)
+                {
+                    isUpdating = true;
+                    mFailReason = BlueConnectFailReason.UnableUpgrade;
+                    mUpdateTime = Time.time;
+                }
+            }
             else
             {
-                mNeedUpdateServoList.Add(needUpdateId);
-            }
-            if (ErrorCode.Robot_Adapter_Open_Protect == mServoUpdateResult)
-            {//有升级，且开启了充电保护，不断开
-                if (mCheckUpdateFlag)
-                {
-                    isSuccess = true;
-                    PlatformMgr.Instance.NeedUpdateFlag = true;
-                    PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("充电状态下不能升级"), PopPowerLowOnClick);
-                }
-            }
-            else if (ErrorCode.Robot_Adapter_Close_Protect == mServoUpdateResult)
-            {//有升级，未开充电保护，断开
-                if (mCheckUpdateFlag)
-                {
-                    PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("充电状态下不能升级"), PopPowerLowOnClick);
-                }
-            }
-            else if (ErrorCode.Robot_Power_Low == mServoUpdateResult)
-            {//电量过低，不升级
-                if (mCheckUpdateFlag)
-                {
-                    PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("舵机版本不一致且设备电量过低"));
-                }
-            }
-            else
-            {//需要升级
-                if (null != mRobot && (!mCheckUpdateFlag || mRobot.ServoUpdate(needUpdateId)))
+                if (mMainBoardData.errorVerIds.Count > 0)
                 {
                     if (mCheckUpdateFlag)
                     {
-                        isUpdating = true;
-                        mUpdateTime = Time.time;
+                        mFailReason = BlueConnectFailReason.UnableUpgrade;
+                        PromptMsg msg = PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("DuoJiBanBenBuYiZhi"), PublicFunction.ListToString(mMainBoardData.errorVerIds)), PopRetrieveMotherboardDataOnClick);
+                        msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
                     }
                 }
                 else
                 {
-                    mServoUpdateResult = ErrorCode.Do_Not_Upgrade;
+                    mServoUpdateResult = ErrorCode.Result_OK;
                     mNeedUpdateServoList.Clear();
                 }
             }
         }
+    }
 
-        if (ErrorCode.Do_Not_Upgrade != mServoUpdateResult)
-        {//有更新
+    void CheckSystemUpdate()
+    {
+
+        if (ErrorCode.Result_OK == mSystemUpdateResult)
+        {//一切正常
+
         }
-        else if (mMainBoardData.errorVerIds.Count > 0)
-        {
+        /*else if (ErrorCode.Robot_Adapter_Open_Protect == mSystemUpdateResult)
+        {//有升级，且开启了充电保护，不断开
             if (mCheckUpdateFlag)
             {
-                PromptMsg msg = PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("DuoJiBanBenBuYiZhi"), PublicFunction.ListToString(mMainBoardData.errorVerIds)), PopRetrieveMotherboardDataOnClick);
-                msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
+                //PlatformMgr.Instance.NeedUpdateFlag = true;
+                PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("充电状态下不能升级"), PopPowerAdapterOnClick);
+            }
+        }
+        else if (ErrorCode.Robot_Adapter_Close_Protect == mSystemUpdateResult)
+        {//有升级，未开充电保护，断开
+            if (mCheckUpdateFlag)
+            {
+                PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("充电状态下不能升级"), PopPowerAdapterOnClick);
+                //msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
+            }
+        }*/
+        else if (ErrorCode.Robot_Power_Low == mSystemUpdateResult)
+        {//电量过低，不升级
+            if (mCheckUpdateFlag)
+            {
+                mFailReason = BlueConnectFailReason.UnableUpgrade;
+                PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("固件需要升级，但是电量过低"), PopPowerLowOnClick);
             }
         }
         else
-        {//
-            if (ErrorCode.Do_Not_Upgrade == mSystemUpdateResult)
-            {//一切正常
-                isSuccess = true;
-                if (!mCheckUpdateFlag)
-                {
-                    CheckSensorData();
-                }
-            }
-            else if (ErrorCode.Robot_Adapter_Open_Protect == mSystemUpdateResult)
-            {//有升级，且开启了充电保护，不断开
+        {//需要升级
+            if (!mCheckUpdateFlag || SingletonObject<UpdateManager>.GetInst().UpdateStart(TopologyPartType.MainBoard, mRobot))
+            {
                 if (mCheckUpdateFlag)
                 {
-                    isSuccess = true;
-                    PlatformMgr.Instance.NeedUpdateFlag = true;
-                    PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("充电状态下不能升级"), PopPowerLowOnClick);
-                }
-            }
-            else if (ErrorCode.Robot_Adapter_Close_Protect == mSystemUpdateResult)
-            {//有升级，未开充电保护，断开
-                if (mCheckUpdateFlag)
-                {
-                    PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("充电状态下不能升级"), PopPowerLowOnClick);
-                    //msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
-                }
-            }
-            else if (ErrorCode.Robot_Power_Low == mSystemUpdateResult)
-            {//电量过低，不升级
-                if (mCheckUpdateFlag)
-                {
-                    PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("检测到主板程序有更新且设备电量过低"));
+                    mFailReason = BlueConnectFailReason.UnableUpgrade;
+                    isUpdating = true;
+                    mUpdateTime = Time.time;
                 }
             }
             else
-            {//需要升级
-                if (!mCheckUpdateFlag || mRobot.RobotBlueUpdate())
-                {
-                    if (mCheckUpdateFlag)
-                    {
-                        isUpdating = true;
-                        mUpdateTime = Time.time;
-                    }
-                }
-                else
-                {
-                    if (!mCheckUpdateFlag)
-                    {
-                        CheckSensorData();
-                    }
-                    mSystemUpdateResult = ErrorCode.Do_Not_Upgrade;
-                    isSuccess = true;
-                }
-            }
-        }
-        if (mCheckUpdateFlag)
-        {
-            if (isUpdating)
             {
-                isUpdateSuccess = false;
-                if (ErrorCode.Result_OK == mServoUpdateResult)
-                {
-                    mTopologyUI.OpenServoUpdateAnim(mNeedUpdateServoList);
-                }
-                else if (ErrorCode.Result_OK == mSystemUpdateResult)
-                {
-                    mTopologyUI.OpenMainBoardUpdateAnim();
-                }
+                mSystemUpdateResult = ErrorCode.Result_OK;
             }
         }
     }
@@ -1209,19 +1516,91 @@ public class TopologyBaseMsg : BasePopWin
                     {
                         if (data.ids.Count > 1 || data.errorIds.Count > 0)
                         {
-                            PromptMsg msg = PromptMsg.ShowDoublePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
-                            msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
+                            PromptMsg msg = PromptMsg.ShowSinglePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
+                            //msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
+                            return;
                         }
                     }
                     else if (data.errorIds.Count > 0)
                     {
-                        PromptMsg.ShowSinglePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
+                        PromptMsg msg = PromptMsg.ShowSinglePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
                         return;
                     }
                 }
             }
+            CheckSensorUpdate();
         }
         
+    }
+
+    /// <summary>
+    /// 检查传感器升级
+    /// </summary>
+    void CheckSensorUpdate()
+    {
+        if (null != mMainBoardData && null != mSensorUpdateResult)
+        {
+            TopologyPartType[] partType = PublicFunction.Open_Topology_Part_Type;
+            for (int i = 0, imax = partType.Length; i < imax; ++i)
+            {
+                SensorData data = mMainBoardData.GetSensorData(partType[i]);
+                if (null != data && mSensorUpdateResult.ContainsKey(partType[i]) && mSensorNeedUpdateList.ContainsKey(partType[i]))
+                {
+                    if (ErrorCode.Result_OK == mSensorUpdateResult[partType[i]])
+                    {
+                    }
+                    else if (ErrorCode.Robot_Power_Low == mSensorUpdateResult[partType[i]])
+                    {//电量过低，不升级
+                        if (mCheckUpdateFlag)
+                        {
+                            PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("固件需要升级，但是电量过低"), PopPowerLowOnClick);
+                            return;
+                        }
+                    }
+                    else
+                    {//需要升级
+                        byte needUpdateId = (mSensorNeedUpdateList[partType[i]].Count == 1) ? mSensorNeedUpdateList[partType[i]][0] : (byte)0;
+                        if (null != mRobot && (!mCheckUpdateFlag || SingletonObject<UpdateManager>.GetInst().UpdateStart(partType[i], mRobot, needUpdateId)/* mRobot.ServoUpdate(needUpdateId)*/))
+                        {
+                            if (mCheckUpdateFlag)
+                            {
+                                isUpdating = true;
+                                mUpdateTime = Time.time;
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            mSensorUpdateResult[partType[i]] = ErrorCode.Result_OK;
+                            mSensorNeedUpdateList.Remove(partType[i]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    bool CheckDeviceUpdateFinished()
+    {
+        if (ErrorCode.Result_OK != mSystemUpdateResult)
+        {
+            return false;
+        }
+        if (ErrorCode.Result_OK != mServoUpdateResult)
+        {
+            return false;
+        }
+        if (null != mSensorUpdateResult)
+        {
+            foreach (var kvp in mSensorUpdateResult)
+            {
+                if (ErrorCode.Result_OK != kvp.Value)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     void PopSensorErrorOnClick(GameObject obj)
@@ -1229,7 +1608,7 @@ public class TopologyBaseMsg : BasePopWin
         if (null != mMainBoardData)
         {
             TopologyPartType[] partType = PublicFunction.Open_Topology_Part_Type;
-            if (partType[mCheckSensorTypeIndex] == TopologyPartType.Speaker && PromptMsg.RightBtnName.Equals(obj.name))
+            /*if (partType[mCheckSensorTypeIndex] == TopologyPartType.Speaker && PromptMsg.RightBtnName.Equals(obj.name))
             {
                 if (null != mRobot)
                 {
@@ -1243,7 +1622,7 @@ public class TopologyBaseMsg : BasePopWin
                     }
                 }
             }
-            else
+            else*/
             {
                 for (int i = mCheckSensorTypeIndex + 1, imax = partType.Length; i < imax; ++i)
                 {
@@ -1255,8 +1634,9 @@ public class TopologyBaseMsg : BasePopWin
                         {
                             if (data.ids.Count > 1 || data.errorIds.Count > 0)
                             {
-                                PromptMsg msg = PromptMsg.ShowDoublePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
-                                msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
+                                PromptMsg msg = PromptMsg.ShowSinglePrompt(GetSensorRepeatTips(partType[i], PublicFunction.ListToString<byte>(data.errorIds)), PopSensorErrorOnClick);
+                                //msg.SetRightBtnText(LauguageTool.GetIns().GetText("已修复"));
+                                return;
                             }
                         }
                         else if (data.errorIds.Count > 0)
@@ -1267,7 +1647,7 @@ public class TopologyBaseMsg : BasePopWin
                     }
                 }
             }
-            
+            CheckSensorUpdate();
         }
     }
 
@@ -1279,40 +1659,7 @@ public class TopologyBaseMsg : BasePopWin
         }
     }
 
-    /// <summary>
-    /// 比较实物舵机与软件记录的舵机数据是否匹配
-    /// </summary>
-    /// <returns></returns>
-    ErrorCode CompareServoData()
-    {
-        ErrorCode ret = ErrorCode.Result_OK;
-        do
-        {
-            if (null == mMainBoardData)
-            {
-                break;
-            }
-            List<byte> list = mRobot.GetAllDjData().GetIDList();
-            if (list.Count != mMainBoardData.ids.Count)
-            {
-                ret = ErrorCode.Result_Servo_Num_Inconsistent;
-                break;
-            }
-            for (int i = 0, icount = list.Count; i < icount; ++i)
-            {
-                if (list[i] != mMainBoardData.ids[i])
-                {
-                    ret = ErrorCode.Result_Servo_ID_Inconsistent;
-                    break;
-                }
-                if (ErrorCode.Result_Servo_ID_Inconsistent == ret)
-                {
-                    break;
-                }
-            }
-        } while (false);
-        return ret;
-    }
+    
     /// <summary>
     /// 设置确认界面按钮状态
     /// </summary>
@@ -1338,9 +1685,9 @@ public class TopologyBaseMsg : BasePopWin
     }
 
     
-    void UpdateFinishedAnim(bool state)
+    void UpdateFinishedAnim(bool state, bool instant = false)
     {
-        mTopologyUI.UpdateFinishedAnim(state);
+        mTopologyUI.UpdateFinishedAnim(state, instant);
     }
     /// <summary>
     /// 确认完毕，跳入下一个页面
@@ -1352,9 +1699,11 @@ public class TopologyBaseMsg : BasePopWin
             ServosConnection servosConnection = SingletonObject<ServosConManager>.GetInst().GetServosConnection(mRobot.ID);
             if (null == servosConnection)
             {//提示去设置拓扑图
-                PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("设置你的拓扑图"), PopSetTopologyOnClick);
+                mTopologyUI.SaveTopologyData();
+                OnClose();
+                /*PromptMsg msg = PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("设置你的拓扑图"), PopSetTopologyOnClick);
                 msg.SetLeftBtnText(LauguageTool.GetIns().GetText("模型无轮子"));
-                msg.SetRightBtnText(LauguageTool.GetIns().GetText("去设置"));
+                msg.SetRightBtnText(LauguageTool.GetIns().GetText("去设置"));*/
             }
             else
             {
@@ -1424,19 +1773,31 @@ public class TopologyBaseMsg : BasePopWin
                     if (null != mBtnRefreshTrans)
                     {
                         Vector3 pos = UIManager.GetWinPos(mBtnRefreshTrans, UIWidget.Pivot.BottomLeft, PublicFunction.Back_Btn_Pos.x, 100);
-                        SetTransPosition(mBtnRefreshTrans, pos, false);
+                        SetTransPosition(mBtnRefreshTrans, pos, true);
                     }
                     mTopologyUI.CloseEditTopology();
+#if UNITY_EDITOR
+                    if (null != mAddSensorGameObject)
+                    {
+                        GameObject.Destroy(mAddSensorGameObject);
+                        mAddSensorGameObject = null;
+                    }
+#endif
                 }
                 break;
             case TopologyMsgType.Topology_ShowInfo:
                 {
                     SetTransPosition(mConfirmTitleTrans, new Vector3(0, 300), true);
                     SetTransPosition(mShowInfoBottomTrans, new Vector3(0, -300), true);
-                    if (null != mBtnDeviceTrans)
+                    /*if (null != mBtnDeviceTrans)
                     {
                         Vector3 pos = UIManager.GetWinPos(mBtnDeviceTrans, UIWidget.Pivot.TopRight, PublicFunction.Back_Btn_Pos.x, PublicFunction.Back_Btn_Pos.y);
                         SetTransPosition(mBtnDeviceTrans, pos + new Vector3(300, 0), true);
+                    }*///20161209注释
+                    if (null != mBtnSetServoTrans)
+                    {
+                        Vector3 pos = UIManager.GetWinPos(mBtnSettingTrans, UIWidget.Pivot.TopRight, PublicFunction.Back_Btn_Pos.x, PublicFunction.Back_Btn_Pos.y);
+                        SetTransPosition(mBtnSetServoTrans, pos + new Vector3(300, 0), true);
                     }
                     if (null != mBtnSettingTrans)
                     {
@@ -1477,6 +1838,7 @@ public class TopologyBaseMsg : BasePopWin
                 {
                     if (null != mBtnRefreshTrans)
                     {
+                        mBtnRefreshTrans.gameObject.SetActive(true);
                         Vector3 pos = UIManager.GetWinPos(mBtnRefreshTrans, UIWidget.Pivot.BottomLeft, PublicFunction.Back_Btn_Pos.x, PublicFunction.Back_Btn_Pos.y);
                         SetTransPosition(mBtnRefreshTrans, pos, false);
                     }
@@ -1500,13 +1862,17 @@ public class TopologyBaseMsg : BasePopWin
                             SetTransPosition(mBtnHelpTrans, pos, false);
                         }
                     }
-                    mTopologyUI.OpenEditTopology();
                     mTopologyUI.SetOnClickDelegate(null);
                     mTopologyUI.SetChoicePartActiveCallBack(ChangeRefreshPosition);
+                    mTopologyUI.OpenEditTopology();
                     if (null != mRobot)
                     {
                         mRobot.RobotPowerDown();
                     }
+#if UNITY_EDITOR
+                    mAddSensorGameObject = new GameObject("addSensor");
+                    mAddSensorGameObject.AddComponent<TopologyAddSensor>();
+#endif
                 }
                 break;
             case TopologyMsgType.Topology_ShowInfo:
@@ -1534,7 +1900,15 @@ public class TopologyBaseMsg : BasePopWin
                         }*/
 
                     }
-                    mTopologyUI.SetOnClickDelegate(null);
+                    if (null != mRobot)
+                    {
+                        SetNormalTitle(mRobot.ShowName, false);
+                    }
+                    else
+                    {
+                        SetNormalTitle(string.Empty, false);
+                    }
+                    mTopologyUI.SetOnClickDelegate(ShowInfoOnClick);
                     mTopologyUI.SetChoicePartActiveCallBack(null);
                 }
                 bool showSetFlag = false;
@@ -1548,29 +1922,106 @@ public class TopologyBaseMsg : BasePopWin
 #endif
                 if (showSetFlag)
                 {
-                    if (null != mBtnDeviceTrans)
+                    /*if (null != mBtnDeviceTrans)
                     {
                         mBtnDeviceTrans.gameObject.SetActive(true);
                         Vector3 pos = UIManager.GetWinPos(mBtnDeviceTrans, UIWidget.Pivot.TopRight, PublicFunction.Back_Btn_Pos.x + 124, PublicFunction.Back_Btn_Pos.y);
                         SetTransPosition(mBtnDeviceTrans, pos, false);
-                    }
+                    }*///20161209注释
                     if (null != mBtnSettingTrans)
                     {
                         mBtnSettingTrans.gameObject.SetActive(true);
                         Vector3 pos = UIManager.GetWinPos(mBtnSettingTrans, UIWidget.Pivot.TopRight, PublicFunction.Back_Btn_Pos.x, PublicFunction.Back_Btn_Pos.y);
                         SetTransPosition(mBtnSettingTrans, pos, false);
                     }
+                    if (null != mBtnSetServoTrans)
+                    {
+                        mBtnSetServoTrans.gameObject.SetActive(true);
+                        Vector3 pos = UIManager.GetWinPos(mBtnSetServoTrans, UIWidget.Pivot.TopRight, PublicFunction.Back_Btn_Pos.x + 124, PublicFunction.Back_Btn_Pos.y);
+                        SetTransPosition(mBtnSetServoTrans, pos, false);
+                    }
                 }
                 else
                 {
-                    if (null != mBtnDeviceTrans)
+                    
+                    /*if (null != mBtnDeviceTrans)
                     {
                         mBtnDeviceTrans.gameObject.SetActive(true);
                         Vector3 pos = UIManager.GetWinPos(mBtnDeviceTrans, UIWidget.Pivot.TopRight, PublicFunction.Back_Btn_Pos.x, PublicFunction.Back_Btn_Pos.y);
                         SetTransPosition(mBtnDeviceTrans, pos, false);
-                    }
+                    }*///20161209注释
                 }
                 break;
+        }
+    }
+
+    void SetNormalTitle(string text, bool showSubTitle)
+    {
+        Transform title = mTrans.Find("top/title/normal");
+        if (null != title)
+        {
+            Transform maintitle = title.Find("maintitle");
+            if (null != maintitle)
+            {
+                GameHelper.SetLabelText(maintitle, text);
+                TweenPosition tweenPosition = maintitle.GetComponent<TweenPosition>();
+                if (null != tweenPosition)
+                {
+                    if (showSubTitle)
+                    {
+                        GameHelper.PlayTweenPosition(tweenPosition, new Vector3(0, 17));
+                    }
+                    else
+                    {
+                        GameHelper.PlayTweenPosition(tweenPosition, Vector3.zero);
+                    }
+                }
+                else
+                {
+                    if (showSubTitle)
+                    {
+                        maintitle.localPosition = new Vector3(0, 17);
+                    }
+                    else
+                    {
+                        maintitle.localPosition = Vector3.zero;
+                    }
+                }
+            }
+            Transform subtitle = title.Find("subtitle");
+            if (null != subtitle)
+            {
+                TweenAlpha tweenAlpha = subtitle.GetComponent<TweenAlpha>();
+                if (null != tweenAlpha)
+                {
+                    tweenAlpha.onFinished.Clear();
+                    if (showSubTitle)
+                    {
+                        subtitle.gameObject.SetActive(true);
+                        GameHelper.SetTransformAlpha(subtitle, 0);
+                        GameHelper.PlayTweenAlpha(tweenAlpha, 1);
+                    }
+                    else
+                    {
+                        if (subtitle.gameObject.activeSelf)
+                        {
+                            GameHelper.PlayTweenAlpha(tweenAlpha, 0);
+                            tweenAlpha.SetOnFinished(delegate () { subtitle.gameObject.SetActive(false); });
+                        }
+                    }
+                }
+                else
+                {
+                    if (showSubTitle)
+                    {
+                        subtitle.gameObject.SetActive(true);
+                    }
+                    else
+                    {
+                        subtitle.gameObject.SetActive(false);
+                    }
+                }
+            }
         }
     }
 
@@ -1688,6 +2139,50 @@ public class TopologyBaseMsg : BasePopWin
         }
     }
 
+    void UpdateBtnOnSleep()
+    {
+        SetOnSleep(mConfirmBtnTrans);
+        SetOnSleep(mReDetectBtnTrans);
+        if (null != mTrans)
+        {
+            SetOnSleep(mTrans.Find("top/btnBack"));
+        }
+    }
+
+    void UpdateBtnOnAwake()
+    {
+        SetOnAwake(mConfirmBtnTrans);
+        SetOnAwake(mReDetectBtnTrans);
+        if (null != mTrans)
+        {
+            SetOnAwake(mTrans.Find("top/btnBack"));
+        }
+    }
+
+    void SetOnAwake(Transform trans)
+    {
+        if (null != trans)
+        {
+            UIButton btn = trans.GetComponent<UIButton>();
+            if (null != btn)
+            {
+                btn.OnAwake();
+            }
+        }
+    }
+
+    void SetOnSleep(Transform trans)
+    {
+        if (null != trans)
+        {
+            UIButton btn = trans.GetComponent<UIButton>();
+            if (null != btn)
+            {
+                btn.OnSleep();
+            }
+        }
+    }
+
     void PopUpdateErrorOnClick(GameObject obj)
     {
         if (obj.name.Equals(PromptMsg.LeftBtnName))
@@ -1700,7 +2195,8 @@ public class TopologyBaseMsg : BasePopWin
             {
                 if (PlatformMgr.Instance.GetBluetoothState())
                 {
-                    mRobot.RetrieveMotherboardData();
+                    CheckUpdateData(true);
+                    SetCheckUpdateInfo();
                 }
                 else
                 {
@@ -1738,6 +2234,7 @@ public class TopologyBaseMsg : BasePopWin
         {
             if (null != mRobot)
             {
+                isUpdateSuccess = true;
                 if (PlatformMgr.Instance.GetBluetoothState())
                 {
                     mRobot.RetrieveMotherboardData();
@@ -1747,8 +2244,18 @@ public class TopologyBaseMsg : BasePopWin
                     PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("蓝牙断开"));
                 }
             }
-            isUpdateSuccess = true;
+            
             //SetBtnState();
+        }
+    }
+
+    void PopPowerAdapterOnClick(GameObject obj)
+    {
+        if (obj.name.Equals(PromptMsg.RightBtnName))
+        {
+            CheckUpdateResult();
+            CheckUpdateData(mCheckUpdateFlag);
+            SetCheckUpdateInfo();
         }
     }
 
@@ -1756,9 +2263,7 @@ public class TopologyBaseMsg : BasePopWin
     {
         if (obj.name.Equals(PromptMsg.RightBtnName))
         {
-            mServoUpdateResult = Robot.CheckServoUpdate(mMainBoardData);
-            mSystemUpdateResult = Robot.CheckSystemUpdate(mMainBoardData.mbVersion);
-            CheckUpdateData(mCheckUpdateFlag); ;
+            OnClose();
         }
     }
 
@@ -1766,33 +2271,78 @@ public class TopologyBaseMsg : BasePopWin
     {
         try
         {
-            bool updateSystem = (bool)arg[0];
-            UpdateFinishedAnim(true);
-            Timer.Add(1, 1, 1, delegate ()
+            TopologyPartType partType = (TopologyPartType)arg[0];
+            isSuccess = true;
+            
+            if (TopologyPartType.MainBoard == partType)
             {
-                isUpdating = false;
-                isSuccess = true;
-                if (updateSystem || mSystemUpdateResult == ErrorCode.Do_Not_Upgrade)
+                mSystemUpdateResult = ErrorCode.Result_OK;
+                Timer.Add(3, 1, 1, delegate () {
+                    //必须等待一段时间才发送命令，否则握手命令不会回包
+                    if (PlatformMgr.Instance.GetBluetoothState())
+                    {
+                        mRobot.RetrieveMotherboardData(false);
+                    }
+                    else
+                    {
+                        isUpdating = false;
+                        SetCheckUpdateInfo();
+                        UpdateFinishedAnim(true);
+                        PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("蓝牙断开"));
+                    }
+                });
+            }
+            else
+            {
+                if (partType == TopologyPartType.Servo)
                 {
-                    PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("设备升级成功"), PopUpdateSuccessOnClick);
+                    mServoUpdateResult = ErrorCode.Result_OK;
                 }
                 else
                 {
-                    mMainBoardData.djVersion = PlatformMgr.Instance.Robot_Servo_Version;
-                    mMainBoardData.errorVerIds.Clear();
-                    mServoUpdateResult = Robot.CheckServoUpdate(mMainBoardData);
-                    mSystemUpdateResult = Robot.CheckSystemUpdate(mMainBoardData.mbVersion);
-                    CheckUpdateData(mCheckUpdateFlag);
+                    mSensorUpdateResult[partType] = ErrorCode.Result_OK;
                 }
-            });
+                if (CheckDeviceUpdateFinished())
+                {
+                    isUpdateSuccess = true;
+                    if (null != mRobot)
+                    {
+                        Timer.Add(2, 1, 1, delegate ()
+                        {
+                            if (PlatformMgr.Instance.GetBluetoothState())
+                            {
+                                mRobot.RetrieveMotherboardData(false);
+                            }
+                            else
+                            {
+                                isUpdating = false;
+                                SetCheckUpdateInfo();
+                                UpdateFinishedAnim(true);
+                                PromptMsg.ShowSinglePrompt(LauguageTool.GetIns().GetText("蓝牙断开"));
+                            }
+                        });
+                    }
+                }
+                else
+                {
+                    UpdateFinishedAnim(true);
+                    Timer.Add(1f, 1, 1, delegate ()
+                    {
+                        CheckUpdateData(mCheckUpdateFlag);
+                    });
+                }
+                /*isUpdating = false;
+                SetCheckUpdateInfo();
+                UpdateFinishedAnim(true);
+                CheckUpdateResult();
+                CheckUpdateData(mCheckUpdateFlag);*/
+            }
+            
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1801,34 +2351,35 @@ public class TopologyBaseMsg : BasePopWin
         try
         {
             PlatformMgr.Instance.SetSendXTState(true);
-            bool updateSystem = (bool)arg[0];
+            TopologyPartType partType = (TopologyPartType)arg[0];
             UpdateFinishedAnim(false);
             if (null != mRobot)
             {
-                if (updateSystem)
+                switch (partType)
                 {
-                    mRobot.RobotBlueUpdateStop();
+                    case TopologyPartType.MainBoard:
+                        mRobot.RobotBlueUpdateStop();
+                        break;
+                    case TopologyPartType.Servo:
+                        mRobot.StopServoUpdate();
+                        break;
+                    default:
+                        mRobot.StopSensorUpdate(partType);
+                        break;
                 }
-                else
-                {
-                    mRobot.StopServoUpdate();
-                }
-                
             }
             Timer.Add(1, 1, 1, delegate ()
             {
                 isUpdating = false;
-                PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("升级异常！您是否需要重新升级？"), PopUpdateErrorOnClick);
+                SetCheckUpdateInfo();
+                PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("升级异常！您是否需要重新升级？"), PopUpdateErrorOnClick, PopUpdateFailHelpOnClick);
             });
 
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1836,30 +2387,40 @@ public class TopologyBaseMsg : BasePopWin
     {
         try
         {
-            bool updateSystem = (bool)arg[0];
-            if (updateSystem)
+            TopologyPartType partType = (TopologyPartType)arg[0];
+            switch (partType)
             {
-                isUpdating = false;
-            }
-            else
-            {
-                ServoUpdateFailAck msg = (ServoUpdateFailAck)arg[1];
-                UpdateFinishedAnim(false);
-                Timer.Add(1, 1, 1, delegate ()
-                {
+                case TopologyPartType.MainBoard:
+                    UpdateFinishedAnim(false);
                     isUpdating = false;
-                    PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("舵机升级失败,您是否需要重新升级？"), PublicFunction.ListToString(msg.servoList)), PopUpdateErrorOnClick);
-                });
-
+                    SetCheckUpdateInfo();
+                    break;
+                case TopologyPartType.Servo:
+                    List<byte> servoList = (List<byte>)arg[1];
+                    UpdateFinishedAnim(false);
+                    Timer.Add(1, 1, 1, delegate ()
+                    {
+                        isUpdating = false;
+                        SetCheckUpdateInfo();
+                        PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("舵机升级失败,您是否需要重新升级？"), PublicFunction.ListToString(servoList)), PopUpdateErrorOnClick, PopUpdateFailHelpOnClick);
+                    });
+                    break;
+                default:
+                    List<byte> sensorList = (List<byte>)arg[1];
+                    UpdateFinishedAnim(false);
+                    Timer.Add(1, 1, 1, delegate ()
+                    {
+                        isUpdating = false;
+                        SetCheckUpdateInfo();
+                        PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("固件升级失败,您是否需要重新升级？"), PublicFunction.ListToString(sensorList)), PopUpdateErrorOnClick, PopUpdateFailHelpOnClick);
+                    });
+                    break;
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1875,20 +2436,33 @@ public class TopologyBaseMsg : BasePopWin
             }
             else
             {
+                if (mFailReason != BlueConnectFailReason.unknow)
+                {
+                    mFailReason = BlueConnectFailReason.Disconnect;
+                }
+                else if (PlatformMgr.Instance.PowerData.power <= PublicFunction.Robot_Power_Empty)
+                {
+                    mFailReason = BlueConnectFailReason.LowPower;
+                }
                 if (isUpdating)
                 {
                     isUpdating = false;
-                    UpdateFinishedAnim(false);
+                    if (UpdateState.State_Success == SingletonObject<UpdateManager>.GetInst().GetUpdateState())
+                    {
+                        UpdateFinishedAnim(true);
+                    }
+                    else
+                    {
+                        UpdateFinishedAnim(false);
+                    }
+                    SetCheckUpdateInfo();
                 }
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
 
     }
@@ -1906,11 +2480,35 @@ public class TopologyBaseMsg : BasePopWin
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+        }
+    }
+
+    void UpdateCannelCallBack(EventArg arg)
+    {
+        try
+        {
+            UpdateFinishedAnim(false, true);
+            Timer.Add(0.2f, 1, 1, delegate ()
             {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+                isUpdating = false;
+                SetCheckUpdateInfo();
+                PromptMsg.ShowDoublePrompt(LauguageTool.GetIns().GetText("升级异常！您是否需要重新升级？"), PopUpdateErrorOnClick);
+            });
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+        }
+    }
+
+    void SaveTopologyCallBack(EventArg arg)
+    {
+        if (null != mTopologyUI)
+        {
+            mTopologyUI.SaveTopologyData();
         }
     }
     /// <summary>
@@ -1921,11 +2519,14 @@ public class TopologyBaseMsg : BasePopWin
     {
         try
         {
-            byte id = (byte)args[0];
-            SpeakerData speakerData = (SpeakerData)mRobot.GetReadSensorData(TopologyPartType.Speaker);
+            if (isSpeakerPromptFlag || isUpdating)
+            {
+                return;
+            }
+            SpeakerData speakerData = (SpeakerData)args[0];
             if (null != speakerData)
             {
-                SpeakerInfoData infoData = speakerData.GetSpeakerData(id);
+                SpeakerInfoData infoData = speakerData.GetSpeakerData();
                 if (null != infoData)
                 {
 #if UNITY_ANDROID
@@ -1936,16 +2537,14 @@ public class TopologyBaseMsg : BasePopWin
 #else
                     PromptMsg.ShowDoublePrompt(string.Format(LauguageTool.GetIns().GetText("检测到蓝牙音响需要连接"), infoData.speakerName), PopSpeakerOnClick);
 #endif
+                    isSpeakerPromptFlag = true;
                 }
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1964,6 +2563,47 @@ public class TopologyBaseMsg : BasePopWin
             SetMsgType(TopologyMsgType.Topology_Setting);
             SingletonObject<PopWinManager>.GetInst().ShowPopWin(typeof(TopologyGuideMsg));
         }
+    }
+
+    /// <summary>
+    /// 舵机重复
+    /// </summary>
+    /// <param name="obj"></param>
+    void PopServoRepeatHelpOnClick(GameObject obj)
+    {
+        PlatformMgr.Instance.PopWebErrorType(ConnectionErrorType.ConnectionServoIdRepeatType);
+    }
+    /// <summary>
+    /// 舵机ID不匹配
+    /// </summary>
+    /// <param name="obj"></param>
+    void PopServoIDDoNotMatchHelpOnClick(GameObject obj)
+    {
+        PlatformMgr.Instance.PopWebErrorType(ConnectionErrorType.ConnectionServoVSLineType);
+    }
+    /// <summary>
+    /// 舵机数量不匹配
+    /// </summary>
+    /// <param name="obj"></param>
+    void PopServoNumDoNotMatchHelpOnClick(GameObject obj)
+    {
+        PlatformMgr.Instance.PopWebErrorType(ConnectionErrorType.ConnectionServoNumVsLineType);
+    }
+    /// <summary>
+    /// 舵机连接异常
+    /// </summary>
+    /// <param name="obj"></param>
+    void PopServoConnectionExceptionHelpOnClick(GameObject obj)
+    {
+        PlatformMgr.Instance.PopWebErrorType(ConnectionErrorType.ConnectionServoLineErrorType);
+    }
+    /// <summary>
+    /// 固件升级失败
+    /// </summary>
+    /// <param name="obj"></param>
+    void PopUpdateFailHelpOnClick(GameObject obj)
+    {
+        PlatformMgr.Instance.PopWebErrorType(ConnectionErrorType.ConnectionFirmwareUpdateErrorType);
     }
 
 }

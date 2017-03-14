@@ -11,6 +11,7 @@ GameObject:
   - 114: {fileID: 11400000}
   - 65: {fileID: 6500000}
   - 114: {fileID: 11400008}
+  - 114: {fileID: 11475942}
   m_Layer: 4
   m_Name: servo_
   m_TagString: Untagged
@@ -160,7 +161,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100002}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -69.1600037, z: 0}
+  m_LocalPosition: {x: 0, y: 6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
@@ -172,7 +173,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100004}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 53, y: 53, z: 0}
+  m_LocalPosition: {x: 54, y: 54, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
@@ -184,7 +185,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100006}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
@@ -196,7 +197,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 141626}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 53, y: 53, z: 0}
+  m_LocalPosition: {x: 54, y: 54, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
@@ -208,7 +209,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 145194}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 53, y: 53, z: 0}
+  m_LocalPosition: {x: 54, y: 54, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
@@ -220,7 +221,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 145196}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 53, y: 53, z: 0}
+  m_LocalPosition: {x: 54, y: 54, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
@@ -232,7 +233,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 145198}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 53, y: 53, z: 0}
+  m_LocalPosition: {x: 54, y: 54, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400000}
@@ -247,7 +248,7 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 106, y: 106, z: 0}
+  m_Size: {x: 128, y: 128, z: 0}
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &11400000
 MonoBehaviour:
@@ -279,8 +280,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 106
-  mHeight: 106
+  mWidth: 128
+  mHeight: 128
   mDepth: 2
   autoResizeBoxCollider: 1
   hideIfOffScreen: 0
@@ -297,7 +298,7 @@ MonoBehaviour:
   bottomType: 1
   topType: 1
   mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
-  mSpriteName: servoIcon@3x
+  mSpriteName: servoTurnEnable
   mFillCenter: 1
 --- !u!114 &11400002
 MonoBehaviour:
@@ -329,9 +330,9 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: .984313726, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 32
-  mHeight: 32
-  mDepth: 3
+  mWidth: 36
+  mHeight: 36
+  mDepth: 0
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -346,8 +347,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
-  mSpriteName: servoModel_lS3x
+  mAtlas: {fileID: 11400000, guid: 80cffdb59d2e419459cc679c12a75efa, type: 2}
+  mSpriteName: Clean
   mFillCenter: 1
 --- !u!114 &11400004
 MonoBehaviour:
@@ -355,7 +356,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100004}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1b3dc54f924693f41b5cbecb267e647a, type: 3}
   m_Name: 
@@ -429,20 +430,20 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: .466666669, g: .482352942, b: .486274511, a: 1}
   mPivot: 4
-  mWidth: 100
-  mHeight: 28
-  mDepth: 0
+  mWidth: 36
+  mHeight: 36
+  mDepth: 6
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
-  aspectRatio: 3.57142854
+  aspectRatio: 1
   keepCrispWhenShrunk: 1
   mTrueTypeFont: {fileID: 0}
   mFont: {fileID: 11412660, guid: c773a71627f33824f870e94394463105, type: 2}
-  mText: 
-  mFontSize: 22
+  mText: 0
+  mFontSize: 24
   mFontStyle: 0
-  mAlignment: 0
+  mAlignment: 2
   mEncoding: 1
   mMaxLineCount: 0
   mEffectStyle: 0
@@ -473,8 +474,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tweenTarget: {fileID: 0}
-  hover: {x: 1.10000002, y: 1.10000002, z: 1.10000002}
-  pressed: {x: 1.04999995, y: 1.04999995, z: 1.04999995}
+  hover: {x: 1.04999995, y: 1.04999995, z: 1.04999995}
+  pressed: {x: 1.10000002, y: 1.10000002, z: 1.10000002}
   duration: .200000003
 --- !u!114 &11436696
 MonoBehaviour:
@@ -828,6 +829,20 @@ MonoBehaviour:
   mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
   mSpriteName: selected04@2x
   mFillCenter: 1
+--- !u!114 &11475942
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f02842fa4878db54f9587ff4de7d9f2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scrollView: {fileID: 0}
+  onlyOnTouch: 0
+  draggablePanel: {fileID: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

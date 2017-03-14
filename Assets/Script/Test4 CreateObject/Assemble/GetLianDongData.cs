@@ -37,7 +37,7 @@ public class GetLianDongData : SingletonBehaviour<GetLianDongData>
         //Debug.Log("opentype:" + opentype + ";name:" + RecordContactInfo.Instance.robotname);
         string xmlName = RecordContactInfo.Instance.robotname;//RobotMgr.NameNoType(RecordContactInfo.Instance.robotname);
         
-        string pathfile = Application.persistentDataPath + "/" + opentype + "/" + xmlName + "/ldgos/ldgos.xml";
+        string pathfile = ResourcesEx.persistentDataPath + "/" + opentype + "/" + xmlName + "/ldgos/ldgos.xml";
 
         return pathfile;
     }

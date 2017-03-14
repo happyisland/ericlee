@@ -69,7 +69,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: 1_1
     x: 271
-    y: 981
+    y: 605
     width: 100
     height: 375
     borderLeft: 0
@@ -121,7 +121,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: 2_2
     x: 271
-    y: 605
+    y: 981
     width: 100
     height: 375
     borderLeft: 0
@@ -237,16 +237,16 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Add
-    x: 1971
-    y: 1873
-    width: 74
-    height: 74
+    x: 1340
+    y: 1516
+    width: 38
+    height: 37
     borderLeft: 0
     borderRight: 0
     borderTop: 0
     borderBottom: 0
-    paddingLeft: 1
-    paddingRight: 1
+    paddingLeft: 0
+    paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
   - name: backButton
@@ -264,7 +264,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Battery_no
     x: 718
-    y: 616
+    y: 569
     width: 88
     height: 46
     borderLeft: 0
@@ -289,7 +289,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Body Copy 2@2x
-    x: 963
+    x: 1120
     y: 937
     width: 156
     height: 100
@@ -303,7 +303,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Body Copy 2@3x
     x: 0
-    y: 14
+    y: 165
     width: 234
     height: 150
     borderLeft: 0
@@ -315,7 +315,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Body Copy@2x
-    x: 1120
+    x: 963
     y: 937
     width: 156
     height: 100
@@ -329,7 +329,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Body Copy@3x
     x: 0
-    y: 165
+    y: 14
     width: 234
     height: 150
     borderLeft: 0
@@ -432,7 +432,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Bounced prompt shadow Copy@2x
-    x: 1932
+    x: 1835
     y: 941
     width: 96
     height: 96
@@ -458,7 +458,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Bounced prompt shadow@2x
-    x: 1835
+    x: 1932
     y: 941
     width: 96
     height: 96
@@ -484,7 +484,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: bounced shadow copy 2@2x
-    x: 1082
+    x: 1297
     y: 1554
     width: 214
     height: 100
@@ -497,7 +497,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: bounced shadow@2x
-    x: 1297
+    x: 1512
     y: 1554
     width: 214
     height: 100
@@ -523,7 +523,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: bounced@2x
-    x: 1512
+    x: 1082
     y: 1554
     width: 214
     height: 100
@@ -575,8 +575,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Button
-    x: 1431
-    y: 937
+    x: 812
+    y: 477
     width: 100
     height: 100
     borderLeft: 0
@@ -589,7 +589,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Button_b
     x: 812
-    y: 174
+    y: 376
     width: 100
     height: 100
     borderLeft: 0
@@ -601,8 +601,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Camera_icon
-    x: 1340
-    y: 1525
+    x: 1971
+    y: 1848
     width: 43
     height: 28
     borderLeft: 0
@@ -627,8 +627,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: charging
-    x: 1971
-    y: 1849
+    x: 1379
+    y: 1530
     width: 45
     height: 23
     borderLeft: 0
@@ -654,7 +654,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Clean
     x: 372
-    y: 1172
+    y: 987
     width: 184
     height: 184
     borderLeft: 0
@@ -692,8 +692,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: connect
-    x: 1942
-    y: 1554
+    x: 812
+    y: 275
     width: 100
     height: 100
     borderLeft: 0
@@ -705,7 +705,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Control Icon@2x
-    x: 963
+    x: 1150
     y: 1038
     width: 186
     height: 90
@@ -718,7 +718,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Control Icon@3x
-    x: 1150
+    x: 963
     y: 1038
     width: 186
     height: 90
@@ -732,7 +732,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: delete
     x: 812
-    y: 376
+    y: 174
     width: 100
     height: 100
     borderLeft: 0
@@ -783,8 +783,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: edit
-    x: 812
-    y: 275
+    x: 1431
+    y: 937
     width: 100
     height: 100
     borderLeft: 0
@@ -835,8 +835,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Icon Book Copy@1x
-    x: 1384
-    y: 1524
+    x: 2015
+    y: 1847
     width: 29
     height: 29
     borderLeft: 0
@@ -926,8 +926,8 @@ MonoBehaviour:
     paddingTop: 1
     paddingBottom: 0
   - name: icon_play
-    x: 812
-    y: 477
+    x: 1633
+    y: 937
     width: 100
     height: 100
     borderLeft: 0
@@ -940,7 +940,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: icon_star_sel
     x: 199
-    y: 322
+    y: 393
     width: 57
     height: 54
     borderLeft: 0
@@ -952,8 +952,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_stop
-    x: 812
-    y: 578
+    x: 1734
+    y: 937
     width: 100
     height: 100
     borderLeft: 0
@@ -978,8 +978,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: KnowBtn
-    x: 199
-    y: 444
+    x: 1971
+    y: 1877
     width: 70
     height: 70
     borderLeft: 26
@@ -1017,8 +1017,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Next Button@1x
-    x: 1532
-    y: 937
+    x: 1942
+    y: 1554
     width: 100
     height: 100
     borderLeft: 0
@@ -1056,7 +1056,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: P1
-    x: 1998
+    x: 2011
     y: 1957
     width: 12
     height: 11
@@ -1069,7 +1069,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: P2
-    x: 2011
+    x: 1998
     y: 1957
     width: 12
     height: 11
@@ -1109,7 +1109,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: power2
     x: 718
-    y: 663
+    y: 616
     width: 88
     height: 46
     borderLeft: 0
@@ -1121,8 +1121,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Prev Button@1x
-    x: 1734
-    y: 937
+    x: 812
+    y: 578
     width: 100
     height: 100
     borderLeft: 0
@@ -1199,7 +1199,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Progress Copy@3x
-    x: 271
+    x: 320
     y: 6
     width: 48
     height: 222
@@ -1225,7 +1225,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Progress shadow@3x
-    x: 320
+    x: 271
     y: 6
     width: 48
     height: 222
@@ -1251,8 +1251,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Rectangle 1
-    x: 2017
-    y: 1847
+    x: 1462
+    y: 1528
     width: 25
     height: 25
     borderLeft: 0
@@ -1264,7 +1264,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: Rectangle 2
-    x: 1451
+    x: 1512
     y: 1528
     width: 25
     height: 25
@@ -1290,8 +1290,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: "Right Panel\uFF0Dmiddle shadow@2x"
-    x: 557
-    y: 1035
+    x: 372
+    y: 231
     width: 160
     height: 160
     borderLeft: 70
@@ -1304,7 +1304,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: "Right Panel\uFF0Dmiddle@2x"
     x: 557
-    y: 1196
+    y: 391
     width: 160
     height: 160
     borderLeft: 70
@@ -1317,7 +1317,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: "Right Panel\uFF0Dtop shadow@2x"
     x: 372
-    y: 231
+    y: 70
     width: 160
     height: 160
     borderLeft: 70
@@ -1329,8 +1329,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: "Right Panel\uFF0Dtop shadow@2x_"
-    x: 372
-    y: 70
+    x: 557
+    y: 552
     width: 160
     height: 160
     borderLeft: 0
@@ -1343,7 +1343,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: "Right Panel\uFF0Dtop@2x"
     x: 557
-    y: 391
+    y: 1196
     width: 160
     height: 160
     borderLeft: 70
@@ -1356,7 +1356,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: "Right Panel\uFF0Dunder shadow@2x"
     x: 557
-    y: 552
+    y: 1035
     width: 160
     height: 160
     borderLeft: 70
@@ -1369,7 +1369,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: "Right Panel\uFF0Dunder shadow@2x_"
     x: 557
-    y: 713
+    y: 874
     width: 160
     height: 160
     borderLeft: 0
@@ -1382,7 +1382,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: "Right Panel\uFF0Dunder@2x"
     x: 557
-    y: 874
+    y: 713
     width: 160
     height: 160
     borderLeft: 70
@@ -1395,7 +1395,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: Shape
     x: 718
-    y: 569
+    y: 663
     width: 88
     height: 46
     borderLeft: 0
@@ -1433,7 +1433,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: slice@2x
-    x: 1414
+    x: 1425
     y: 1531
     width: 36
     height: 22
@@ -1446,7 +1446,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: sstop
-    x: 1633
+    x: 1532
     y: 937
     width: 100
     height: 100
@@ -1473,7 +1473,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: tour_bg
     x: 199
-    y: 377
+    y: 448
     width: 71
     height: 66
     borderLeft: 30
@@ -1512,7 +1512,7 @@ MonoBehaviour:
     paddingBottom: 0
   - name: White
     x: 372
-    y: 987
+    y: 1172
     width: 184
     height: 184
     borderLeft: 0

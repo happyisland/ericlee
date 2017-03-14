@@ -3,6 +3,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Xml;
+using Game.Resource;
 
 public class AnimReadData
 {
@@ -79,8 +80,15 @@ public class AnimReadData
         string nameTemp = RobotMgr.Instance.rbtnametempt;
         string nameNoType = RobotMgr.NameNoType(nameTemp);
         string pathfile = "";
-
-        pathfile = Application.persistentDataPath + "/" + opentype + "/" + nameNoType + "/anim/" + robotid + ".xml";
+        if (opentype == "default")
+        {
+            pathfile = ResourcesEx.GetCommonPathForNoTypeName(nameNoType);
+        }
+        else
+        {
+            pathfile = ResourcesEx.GetRobotPathForNoTypeName(nameNoType);
+        }
+        pathfile = pathfile + "/anim/" + robotid + ".xml";
 
         return pathfile;
         
@@ -91,7 +99,7 @@ public class AnimReadData
     {  
         XmlNodeList nodeList = x.GetElementsByTagName("Anim");
         Dictionary<string, string[]> names = new Dictionary<string, string[]>();
-        string[] xl=new string[15];
+        string[] xl=new string[16];
 
         int idTemp = 1;
         if (nodeList != null && nodeList.Count > 0)
@@ -103,7 +111,7 @@ public class AnimReadData
                     XmlElement xe = (XmlElement)xn;   //xe.InnerText:按钮的名称
                     if (xe.GetAttribute("id") !=null)
                     {
-                        xl = new string[15];
+                        xl = new string[16];
 
                         xl[0] = idTemp.ToString();    //labelname
 
@@ -196,6 +204,16 @@ public class AnimReadData
                         else
                         {
                             xl[14] = null;
+                        }
+
+                        if (xe.HasAttribute("sensorID"))
+                        {
+                            xl[15] = xe.GetAttribute("sensorID");
+                            Debug.Log("xl:" + xl[15] + ";" + xl[0]);
+                        }
+                        else
+                        {
+                            xl[15] = null;
                         }
 
                         names.Add(idTemp.ToString(), xl);

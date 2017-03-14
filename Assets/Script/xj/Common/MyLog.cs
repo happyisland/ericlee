@@ -3,6 +3,7 @@ using UnityEngine;
 using System.IO;
 using Game.Resource;
 using System.Text;
+using System.Threading;
 
 /// <summary>
 /// Author:xj
@@ -19,6 +20,7 @@ public class MyLog
     FileStream mFileStream;
     StreamWriter mStreamWriter;
     static MyLog mInst;
+
     #endregion
 
     #region 公有函数
@@ -33,6 +35,16 @@ public class MyLog
     public MyLog()
     {
         mInst = this;
+        string path = ResourcesEx.persistentDataPath + "/log.txt";
+        if (File.Exists(path))
+        {
+            mInst.mFileStream = new FileStream(path, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+        }
+        else
+        {
+            mInst.mFileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
+        }
+        mInst.mStreamWriter = new StreamWriter(mInst.mFileStream);
     }
 
     public static void CloseMyLog()
@@ -111,70 +123,11 @@ public class MyLog
         if (null == mInst)
         {
             mInst = new MyLog();
-            string path = ResourcesEx.persistentDataPath + "/log.txt";
-            string readText = string.Empty;
-            if (File.Exists(path))
-            {
-                using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                {
-                    StreamReader sr = new StreamReader(fs);
-                    readText = sr.ReadToEnd();
-                    sr.Dispose();
-                    sr.Close();
-                    fs.Dispose();
-                    fs.Close();
-                }
-            }
-            mInst.mFileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
-            mInst.mStreamWriter = new StreamWriter(mInst.mFileStream);
-            if (!string.IsNullOrEmpty(readText))
-            {
-                mInst.mStreamWriter.WriteLine(readText);
-            }
         }
-        //text += ReadText();
         mInst.mStreamWriter.WriteLine(text);
         mInst.mStreamWriter.Flush();
-        //WriteText(text);
     }
-    static string ReadText()
-    {
-        string text = string.Empty;
-        try
-        {
-            string path = ResourcesEx.persistentDataPath + "/log.txt";
-            if (File.Exists(path))
-            {
-                FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                StreamReader sr = new StreamReader(fs);
-                text = sr.ReadToEnd();
-                sr.Dispose();
-                sr.Close();
-            }
-            
-        }
-        catch (System.Exception ex)
-        {
-        	
-        }
-        return text;
-    }
-    static void WriteText(string text)
-    {
-        try
-        {
-            string path = ResourcesEx.persistentDataPath + "/log.txt";
-            FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
-            StreamWriter sr = new StreamWriter(fs);
-            sr.Flush();
-            sr.WriteLine(text);
-            sr.Close();
-            sr.Dispose();
-        }
-        catch (System.Exception ex)
-        {
 
-        }
-    }
+
     #endregion
 }

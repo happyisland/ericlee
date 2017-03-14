@@ -94,7 +94,9 @@ public class NormalStringData{
         translateData.Add("not21","舵盘复位1");
         translateData.Add("not22", "舵盘复位2");   
         translateData.Add("not23", "确定");
-        translateData.Add("not24", "搭建履带"); 
+        translateData.Add("not24", "搭建履带");
+        translateData.Add("not25", "取出物体");
+        translateData.Add("not26", "取出物体注意"); 
         return translateData;
     }
 }

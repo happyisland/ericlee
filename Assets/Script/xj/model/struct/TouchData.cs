@@ -1,4 +1,6 @@
-﻿using LitJson;
+﻿using Game;
+using Game.Platform;
+using LitJson;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,47 +19,60 @@ public class TouchData : ReadSensorDataBase
 
     #region 其他属性
     Dictionary<byte, byte> dataDict;
+    Dictionary<byte, byte> mTouchValueDict;
+    Dictionary<byte, long> mResetValueIndexDict;
     #endregion
 
     #region 公有函数
     public TouchData()
     {
         dataDict = new Dictionary<byte, byte>();
+        mTouchValueDict = new Dictionary<byte, byte>();
+        mResetValueIndexDict = new Dictionary<byte, long>();
     }
 
     public TouchData(List<byte> ids) : base(ids)
     {
         dataDict = new Dictionary<byte, byte>();
+        mTouchValueDict = new Dictionary<byte, byte>();
+        mResetValueIndexDict = new Dictionary<byte, long>();
         for (int i = 0, imax = ids.Count; i < imax; ++i)
         {
             dataDict[ids[i]] = 0;
+            mTouchValueDict[ids[i]] = 0;
         }
     }
 
     public override string GetReadResult()
     {
         List<Dictionary<string, object>> result = new List<Dictionary<string, object>>();
+        List<byte> ids = new List<byte>();
         if (readIds[0] == 0)
         {
-            foreach (KeyValuePair<byte, byte> kvp in dataDict)
+            foreach (KeyValuePair<byte, byte> kvp in mTouchValueDict)
             {
-                Dictionary<string, object> dict = new Dictionary<string, object>();
-                dict["id"] = kvp.Key;
-                dict["result"] = kvp.Value;
-                result.Add(dict);
+                ids.Add(kvp.Key);
             }
         }
         else
         {
-            for (int i = 0, imax = readIds.Count; i < imax; ++i)
+            ids = readIds;
+        }
+        for (int i = 0, imax = ids.Count; i < imax; ++i)
+        {
+            byte id = ids[i];
+            if (mTouchValueDict.ContainsKey(id))
             {
-                if (dataDict.ContainsKey(readIds[i]))
+                Dictionary<string, object> dict = new Dictionary<string, object>();
+                dict["id"] = id;
+                dict["result"] = mTouchValueDict[id];
+                mTouchValueDict[id] = 0;
+                if (mResetValueIndexDict.ContainsKey(id) && -1 != mResetValueIndexDict[id])
                 {
-                    Dictionary<string, object> dict = new Dictionary<string, object>();
-                    dict["id"] = readIds[i];
-                    dict["result"] = dataDict[readIds[i]];
-                    result.Add(dict);
+                    Timer.Cancel(mResetValueIndexDict[id]);
+                    mResetValueIndexDict[id] = -1;
                 }
+                result.Add(dict);
             }
         }
         return Json.Serialize(result);
@@ -108,9 +123,20 @@ public class TouchData : ReadSensorDataBase
                 {
                     ReadTouchDataMsgAck msg = new ReadTouchDataMsgAck();
                     msg.Read(br);
-                    if (dataDict.ContainsKey(backIds[i]))
+                    byte id = backIds[i];
+                    if (dataDict.ContainsKey(id))
                     {
-                        dataDict[backIds[i]] = msg.arg;
+                        dataDict[id] = msg.arg;
+                    }
+                    if (msg.arg > 0 && mTouchValueDict.ContainsKey(id))
+                    {
+                        mTouchValueDict[id] = msg.arg;
+                        if (mResetValueIndexDict.ContainsKey(id) && -1 != mResetValueIndexDict[id])
+                        {
+                            Timer.Cancel(mResetValueIndexDict[id]);
+                            mResetValueIndexDict[id] = -1;
+                        }
+                        mResetValueIndexDict[id] = Timer.Add(3, 1, 1, ResetTouchValue, id);
                     }
                 }
             }
@@ -118,24 +144,43 @@ public class TouchData : ReadSensorDataBase
             {
                 for (int i = 0, imax = errIds.Count; i < imax; ++i)
                 {
-                    if (dataDict.ContainsKey(errIds[i]))
+                    byte id = errIds[i];
+                    if (dataDict.ContainsKey(id))
                     {
-                        dataDict[errIds[i]] = 0;
+                        dataDict[id] = 0;
+                    }
+                    if (mTouchValueDict.ContainsKey(id))
+                    {
+                        mTouchValueDict[id] = 0;
+                        if (mResetValueIndexDict.ContainsKey(id) && -1 != mResetValueIndexDict[id])
+                        {
+                            Timer.Cancel(mResetValueIndexDict[id]);
+                            mResetValueIndexDict[id] = -1;
+                        }
                     }
                 }
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     #endregion
 
     #region 其他函数
+    void ResetTouchValue(params object[] arg)
+    {
+        byte id = (byte)arg[0];
+        if (mTouchValueDict.ContainsKey(id))
+        {
+            mTouchValueDict[id] = 0;
+        }
+        if (mResetValueIndexDict.ContainsKey(id))
+        {
+            mResetValueIndexDict[id] = -1;
+        }
+    }
     #endregion
 }

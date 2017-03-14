@@ -1,4 +1,5 @@
 ﻿using Game;
+using Game.Platform;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -141,7 +142,7 @@ public class TopologyGuideMsg : BasePopWin
                     {
                         uiPanel.depth = mDepth + 1;
                         Vector4 rect = uiPanel.finalClipRegion;
-                        rect.z = PublicFunction.GetWidth() - PublicFunction.Back_Btn_Pos.x * 2 - 240 - uiPanel.clipSoftness.x * 2;
+                        rect.z = PublicFunction.GetWidth() - PublicFunction.Back_Btn_Pos.x * 2 - 120 - uiPanel.clipSoftness.x * 2;
                         mShowSize = (int)(rect.z / (mServoSize.x ));
                         rect.x = rect.z / 2 + uiPanel.clipSoftness.x;
                         uiPanel.baseClipRegion = rect;
@@ -153,11 +154,8 @@ public class TopologyGuideMsg : BasePopWin
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -342,16 +340,16 @@ public class TopologyGuideMsg : BasePopWin
 
     void SetServoModelIcon(GameObject servo, ServoModel modelType)
     {
-        UISprite icon = GameHelper.FindChildComponent<UISprite>(servo.transform, "icon");
+        UISprite icon = GameHelper.FindChildComponent<UISprite>(servo.transform, "bg");
         if (null != icon)
         {
             if (modelType == ServoModel.Servo_Model_Angle)
             {
-                icon.spriteName = "angle_icon";
+                icon.spriteName = "servo_angle";
             }
             else
             {
-                icon.spriteName = "wheel_icon";
+                icon.spriteName = "servo_turn";
             }
         }
     }

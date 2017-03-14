@@ -45,6 +45,8 @@ public class PublicFunction
     public const char Separator_Or = '|';
     public const byte Show_Error_Time_Space = 10;
 
+    public static Color32 GreyColor = new Color32(119, 123, 124, 255);
+
 
     public static Vector2 Back_Btn_Pos = new Vector2(34, 34);
     /// <summary>
@@ -58,7 +60,7 @@ public class PublicFunction
     /// <summary>
     /// 默认动作的名字
     /// </summary>
-    public const string Default_Actions_Name = "Default";
+    public const string Default_Actions_Name = "待命";
     /// <summary>
     /// 复位动作的中文名字
     /// </summary>
@@ -84,17 +86,17 @@ public class PublicFunction
     /// <summary>
     /// 需要读取数据的传感器
     /// </summary>
-    public static TopologyPartType[] Read_All_Sensor_Type = new TopologyPartType[] { TopologyPartType.Infrared};
-/// <summary>
-/// 获取uiroot的manualHeight用于适配
-/// </summary>
-public static int RootManualHeight
+
+    public static TopologyPartType[] Read_All_Sensor_Type = new TopologyPartType[] { TopologyPartType.Infrared, TopologyPartType.Touch/*, TopologyPartType.Gyro*/};
+    /// <summary>
+    /// 获取uiroot的manualHeight用于适配
+    /// </summary>
+    public static int RootManualHeight
     {
         get 
         {
             if (rootManualHeight == 0)
             {
-#if UNITY_EDITOR
                 float width = Default_Screen_Height * Screen.width / Screen.height;
                 if (width >= Default_Screen_Width)
                 {
@@ -104,35 +106,6 @@ public static int RootManualHeight
                 {
                     rootManualHeight = (int)(Default_Screen_Width * Screen.height / Screen.width);
                 }
-#elif UNITY_ANDROID
-                if (PlayerPrefs.HasKey("rootManualHeight"))
-                {
-                    rootManualHeight = PlayerPrefs.GetInt("rootManualHeight");
-                }
-                else
-                {
-                    float width = Default_Screen_Height * Screen.width / Screen.height;
-                    if (width >= Default_Screen_Width)
-                    {
-                        rootManualHeight = (int)(Default_Screen_Height);
-                    }
-                    else
-                    {
-                        rootManualHeight = (int)(Default_Screen_Width * Screen.height / Screen.width);
-                    }
-                    PlayerPrefs.SetInt("rootManualHeight", rootManualHeight);
-                }
-#else
-                float width = Default_Screen_Height * Screen.width / Screen.height;
-                if (width >= Default_Screen_Width)
-                {
-                    rootManualHeight = (int)(Default_Screen_Height);
-                }
-                else
-                {
-                    rootManualHeight = (int)(Default_Screen_Width * Screen.height / Screen.width);
-                }
-#endif
             }
             return rootManualHeight;
         }
@@ -225,7 +198,7 @@ public static int RootManualHeight
     /// <returns>true：有汉字</returns>
     public static bool CheckStrChinessReg(string text)
     {
-        if (Regex.IsMatch(text, @"[\u4e00-\u9fbb]+$"))
+        if (Regex.IsMatch(text, @"[\u4e00-\u9fbb]+"))
         {
             return true;
         }
@@ -427,7 +400,34 @@ public static int RootManualHeight
                 Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
-        
+        return str;
+    }
+
+    public static string ListToString<T>(List<T> list, char sep)
+    {
+        string str = string.Empty;
+        try
+        {
+            if (null != list)
+            {
+                for (int i = 0, imax = list.Count; i < imax; ++i)
+                {
+                    if (!string.IsNullOrEmpty(str))
+                    {
+                        str += sep;
+                    }
+                    str += list[i];
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+        }
         return str;
     }
 
@@ -691,8 +691,8 @@ public static int RootManualHeight
     {
         trans.localScale = Vector3.one;
         Bounds bs = NGUIMath.CalculateRelativeWidgetBounds(parentTrans, trans);
-        float width = PublicFunction.GetWidth() * scalingFactor;
-        float height = PublicFunction.GetHeight() * scalingFactor;
+        float width = rect.z * scalingFactor;
+        float height = rect.w * scalingFactor;
         float x = bs.size.x / width;
         float y = bs.size.y / height;
         if (x > 1.0001f || y > 1.0001f)
@@ -709,7 +709,22 @@ public static int RootManualHeight
         else
         {
             Vector3 pos = trans.localPosition + PublicFunction.CalculateCenterOffset(bs1.min, bs1.max, rect);
-            TweenPosition.Begin(trans.gameObject, 0.4f, pos);
+            TweenPosition.Begin(trans.gameObject, 0.3f, pos);
+        }
+    }
+
+    public static void RemoveToCenter(Transform trans, Transform parentTrans, Vector4 rect, bool instant)
+    {
+        trans.localScale = Vector3.one;
+        Bounds bs1 = NGUIMath.CalculateRelativeWidgetBounds(parentTrans, trans);
+        if (instant)
+        {
+            trans.localPosition += PublicFunction.CalculateCenterOffset(bs1.min, bs1.max, rect);
+        }
+        else
+        {
+            Vector3 pos = trans.localPosition + PublicFunction.CalculateCenterOffset(bs1.min, bs1.max, rect);
+            TweenPosition.Begin(trans.gameObject, 0.3f, pos);
         }
     }
 
@@ -942,6 +957,25 @@ public static int RootManualHeight
     }
 #endif
 
+    /// <summary>
+    /// 拼接路径
+    /// </summary>
+    /// <param name="args"></param>
+    /// <returns></returns>
+    public static string CombinePath(params string [] args)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0, imax = args.Length; i < imax; ++i)
+        {
+            if (sb.Length > 0)
+            {
+                sb.Append('/');
+            }
+            sb.Append(args[i]);
+        }
+        return sb.ToString();
+    }
+
 #endregion
     #region 私有函数
     #endregion
@@ -951,4 +985,22 @@ public struct Int2
 {
     public int num1;
     public int num2;
+}
+/// <summary>
+/// 蓝牙连接失败原因
+/// </summary>
+public enum BlueConnectFailReason : byte
+{
+    BluetoothFail = 0,   //连接蓝牙失败；
+    ReadDeviceFail,  //读取设备类型失败；
+    ReadControlboxInfoFail,  //读取主板信息失败；
+    ModelInfoIncorrect,  //模型数据不匹配；
+    ModelInfoIncorrect_differentID,  //ID不一致
+    ModelInfoIncorrect_servoAmount,  //舵机数量不一致
+    ModelInfoIncorrect_repeatedID,   //ID重复
+    UnableUpgrade,   //因各种原因不能升级而导致失败；
+    Cancel,  //用户取消连接；
+    Disconnect,  //蓝牙异常断开导致的失败(主板不回消息)
+    LowPower,    //低电量
+    unknow  //未知异常
 }

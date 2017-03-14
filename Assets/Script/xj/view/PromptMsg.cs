@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Game;
+using Game.Platform;
 
 /// <summary>
 /// Author:xj
@@ -12,7 +13,6 @@ using Game;
 public class PromptMsg : BasePopWin
 {
     #region 公有属性
-    public ButtonDelegate.OnClick onBtnClick;
     public const string LeftBtnName = "leftBtn";
     public const string RightBtnName = "rightBtn";
 
@@ -34,10 +34,13 @@ public class PromptMsg : BasePopWin
     UILabel mRightBtnLabel;
     MsgBtnNum mMsgBtnNum;
     float mAddHeight;
+
+    ButtonDelegate.OnClick onBtnClick;
+    ButtonDelegate.OnClick onHelpBtnClick;
     #endregion
 
     #region 公有函数
-    public PromptMsg(MsgBtnNum btnNum, string content, ButtonDelegate.OnClick onClick)
+    public PromptMsg(MsgBtnNum btnNum, string content, ButtonDelegate.OnClick onClick, ButtonDelegate.OnClick helpClick)
     {
         mUIResPath = "Prefab/UI/PromptMsg";
         if (null == sShowMsg)
@@ -50,6 +53,7 @@ public class PromptMsg : BasePopWin
         mRightBtnText = LauguageTool.GetIns().GetText("确定");
         mContentText = content;
         onBtnClick = onClick;
+        onHelpBtnClick = helpClick;
         mMsgBtnNum = btnNum;
     }
     /// <summary>
@@ -61,12 +65,15 @@ public class PromptMsg : BasePopWin
         if (IsExist(text))
         {
             sShowMsg[text].onBtnClick = null;
+            sShowMsg[text].onHelpBtnClick = null;
+            sShowMsg[text].SetHelpBtnActive(false);
             return sShowMsg[text];
         }
-        object[] args = new object[3];
+        object[] args = new object[4];
         args[0] = MsgBtnNum.MsgBtnNum_Single;
         args[1] = text;
         args[2] = null;
+        args[3] = null;
         return PopWinManager.GetInst().ShowPopWin(typeof(PromptMsg), args) as PromptMsg;
     }
     /// <summary>
@@ -74,17 +81,27 @@ public class PromptMsg : BasePopWin
     /// </summary>
     /// <param name="text"></param>
     /// <param name="btnOnClick"></param>
-    public static PromptMsg ShowSinglePrompt(string text, ButtonDelegate.OnClick btnOnClick)
+    public static PromptMsg ShowSinglePrompt(string text, ButtonDelegate.OnClick btnOnClick, ButtonDelegate.OnClick helpClick = null)
     {
         if (IsExist(text))
         {
             sShowMsg[text].onBtnClick = btnOnClick;
+            sShowMsg[text].onHelpBtnClick = helpClick;
+            if (null != helpClick)
+            {
+                sShowMsg[text].SetHelpBtnActive(true);
+            }
+            else
+            {
+                sShowMsg[text].SetHelpBtnActive(false);
+            }
             return sShowMsg[text];
         }
-        object[] args = new object[3];
+        object[] args = new object[4];
         args[0] = MsgBtnNum.MsgBtnNum_Single;
         args[1] = text;
         args[2] = btnOnClick;
+        args[3] = helpClick;
         return PopWinManager.GetInst().ShowPopWin(typeof(PromptMsg), args) as PromptMsg;
     }
     /// <summary>
@@ -92,17 +109,27 @@ public class PromptMsg : BasePopWin
     /// </summary>
     /// <param name="text"></param>
     /// <param name="btnOnClick"></param>
-    public static PromptMsg ShowDoublePrompt(string text, ButtonDelegate.OnClick btnOnClick)
+    public static PromptMsg ShowDoublePrompt(string text, ButtonDelegate.OnClick btnOnClick, ButtonDelegate.OnClick helpClick = null)
     {
         if (IsExist(text))
         {
             sShowMsg[text].onBtnClick = btnOnClick;
+            sShowMsg[text].onHelpBtnClick = helpClick;
+            if (null != helpClick)
+            {
+                sShowMsg[text].SetHelpBtnActive(true);
+            }
+            else
+            {
+                sShowMsg[text].SetHelpBtnActive(false);
+            }
             return sShowMsg[text];
         }
-        object[] args = new object[3];
+        object[] args = new object[4];
         args[0] = MsgBtnNum.MsgBtnNum_Double;
         args[1] = text;
         args[2] = btnOnClick;
+        args[3] = helpClick;
         return PopWinManager.GetInst().ShowPopWin(typeof(PromptMsg), args) as PromptMsg;
     }
 
@@ -125,6 +152,15 @@ public class PromptMsg : BasePopWin
         if (null != mRightBtnLabel)
         {
             mRightBtnLabel.text = text;
+        }
+    }
+
+    public void SetContentsPivot(UIWidget.Pivot pivot)
+    {
+        UILabel lb = GameHelper.FindChildComponent<UILabel>(mTrans, "contents/text/Label");
+        if (null != lb)
+        {
+            lb.pivot = pivot;
         }
     }
 
@@ -173,12 +209,21 @@ public class PromptMsg : BasePopWin
             {
                 SetBtn(btn);
             }
+            if (null != onHelpBtnClick)
+            {
+                SetHelpBtnActive(true);
+            }
+            else
+            {
+                SetHelpBtnActive(false);
+            }
         }
     }
 
 
     protected override void OnButtonClick(GameObject obj)
     {
+        base.OnButtonClick(obj);
         string name = obj.name;
         if (name.Equals(LeftBtnName) || name.Equals(RightBtnName))
         {
@@ -188,7 +233,14 @@ public class PromptMsg : BasePopWin
             }
             OnClose();
         }
-        
+        else if (name.Equals("btnHelp"))
+        {
+            if (null != onHelpBtnClick)
+            {
+                NetWaitMsg.ShowWait(1);
+                onHelpBtnClick(obj);
+            }
+        }
     }
 
     protected override void Close()
@@ -205,8 +257,24 @@ public class PromptMsg : BasePopWin
     }
     #region 私有函数
 
+    void SetHelpBtnActive(bool activeFlag)
+    {
+        if (null != mTrans)
+        {
+            Transform btnHelp = mTrans.Find("btnHelp");
+            if (null != btnHelp)
+            {
+                btnHelp.gameObject.SetActive(activeFlag);
+            }
+        }
+    }
+
     static bool IsExist(string text)
     {
+        if (string.IsNullOrEmpty(text))
+        {
+            return false;
+        }
         if (null != sShowMsg && sShowMsg.ContainsKey(text))
         {
             return true;
@@ -263,6 +331,7 @@ public class PromptMsg : BasePopWin
                 {
                     //lbtext.color = Color.white;
                     lbtext.text = mContentText.Replace("\\n", "\n");
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "PromptMsg Show Text :" + lbtext.text);
                 }
             }
         }

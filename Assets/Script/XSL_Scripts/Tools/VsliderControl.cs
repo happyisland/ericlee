@@ -126,57 +126,99 @@ public class VsliderControl : MonoBehaviour
         {
             return;
         }
-        
-        if (isPressed)
-        {
-            Lighting(1f);
-            CalculateJoystickAxis();
-            if (On_JoystickMoveStart != null)
-            {
-                On_JoystickMoveStart(this);
-            }
-            isHolding = true;
 
-            // check is useful 
-            if (sliderControl == null)
+        int curVsliderServo = 0;
+        if (ControllerManager.GetInst().widgetManager.vSliderManager.GetVSliderByID(gameObject.name) != null)
+            curVsliderServo = (ControllerManager.GetInst().widgetManager.vSliderManager.GetVSliderByID(gameObject.name)).sliderData.servoID;
+
+        if (curVsliderServo != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)curVsliderServo).modelType == ServoModel.Servo_Model_Angle)
+        {
+            Debug.Log("舵机模式错误！！");
+            if (isPressed)
             {
-                sliderControl = ControllerManager.GetInst().widgetManager.vSliderManager.GetVSliderByID(gameObject.name);
+                Lighting(1f);
+                CalculateJoystickAxis();
+                if (On_JoystickMoveStart != null)
+                {
+                    On_JoystickMoveStart(this);
+                }
+                isHolding = true;
+
+                // check is useful 
                 if (sliderControl == null)
                 {
-                    return;
+                    sliderControl = ControllerManager.GetInst().widgetManager.vSliderManager.GetVSliderByID(gameObject.name);
+                    if (sliderControl == null)
+                    {
+                        return;
+                    }
                 }
-            }
-            if (sliderControl.isRightSetting && PlatformMgr.Instance.GetBluetoothState()) // 蓝牙是否连接， 是否配置正确
-            {
-                sliderControl.isReady = true;
             }
             else
             {
-                //HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
-                GetComponent<WheelCheck_slider>().enabled = false;
-                sliderControl.isReady = false;
-                return;
-            }
-            if (sliderControl.isReady)
-            {
-                GetComponent<WheelCheck_slider>().enabled = true;
-                sliderControl.TurnWheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, (int)(moveheight / 2.0f));
+                CalculateJoystickAxis();
+                if (On_JoystickMoveEnd != null)
+                {
+                    On_JoystickMoveEnd(this);
+                }
+                thumb.transform.localPosition = Vector3.zero;
+                FadeOut(1f, minAlpha);
+                isHolding = false;
             }
         }
         else
         {
-            if (sliderControl != null && sliderControl.isReady)
+            if (isPressed)
             {
-                sliderControl.TurnWheelSpeed(0, 0, (int)(moveheight / 2.0f));
+                Lighting(1f);
+                CalculateJoystickAxis();
+                if (On_JoystickMoveStart != null)
+                {
+                    On_JoystickMoveStart(this);
+                }
+                isHolding = true;
+
+                // check is useful 
+                if (sliderControl == null)
+                {
+                    sliderControl = ControllerManager.GetInst().widgetManager.vSliderManager.GetVSliderByID(gameObject.name);
+                    if (sliderControl == null)
+                    {
+                        return;
+                    }
+                }
+                if (sliderControl.isRightSetting && PlatformMgr.Instance.GetBluetoothState()) // 蓝牙是否连接， 是否配置正确
+                {
+                    sliderControl.isReady = true;
+                }
+                else
+                {
+                    //HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
+                    GetComponent<WheelCheck_slider>().enabled = false;
+                    sliderControl.isReady = false;
+                    return;
+                }
+                if (sliderControl.isReady)
+                {
+                    GetComponent<WheelCheck_slider>().enabled = true;
+                    sliderControl.TurnWheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, (int)(moveheight / 2.0f));
+                }
             }
-            CalculateJoystickAxis();
-            if (On_JoystickMoveEnd != null)
+            else
             {
-                On_JoystickMoveEnd(this);
+                if (sliderControl != null && sliderControl.isReady)
+                {
+                    sliderControl.TurnWheelSpeed(0, 0, (int)(moveheight / 2.0f));
+                }
+                CalculateJoystickAxis();
+                if (On_JoystickMoveEnd != null)
+                {
+                    On_JoystickMoveEnd(this);
+                }
+                thumb.transform.localPosition = Vector3.zero;
+                FadeOut(1f, minAlpha);
+                isHolding = false;
             }
-            thumb.transform.localPosition = Vector3.zero;
-            FadeOut(1f, minAlpha);
-            isHolding = false;
         }
     }
 
@@ -244,7 +286,7 @@ public class VsliderControl : MonoBehaviour
     void CalculateJoystickAxis()
     {
         Vector3 offset = ScreenPos_to_NGUIPos(UICamera.currentTouch.pos);
-        offset -= transform.localPosition;
+        offset -= (transform.localPosition-new Vector3(0, 25, 0));
         if (isLimitInCircle)
         {
             if (offset.magnitude > moveheight * 0.5f)

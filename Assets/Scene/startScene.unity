@@ -212,7 +212,7 @@ MonoBehaviour:
   useThirdAppFlag: 0
   simulationUseThirdAppFlag: 0
   debugLogFlag: 1
-  copyDefaultFlag: 1
+  copyDefaultFlag: 0
 --- !u!4 &534047277
 Transform:
   m_ObjectHideFlags: 0
@@ -237,14 +237,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4652bf50247a0cd448256b3d878dc156, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Robot_System_Version: 
-  Robot_System_FilePath: 
-  Robot_Servo_Version: 
-  Robot_Servo_FilePath: 
-  NeedUpdateFlag: 0
   IsWaitUpdateFlag: 0
   Pic_Path: 
-  lastDicConnectedTime: 0
 --- !u!1 &913511456
 GameObject:
   m_ObjectHideFlags: 0

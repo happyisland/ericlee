@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System;
 using System.IO;
+using Game.Resource;
 
 public class RecordInfo
 {
@@ -66,7 +67,7 @@ public class RecordInfo
     {
         string pathfile = "";
 
-        pathfile = Application.persistentDataPath + "/rawData/" + xmlName;
+        pathfile = ResourcesEx.persistentDataPath + "/rawData/" + xmlName;
         //Debug.Log(Application.persistentDataPath);
         if (!Directory.Exists(pathfile))
         {

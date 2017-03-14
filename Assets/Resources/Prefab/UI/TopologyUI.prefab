@@ -82,7 +82,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &112822
 GameObject:
   m_ObjectHideFlags: 1
@@ -889,7 +889,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &119658
 GameObject:
   m_ObjectHideFlags: 1
@@ -905,7 +905,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!1 &119660
 GameObject:
   m_ObjectHideFlags: 1
@@ -2530,7 +2530,7 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 119666}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 1, w: -4.37113883e-08}
   m_LocalPosition: {x: -80, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -3517,7 +3517,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 119572}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6ebef6c9f73e3a4b92cce1227308746, type: 3}
   m_Name: 
@@ -3538,6 +3538,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: .5, g: .5, b: .5, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -3656,7 +3658,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: open
   mFillCenter: 1
 --- !u!114 &11412824
@@ -3690,6 +3692,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -3746,7 +3750,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11416636, guid: a1268bd10a9da1e42becd0f176de111b, type: 2}
+  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
   mSpriteName: bg_rf_bg
   mFillCenter: 1
 --- !u!114 &11412830
@@ -3796,7 +3800,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11416636, guid: a1268bd10a9da1e42becd0f176de111b, type: 2}
+  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
   mSpriteName: bg_rf
   mFillCenter: 1
 --- !u!114 &11412832
@@ -3846,7 +3850,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: add
   mFillCenter: 1
 --- !u!114 &11412834
@@ -4049,7 +4053,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 119578}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d81807633ea807d4c8e3fff7e10c6000, type: 3}
   m_Name: 
@@ -4174,8 +4178,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 124
-  mHeight: 124
+  mWidth: 128
+  mHeight: 128
   mDepth: 1
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
@@ -4191,8 +4195,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: servo
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: servo_angle
   mFillCenter: 1
 --- !u!114 &11419560
 MonoBehaviour:
@@ -4288,7 +4292,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 50
   mHeight: 50
-  mDepth: 2
+  mDepth: 6
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -4303,8 +4307,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: Unsuccessful
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: unsuccessful
   mFillCenter: 1
 --- !u!114 &11419564
 MonoBehaviour:
@@ -4376,7 +4380,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 19
   mHeight: 19
-  mDepth: 3
+  mDepth: 8
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -4391,7 +4395,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: no
   mFillCenter: 1
 --- !u!114 &11419568
@@ -4526,6 +4530,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -4597,7 +4603,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: dian_liang
   mFillCenter: 1
 --- !u!114 &11419578
@@ -4616,6 +4622,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -4687,7 +4695,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: dian_liang
   mFillCenter: 1
 --- !u!114 &11419584
@@ -4748,8 +4756,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 182
-  mHeight: 182
+  mWidth: 176
+  mHeight: 176
   mDepth: 2
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
@@ -4765,8 +4773,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: motherboard
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: controller
   mFillCenter: 1
 --- !u!114 &11419590
 MonoBehaviour:
@@ -4877,8 +4885,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: Unsuccessful
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: unsuccessful
   mFillCenter: 1
 --- !u!114 &11419594
 MonoBehaviour:
@@ -4965,7 +4973,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: no
   mFillCenter: 1
 --- !u!114 &11419598
@@ -5100,6 +5108,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -5171,7 +5181,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: dian_hui
   mFillCenter: 1
 --- !u!114 &11419608
@@ -5190,6 +5200,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -5261,7 +5273,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: dian_hui
   mFillCenter: 1
 --- !u!114 &11419614
@@ -5280,6 +5292,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -5351,7 +5365,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: dian_hui
   mFillCenter: 1
 --- !u!114 &11419620
@@ -5370,6 +5384,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -5441,7 +5457,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: dian_hui
   mFillCenter: 1
 --- !u!114 &11419626
@@ -5460,6 +5476,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -5531,7 +5549,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: dian_hui
   mFillCenter: 1
 --- !u!114 &11419632
@@ -5550,6 +5568,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -5621,7 +5641,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: san_hui
   mFillCenter: 1
 --- !u!114 &11419642
@@ -5671,7 +5691,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: line_angle
   mFillCenter: 1
 --- !u!114 &11419644
@@ -5721,7 +5741,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 0}
   mSpriteName: line_arc
   mFillCenter: 1
 --- !u!114 &11419646
@@ -5771,7 +5791,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: line_bee
   mFillCenter: 1
 --- !u!114 &11419648
@@ -5821,7 +5841,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 0}
   mSpriteName: angle_icon
   mFillCenter: 1
 --- !u!114 &11419650
@@ -5871,7 +5891,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 0}
   mSpriteName: infrared_icon
   mFillCenter: 1
 --- !u!114 &11419652
@@ -5921,7 +5941,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: dian_blue
   mFillCenter: 1
 --- !u!114 &11419654
@@ -5955,6 +5975,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -6011,7 +6033,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: dian_blue
   mFillCenter: 1
 --- !u!114 &11419660
@@ -6045,6 +6067,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -6202,7 +6226,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 19
   mHeight: 19
-  mDepth: 3
+  mDepth: 8
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -6217,7 +6241,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: no
   mFillCenter: 1
 --- !u!114 &11419670
@@ -6290,7 +6314,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 50
   mHeight: 50
-  mDepth: 2
+  mDepth: 7
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -6305,8 +6329,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: Unsuccessful
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: unsuccessful
   mFillCenter: 1
 --- !u!114 &11419674
 MonoBehaviour:
@@ -6400,8 +6424,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 124
-  mHeight: 124
+  mWidth: 128
+  mHeight: 128
   mDepth: 1
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
@@ -6417,8 +6441,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: sensor_modular
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: sensor_infrared
   mFillCenter: 1
 --- !u!114 &11419678
 MonoBehaviour:
@@ -6521,8 +6545,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 108
-  mHeight: 108
+  mWidth: 128
+  mHeight: 128
   mDepth: 3
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
@@ -6538,8 +6562,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: sensor_grey
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: sensor_infrared_upgrade
   mFillCenter: 1
 --- !u!114 &11423292
 MonoBehaviour:
@@ -6569,7 +6593,7 @@ MonoBehaviour:
     relative: 1
     absolute: 0
   updateAnchors: 1
-  mColor: {r: 1, g: 1, b: 1, a: 1}
+  mColor: {r: .423529416, g: .494117647, b: .600000024, a: 1}
   mPivot: 4
   mWidth: 100
   mHeight: 40
@@ -6633,8 +6657,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 160
-  mHeight: 160
+  mWidth: 176
+  mHeight: 176
   mDepth: 3
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
@@ -6650,8 +6674,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: motherboard_grey
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: controller_upgrade
   mFillCenter: 1
 --- !u!114 &11423296
 MonoBehaviour:
@@ -6681,7 +6705,7 @@ MonoBehaviour:
     relative: 1
     absolute: 0
   updateAnchors: 1
-  mColor: {r: 1, g: 1, b: 1, a: 1}
+  mColor: {r: .423529416, g: .494117647, b: .600000024, a: 1}
   mPivot: 4
   mWidth: 100
   mHeight: 40
@@ -6743,7 +6767,7 @@ MonoBehaviour:
     relative: 1
     absolute: 0
   updateAnchors: 1
-  mColor: {r: 1, g: 1, b: 1, a: 1}
+  mColor: {r: .423529416, g: .494117647, b: .600000024, a: 1}
   mPivot: 4
   mWidth: 100
   mHeight: 40
@@ -6807,8 +6831,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 108
-  mHeight: 108
+  mWidth: 128
+  mHeight: 128
   mDepth: 3
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
@@ -6824,8 +6848,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: servo_grey
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: servo_angle_upgrade
   mFillCenter: 1
 --- !u!114 &11438662
 MonoBehaviour:
@@ -7020,7 +7044,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: add
   mFillCenter: 1
 --- !u!114 &11439586
@@ -7243,7 +7267,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11416636, guid: a1268bd10a9da1e42becd0f176de111b, type: 2}
+  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
   mSpriteName: bg_rf
   mFillCenter: 1
 --- !u!114 &11440048
@@ -7293,7 +7317,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11416636, guid: a1268bd10a9da1e42becd0f176de111b, type: 2}
+  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
   mSpriteName: bg_rf_bg
   mFillCenter: 1
 --- !u!114 &11440050
@@ -7343,7 +7367,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: add
   mFillCenter: 1
 --- !u!114 &11440052
@@ -7462,6 +7486,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -7775,8 +7801,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 108
-  mHeight: 108
+  mWidth: 128
+  mHeight: 128
   mDepth: 2
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
@@ -7792,8 +7818,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: servo_update
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: servo_angle_upgrading
   mFillCenter: 1
 --- !u!114 &11467616
 MonoBehaviour:
@@ -7825,8 +7851,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 160
-  mHeight: 160
+  mWidth: 176
+  mHeight: 176
   mDepth: 2
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
@@ -7842,8 +7868,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: motherboard_update
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: controller_upgrading
   mFillCenter: 1
 --- !u!114 &11467618
 MonoBehaviour:
@@ -7875,8 +7901,8 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 108
-  mHeight: 108
+  mWidth: 128
+  mHeight: 128
   mDepth: 2
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
@@ -7892,8 +7918,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: sensor_update
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
+  mSpriteName: sensor_infrared_upgrading
   mFillCenter: 1
 --- !u!114 &11468000
 MonoBehaviour:
@@ -7942,7 +7968,7 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
+  mAtlas: {fileID: 11447276, guid: 5267378f46f2e4e42a5463f483331ad1, type: 2}
   mSpriteName: add_choice
   mFillCenter: 1
 --- !u!114 &11496296

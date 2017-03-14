@@ -13,6 +13,7 @@ public abstract class BasePopWin : BaseUI
     #region 公有属性
     public PopWinBtnDelegate btnClick;
     public float mCoverAlpha;
+    public Color mCoverColor;
     public bool mAddBox;
     public bool isSingle;//只可以创建一个实例
     public int mDepth;
@@ -34,6 +35,7 @@ public abstract class BasePopWin : BaseUI
         isSingle = false;
         mInitDepth = 0;
         isCoverAddPanel = false;
+        mCoverColor = Color.white;
     }
     public override void Init()
     {
@@ -51,7 +53,7 @@ public abstract class BasePopWin : BaseUI
         {
             if (mCoverAlpha > 0.01f)
             {//添加Cover
-                UIManager.AddCover(mTrans, mCoverAlpha, isCoverAddPanel);
+                UIManager.AddCover(mTrans, mCoverAlpha, mCoverColor, isCoverAddPanel);
             }
             if (mAddBox)
             {//添加

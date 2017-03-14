@@ -114,7 +114,7 @@ public class GetRobotData : SingletonBehaviour<GetRobotData>
             //else
             {
                 //PopWinManager.Inst.ShowPopWin(typeof(ConnenctBluetoothMsg));
-                SearchBluetoothMsg.ShowMsg();
+                ConnectBluetoothMsg.ShowMsg();
             }
 #endif
         }

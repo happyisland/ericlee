@@ -4,6 +4,8 @@ using System;
 using System.IO;
 using System.Xml;
 using System.Collections.Generic;
+using Game.Platform;
+using System.Text;
 
 namespace Game.Resource
 {
@@ -18,12 +20,17 @@ namespace Game.Resource
         
         public static ResFileType GetResFileType(string typeStr)
         {
-            for (int i = 0, imax = ResFileTypePath.Length; i < imax; ++i)
+            if (typeStr.Equals("default"))
             {
-                if (ResFileTypePath[i].Equals(typeStr))
-                {
-                    return (ResFileType)(i);
-                }
+                return ResFileType.Type_default;
+            }
+            else if (typeStr.Equals("playerdata"))
+            {
+                return ResFileType.Type_playerdata;
+            }
+            else if (typeStr.Equals("download"))
+            {
+                return ResFileType.Type_download;
             }
             return ResFileType.Type_playerdata;
         }
@@ -38,21 +45,43 @@ namespace Game.Resource
             return ResFileTypePath[index];
         }
         /// <summary>
-        /// 获取本地文件根目录
+        /// 获取模型类型
         /// </summary>
-        /// <param name="resType"></param>
+        /// <param name="robot"></param>
         /// <returns></returns>
-        public static string GetRootPath(ResFileType resType = ResFileType.Type_playerdata)
+        public static ResFileType GetRobotType(Robot robot)
         {
-            return persistentDataPath + "/" + ResFileTypePath[(int)resType];
+            if (robot.Name.EndsWith("_default"))
+            {
+                return ResFileType.Type_default;
+            }
+            else
+            {
+                return ResFileType.Type_playerdata;
+            }
         }
+       
         /// <summary>
         /// 获得动作路径
         /// </summary>
         /// <returns></returns>
-        public static string GetActionsPath(string robotName, ResFileType resType = ResFileType.Type_playerdata)
+        public static string GetActionsFloderPath(string robotName)
         {
-            string path = GetRootPath(resType) + "/" + robotName + "/actions";
+            string path = PublicFunction.CombinePath(GetRobotPath(robotName), "actions");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            return path;
+        }
+        /// <summary>
+        /// 获取公用动作的路径
+        /// </summary>
+        /// <param name="robotName"></param>
+        /// <returns></returns>
+        public static string GetActionsFloderCommonPath(string robotName)
+        {
+            string path = PublicFunction.CombinePath(GetRobotCommonPath(robotName), "actions");
             if (!Directory.Exists(path))
             {
                 Directory.CreateDirectory(path);
@@ -64,13 +93,83 @@ namespace Game.Resource
         /// </summary>
         /// <param name="fileName"></param>
         /// <returns></returns>
-        public static string GetActionsPath(string robotName, string fileName, ResFileType resType = ResFileType.Type_playerdata)
+        public static string GetActionFilePath(string robotName, string fileName)
         {
-            string path = GetActionsPath(robotName, resType) + "/" + fileName + ".xml";
-            return path;
+            return PublicFunction.CombinePath(GetActionsFloderPath(robotName), fileName) + ".xml";
         }
         /// <summary>
-        /// 获取模型文件夹的路径
+        /// 获取公用动作的路径
+        /// </summary>
+        /// <param name="robotName"></param>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static string GetActionFileCommonPath(string robotName, string fileName)
+        {
+            return PublicFunction.CombinePath(GetActionsFloderCommonPath(robotName), fileName) + ".xml";
+        }
+
+        /// <summary>
+        /// 获取某个模型的动作列表
+        /// </summary>
+        /// <param name="robotName">完整的名字</param>
+        /// <returns></returns>
+        public static List<string> GetRobotAllActionsPath(Robot robot)
+        {
+            try
+            {
+                List<string> list = new List<string>();
+                string userPath = GetActionsFloderPath(robot.Name);
+                if (Directory.Exists(userPath))
+                {
+                    string[] files = Directory.GetFiles(userPath);
+                    if (null != files)
+                    {
+                        list.AddRange(files);
+                    }
+                }
+                ResFileType robotType = ResourcesEx.GetRobotType(robot);
+                if (ResFileType.Type_default == robotType)
+                {
+                    string commonPath = GetActionsFloderCommonPath(robot.Name);
+
+                    if (Directory.Exists(commonPath))
+                    {
+                        string[] files = Directory.GetFiles(commonPath);
+                        if (null != files)
+                        {
+                            list.AddRange(files);
+                        }
+                    }
+                }
+
+                return list;
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+                return null;
+            }
+        }
+        
+        /// <summary>
+        /// 官方模型公用数据
+        /// </summary>
+        /// <param name="robotName"></param>
+        /// <returns></returns>
+        public static string GetRobotCommonPath(string robotName)
+        {
+            string robotType = RobotMgr.DataType(robotName);
+            string name = RobotMgr.NameNoType(robotName);
+            return PublicFunction.CombinePath(persistentDataPath, robotType, name);
+        }
+
+        public static string GetCommonPathForNoTypeName(string robotName)
+        {
+            return PublicFunction.CombinePath(persistentDataPath, "default", robotName);
+        }
+        /// <summary>
+        /// 获取官方或者个人用户数据的路径
         /// </summary>
         /// <param name="robotName"></param>
         /// <returns></returns>
@@ -78,82 +177,40 @@ namespace Game.Resource
         {
             string robotType = RobotMgr.DataType(robotName);
             string name = RobotMgr.NameNoType(robotName);
-            return persistentDataPath + "/" + robotType + "/" + name;
+            string path = PublicFunction.CombinePath(persistentDataPath, "users", GetUserFloder(), robotType, name);
+            return path;
+        }
+
+        public static string GetRobotPathForNoTypeName(string robotName)
+        {
+            return PublicFunction.CombinePath(persistentDataPath, "users", GetUserFloder(), "playerdata", robotName);
         }
         /// <summary>
-        /// 获取某个模型的动作列表
+        /// 获取用户的根目录
         /// </summary>
-        /// <param name="robotName">完整的名字</param>
         /// <returns></returns>
-        public static List<string> GetRobotActionsPath(string robotName)
+        public static string GetUserRootPath()
         {
-            string robotType = RobotMgr.DataType(robotName);
-            string name = RobotMgr.NameNoType(robotName);
-            string root = persistentDataPath + "/" + robotType + "/" + name + "/actions";
-            try
-            {
-                List<string> list = new List<string>();
-                if (Directory.Exists(root))
-                {
-                    string[] files = Directory.GetFiles(root);
-                    if (null != files)
-                    {
-                        list.AddRange(files);
-                    }
-                }
-                return list;
-            }
-            catch (System.Exception ex)
-            {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
-                return null;
-            }
+            string path = PublicFunction.CombinePath(persistentDataPath, "users", GetUserFloder());
+            return path;
         }
-        /// <summary>
-        /// 获取所有动作列表
-        /// </summary>
-        /// <param name="resType"></param>
-        /// <returns></returns>
-        public static List<string> GetAllActionsPath(ResFileType resType = ResFileType.Type_playerdata)
+
+        public static string GetCommonRootPath()
         {
-            try
-            {
-                string root = GetRootPath(resType);
-                string[] dirs = Directory.GetDirectories(root);
-                if (null != dirs)
-                {
-                    List<string> list = new List<string>();
-                    for (int i = 0, imax = dirs.Length; i < imax; ++i)
-                    {
-                        string actPath = dirs[i] + "/actions";
-                        if (Directory.Exists(actPath))
-                        {
-                            string[] files = Directory.GetFiles(actPath);
-                            if (null != files)
-                            {
-                                list.AddRange(files);
-                            }
-                        }
-                    }
-                    return list;
-                }
-            }
-            catch (System.Exception ex)
-            {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
-                return null;
-            }
-            return null;
+            string path = PublicFunction.CombinePath(persistentDataPath, "default");
+            return path;
         }
-        
+
+        private static string GetUserFloder()
+        {
+            string str = PlatformMgr.Instance.GetUserData();
+            if (string.IsNullOrEmpty(str))
+            {
+                str = "local";
+            }
+            return str;
+        }
+
         //获取文件名
         private static string GetFileName(string path)
         {
@@ -201,4 +258,13 @@ namespace Game.Resource
         Type_playerdata,
         Type_download
     }
+}
+/// <summary>
+/// 操作文件类型
+/// </summary>
+public enum OperateFileType : byte
+{
+    Operate_File_Add = 1,
+    Operate_File_Change = 2,
+    Operate_File_Del = 3,
 }

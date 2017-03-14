@@ -118,7 +118,7 @@ public class UIManager : SingletonObject<UIManager>
         return null;
     }
 
-    public static GameObject AddCover(Transform trans, float alpha, bool addCoverPanel = false, float duration = 0.3f)
+    public static GameObject AddCover(Transform trans, float alpha, Color color, bool addCoverPanel = false, float duration = 0.3f)
     {
         GameObject obj = new GameObject("Cover");
         obj.transform.parent = trans;
@@ -142,7 +142,7 @@ public class UIManager : SingletonObject<UIManager>
         }
         GameObject text = NGUITools.AddChild(obj);
         text.name = "text";
-        AddUITexture(text, 1);
+        AddUITexture(text, 1, color);
 
         TweenAlpha ta = TweenAlpha.Begin(obj, duration, alpha);
         ta.from = 0;
@@ -151,7 +151,7 @@ public class UIManager : SingletonObject<UIManager>
         return obj;
     }
 
-    public static UITexture AddUITexture(GameObject obj, float alpha, int depth = -1)
+    public static UITexture AddUITexture(GameObject obj, float alpha, Color color,int depth = -1)
     {
         UITexture uiTexture = obj.AddComponent<UITexture>();
         uiTexture.depth = depth;
@@ -159,6 +159,7 @@ public class UIManager : SingletonObject<UIManager>
         //uiTexture.material = 
         Texture2D tex = Texture2D.whiteTexture;//new Texture2D(2, 2, TextureFormat.RGBA32, false);
         uiTexture.mainTexture = tex;
+        uiTexture.color = color;
         uiTexture.shader = Shader.Find("Unlit/Transparent Colored");
         uiTexture.width = PublicFunction.GetExtendWidth();
         uiTexture.height = PublicFunction.GetExtendHeight();
@@ -185,9 +186,9 @@ public class UIManager : SingletonObject<UIManager>
         box.size = new Vector3(PublicFunction.GetExtendWidth(), PublicFunction.GetExtendHeight(), 0);
     }
 
-    public static void AddCoverBox(Transform trans, float alpha, bool addCoverPanel = false, float duration = 0.3f)
+    public static void AddCoverBox(Transform trans, float alpha, Color color, bool addCoverPanel = false, float duration = 0.3f)
     {
-        AddCover(trans, alpha, addCoverPanel, duration);
+        AddCover(trans, alpha, color, addCoverPanel, duration);
         AddBox(trans);
     }
     /// <summary>

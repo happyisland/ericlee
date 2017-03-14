@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Game.Platform;
 
 namespace Game.Event
 {
@@ -47,11 +48,7 @@ namespace Game.Event
                 }
                 catch (System.Exception ex)
                 {
-                    if (ClientMain.Exception_Log_Flag)
-                    {
-                        System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                     //   Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                    }
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, ex.ToString());
                     continue;
                 }
 				

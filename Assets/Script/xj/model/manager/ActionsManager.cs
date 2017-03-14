@@ -5,6 +5,7 @@ using System.IO;
 using Game.Resource;
 using System.Xml;
 using System.Text;
+using Game.Platform;
 
 /// <summary>
 /// Author:xj
@@ -38,7 +39,7 @@ public class ActionsManager
     /// <summary>
     /// 官方动作
     /// </summary>
-    Dictionary<string, int> mOfficialActions = null;
+    //Dictionary<string, int> mOfficialActions = null;
     #endregion
 
     #region 公有函数
@@ -50,31 +51,36 @@ public class ActionsManager
         }
         return mInst;
     }
+
+    public void CleanUp()
+    {
+        if (null != mAllActions)
+        {
+            mAllActions.Clear();
+        }
+        if (null != mAllDefaultActions)
+        {
+            mAllDefaultActions.Clear();
+        }
+    }
     /// <summary>
     /// 读取某个模型的动作
     /// </summary>
     /// <param name="robotName"></param>
     /// <param name="type"></param>
-    public void ReadActions(string robotName)
+    public void ReadActions(Robot robot)
     {
-        Robot robot = RobotManager.GetInst().GetRobotForName(robotName);
-        if (null != robot)
-        {
-            if (!mAllActions.ContainsKey(robot.ID) && !mAllDefaultActions.ContainsKey(robot.ID))
-            {//没读取过动作
-                List<string> files = ResourcesEx.GetRobotActionsPath(robotName);
-                if (null != files && files.Count > 0)
+        if (!mAllActions.ContainsKey(robot.ID) && !mAllDefaultActions.ContainsKey(robot.ID))
+        {//没读取过动作
+            List<string> files = ResourcesEx.GetRobotAllActionsPath(robot);
+            if (null != files && files.Count > 0)
+            {
+                for (int i = 0, icount = files.Count; i < icount; ++i)
                 {
-                    for (int i = 0, icount = files.Count; i < icount; ++i)
+                    ActionSequence actions = ReadXml(files[i], robot);
+                    if (null != actions)
                     {
-                        ActionSequence actions = ReadXml(files[i], robot.ID);
-
-                     //   Debug.Log("action:"+files[i]);
-
-                        if (null != actions)
-                        {
-                            AddRobotActions(actions.RobotID, actions);
-                        }
+                        AddRobotActions(actions.RobotID, actions);
                     }
                 }
             }
@@ -106,12 +112,9 @@ public class ActionsManager
     /// <returns></returns>
     public ActionSequence GetActionForName(string robotId, string name)
     {
-        if (name.Equals(PublicFunction.Default_Actions_Name))
+        if (mAllDefaultActions.ContainsKey(robotId) && name.Equals(mAllDefaultActions[robotId].Name))
         {//默认动作
-            if (mAllDefaultActions.ContainsKey(robotId))
-            {
-                return mAllDefaultActions[robotId];
-            }
+            return mAllDefaultActions[robotId];
         }
         else if (mAllActions.ContainsKey(robotId))
         {
@@ -161,12 +164,20 @@ public class ActionsManager
     /// <param name="acts"></param>
     public void AddRobotActions(string robId, ActionSequence acts)
     {
-        if (acts.Name.Equals(PublicFunction.Default_Actions_Name))
+        if (acts.ActionName.Equals(PublicFunction.Default_Actions_Name))
         {//默认动作
             mAllDefaultActions[robId] = acts;
+            if (mAllActions.ContainsKey(robId) && mAllActions[robId].ContainsKey(acts.Id))
+            {
+                mAllActions[robId].Remove(acts.Id);
+            }
         }
         else
         {
+            if (mAllDefaultActions.ContainsKey(robId) && mAllDefaultActions[robId].Id.Equals(acts.Id))
+            {
+                return;
+            }
             if (mAllActions.ContainsKey(robId))
             {
                 if (mAllActions[robId].ContainsKey(acts.Id))
@@ -264,7 +275,7 @@ public class ActionsManager
     /// <returns></returns>
     public int GetActionsTimeForName(string robId, string actsName)
     {
-        if (actsName.Equals(PublicFunction.Default_Actions_Name) && mAllDefaultActions.ContainsKey(robId))
+        if (mAllDefaultActions.ContainsKey(robId) && actsName.Equals(mAllDefaultActions[robId].Name))
         {
             return mAllDefaultActions[robId].GetAllTime();
         }
@@ -558,25 +569,25 @@ public class ActionsManager
     /// 添加官方动作id
     /// </summary>
     /// <param name="actId"></param>
-    public void AddOfficial(string actId)
+    /*public void AddOfficial(string actId)
     {
         mOfficialActions[actId] = 1;
-    }
+    }*/
     /// <summary>
     /// 判断动作是否是官方动作
     /// </summary>
     /// <param name="actId"></param>
     /// <returns></returns>
-    public bool IsOfficial(string actId)
+    /*public bool IsOfficial(string actId)
     {
         if (mOfficialActions.ContainsKey(actId))
         {
             return true;
         }
         return false;
-    }
+    }*/
 
-    public void SaveOfficialActions()
+    /*public void SaveOfficialActions()
     {
         try
         {
@@ -605,7 +616,7 @@ public class ActionsManager
                 Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
-    }
+    }*/
 
     #endregion
 
@@ -614,7 +625,7 @@ public class ActionsManager
     {
         mAllActions = new Dictionary<string, Dictionary<string, ActionSequence>>();
         mAllDefaultActions = new Dictionary<string, ActionSequence>();
-        mOfficialActions = new Dictionary<string, int>();
+        //mOfficialActions = new Dictionary<string, int>();
         //ReadAllActions();
         mActionIconList = new ActionIconList();
         mActionIconList.LoadXml();
@@ -625,10 +636,10 @@ public class ActionsManager
             tmp = mActionIconList.iconList[i];
             mActionIconDict[tmp.id] = tmp;
         }
-        ReadOfficialActionsXml();
+        //ReadOfficialActionsXml();
     }
 
-    public void ReadOfficialActionsXml()
+    /*public void ReadOfficialActionsXml()
     {
         try
         {
@@ -663,11 +674,11 @@ public class ActionsManager
                 Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
-    }
+    }*/
 
 
 
-    private ActionSequence ReadXml(string path, string robotId)
+    private ActionSequence ReadXml(string path, Robot robot)
     {
         try
         {
@@ -685,6 +696,11 @@ public class ActionsManager
                 return null;
             }
             ActionSequence actions = null;
+            bool isOfficial = false;
+            if (path.StartsWith(ResourcesEx.GetRobotCommonPath(robot.Name)))
+            {
+                isOfficial = true;
+            }
             while (null != node)
             {
                 if (!(node is XmlElement))
@@ -697,12 +713,12 @@ public class ActionsManager
                 if (nodeType.Equals(Game.Resource.XmlNodeType.head.ToString()))
                 {
                     string name = xe.GetAttribute("name");
-                    string robotID = robotId;// xe.GetAttribute("robotID");
+                    string robotID = robot.ID;// xe.GetAttribute("robotID");
                     string id = xe.GetAttribute("id");
                     string icon = xe.GetAttribute("icon");
                     string create = xe.GetAttribute("createTime");
                     string showName = xe.GetAttribute("showName");
-                    actions = new ActionSequence(name, robotID, id, icon, showName);
+                    actions = new ActionSequence(name, robotID, id, icon, showName, isOfficial);
                     if (string.IsNullOrEmpty(create))
                     {
                         FileInfo fileInfo = new FileInfo(path);
@@ -715,28 +731,7 @@ public class ActionsManager
                     {
                         actions.createTime = long.Parse(create);
                     }
-                    string fileName = Path.GetFileNameWithoutExtension(path);
-                    /*if (fileName.Equals(id))
-                    {//以id命名的
-                        if (File.Exists(path.Replace(fileName, name)))
-                        {//如果存在与名字相同的文件，则删除id文件
-                            File.Delete(path);
-                            return null;
-                        }
-                        else
-                        {//不存在，把id改成名字保存
-                            File.Delete(path);
-                            xmlDoc.Save(path.Replace(fileName, name));
-                        }
-
-                    }
-                    else if (fileName.Equals(name))
-                    {//文件名是名字的，检测相同id的文件存不存在
-                        if (File.Exists(path.Replace(fileName, id)))
-                        {//存在则删除id文件
-                            File.Delete(path.Replace(fileName, id));
-                        }
-                    }*/
+                    /*string fileName = Path.GetFileNameWithoutExtension(path);
                     if (fileName.Equals(name))
                     {//已文件名命名的
                         if (File.Exists(path.Replace(fileName, id)))
@@ -756,33 +751,37 @@ public class ActionsManager
                         {//存在则删除名字文件
                             File.Delete(path.Replace(fileName, name));
                         }
-                    }
+                    }*/
                 }
                 else
                 {
-                    Action ac = new Action(xe);
+                    Action ac = new Action(xe, robot);
                     if (null != ac)
                     {
-                        if (null == ac.showList)
+                        if (null == ac.GetShowID())
                         {//兼容以前的老版本
-                            ac.showList = new List<byte>();
                             if (actions.Count == 0)
                             {
                                 byte minId = byte.MaxValue;
                                 foreach (KeyValuePair<byte, short> kvp in ac.rotas)
                                 {
-                                    if (kvp.Value != PublicFunction.DuoJi_Start_Rota)
+                                    DuoJiData tmpData = robot.GetAnDjData(kvp.Key);
+                                    if (null != tmpData && tmpData.modelType == ServoModel.Servo_Model_Angle)
                                     {
-                                        ac.showList.Add(kvp.Key);
+                                        if (kvp.Value != PublicFunction.DuoJi_Start_Rota)
+                                        {
+                                            ac.AddShowID(kvp.Key);
+                                        }
+                                        if (kvp.Key < minId)
+                                        {
+                                            minId = kvp.Key;
+                                        }
                                     }
-                                    if (kvp.Key < minId)
-                                    {
-                                        minId = kvp.Key;
-                                    }
+                                    
                                 }
-                                if (ac.showList.Count == 0)
+                                if ((ac.GetShowID() == null || ac.GetShowID().Count == 0) && minId != byte.MaxValue)
                                 {
-                                    ac.showList.Add(minId);
+                                    ac.AddShowID(minId);
                                 }
                             }
                             else
@@ -790,17 +789,24 @@ public class ActionsManager
                                 Action lastAct = actions[actions.Count - 1];
                                 foreach (KeyValuePair<byte, short> kvp in ac.rotas)
                                 {
-                                    if (lastAct.GetRota(kvp.Key) != kvp.Value)
+                                    DuoJiData tmpData = robot.GetAnDjData(kvp.Key);
+                                    if (null != tmpData && tmpData.modelType == ServoModel.Servo_Model_Angle)
                                     {
-                                        ac.showList.Add(kvp.Key);
+                                        if (lastAct.GetRota(kvp.Key) != kvp.Value)
+                                        {
+                                            ac.AddShowID(kvp.Key);
+                                        }
                                     }
                                 }
-                                if (ac.showList.Count == 0)
+                                if (null == ac.GetShowID() || ac.GetShowID().Count == 0)
                                 {
-                                    List<byte> lastShow = lastAct.showList;
-                                    for (int i = 0, imax = lastShow.Count; i < imax; ++i)
+                                    List<byte> lastShow = lastAct.GetShowID();
+                                    if (null != lastShow)
                                     {
-                                        ac.showList.Add(lastShow[i]);
+                                        for (int i = 0, imax = lastShow.Count; i < imax; ++i)
+                                        {
+                                            ac.AddShowID(lastShow[i]);
+                                        }
                                     }
                                 }
                             }
@@ -815,11 +821,8 @@ public class ActionsManager
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         return null;
     }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Game.Resource;
 
 
 
@@ -171,15 +172,34 @@ public class PartsSprites : MonoBehaviour
     //零件模型的路径
     public string ModelPicPath(string picName)
     {
-        string pathTemp = "file:///" + Application.persistentDataPath + "//default//" + picName + ".png";
+        string pathTemp = "file:///" + ResourcesEx.persistentDataPath + "//default//" + picName + "//" + picName + ".png";
         return pathTemp;
     }
 
-    //零件图片
-    public string PartsPicPath(string picName)
+    //外部零件图片
+    public string OutPartsPicPath(string picName)
     {
-        string pathTemp = "file:///" + Application.persistentDataPath + "//partsPic//" + picName + ".png";
-        return pathTemp;
+        string path1 = "";
+        if (Application.platform == RuntimePlatform.WindowsEditor)
+        {
+
+            path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/editor/" + picName + ".assetbundle";
+        }
+        else if (Application.platform == RuntimePlatform.IPhonePlayer)
+        {
+            path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/ios/" + picName + ".assetbundle";
+        }
+        else if (Application.platform == RuntimePlatform.OSXEditor)
+        {
+            path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/ios/" + picName + ".assetbundle";
+        }
+
+        else if (Application.platform == RuntimePlatform.Android)
+        {
+            path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/android/" + picName + ".assetbundle";
+
+        }
+        return path1;
     }
     
     //添加模型图片
@@ -203,30 +223,41 @@ public class PartsSprites : MonoBehaviour
         #endregion
 
         //模型名称的图片
-        string pathTemp = "file:///" + Application.persistentDataPath + "//default//" + picName +"//"+picName+ ".png";
+        string pathTemp =ModelPicPath(picName);
 
         //string pathTemp = pathT;
         WWW www = new WWW(pathTemp);
 
         Texture textureT = null;
         yield return www;
-        if (www != null && string.IsNullOrEmpty(www.error))
+        try
         {
-            //获取Texture
-            textureT = www.texture;
-            //更多操作...    
-
-            if(textureT!=null)
+            if (www != null && string.IsNullOrEmpty(www.error))
             {
-                //Debug.Log("textureT:" + picName);
-                outPics.Add(picName,textureT);
+                //获取Texture
+                textureT = www.texture;
+                //更多操作...    
+
+                if (textureT != null)
+                {
+                    //Debug.Log("textureT:" + picName);
+                    outPics.Add(picName, textureT);
+                }
+            }
+            else
+            {
+                outPics.Add(picName, textureTT);
             }
         }
-        else
+        catch (System.Exception ex)
         {
-            outPics.Add(picName, textureTT);
-        }
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
 
+        }
 
 
         if (outSprName.Count==0)
@@ -251,7 +282,7 @@ public class PartsSprites : MonoBehaviour
         {
 
         //零件图片
-        string pathTemp = "file:///" + Application.persistentDataPath + "//partsPic//" + outNamT[i] + ".png";
+            string pathTemp = OutPartsPicPath(outNamT[i]);
 
         //模型名称的图片
         //string pathTemp = "file:///"+Application.persistentDataPath + "//default//Meebot//Raph.png";
@@ -260,29 +291,41 @@ public class PartsSprites : MonoBehaviour
 
         Texture textureT = null;
         yield return www;
-        if (www != null && string.IsNullOrEmpty(www.error))
+        try
         {
-            //获取Texture
-            textureT = www.texture;
-            //更多操作...    
-           // Debug.Log("oOOOoutNamT[i:"+outNamT[i]);
-            if (textureT != null&&outPics.ContainsKey(outNamT[i])==false)
+            if (www != null && string.IsNullOrEmpty(www.error))
             {
-               // Debug.Log("iTT:" + i + ";name:" + outNamT[i]);
-                outPics.Add(outNamT[i], textureT);
-            }
-            
-        }
-        else
-        {
-            if(textureTT !=null)
-            {
-                outPics.Add(outNamT[i], textureTT);
-            }
-            
-           
-        }
+                //获取Texture
+                UnityEngine.Object t = www.assetBundle.mainAsset;
+                textureT = t as Texture;
+                //更多操作...    
+                // Debug.Log("oOOOoutNamT[i:"+outNamT[i]);
+                if (textureT != null && outPics.ContainsKey(outNamT[i]) == false)
+                {
+                    // Debug.Log("iTT:" + i + ";name:" + outNamT[i]);
+                    outPics.Add(outNamT[i], textureT);
+                }
 
+            }
+            else
+            {
+                if (textureTT != null)
+                {
+                    outPics.Add(outNamT[i], textureTT);
+                }
+
+
+            }
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+
+        }
 
         i++;
 

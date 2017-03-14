@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using System.IO;
 using GuideView;
+using Game.Resource;
 
 /// <summary>
 /// stepID 步骤的id ; 对话框宽高； 提示语； 相对目标显示偏移量; 提示的类型；对话框是否为目标本身； 如果是对话框相对的提示对象的路径
@@ -341,7 +342,7 @@ public class StepManager
     private static StepManager _ins;
     private StepManager()
     {
-        GuideFilePath = Application.persistentDataPath + "/instruction";
+        GuideFilePath = ResourcesEx.persistentDataPath + "/instruction";
 
         if (!System.IO.File.Exists(GuideFilePath)) //  读取文件 文件不存在需要开启指引
         {

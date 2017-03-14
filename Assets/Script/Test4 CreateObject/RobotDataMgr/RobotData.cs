@@ -46,6 +46,7 @@ public class GO
 
     public PrePosGoPoint ppgp;     //go的PrePos
 
+    public string sensorID;//传感器ID
     
 
     public GO()

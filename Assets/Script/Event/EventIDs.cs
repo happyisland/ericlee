@@ -76,6 +76,7 @@ namespace Game.Event
         Update_Error,//升级异常
         Update_Fail,//升级失败
         Update_Progress,//升级进度
+        Update_Cannel,//取消升级
         
         PowerDown_ReadBack_Switch,//掉电回读状态切换
 
@@ -129,5 +130,13 @@ namespace Game.Event
         //拓扑图
         Item_Drag_Drop_Start,
         Item_Drag_Drop_End,
+
+        Servo_Drag_Drop_Start,
+        Servo_Drag_Drop_End,
+        Servo_Press_Hold,
+        Servo_Press_Hold_Recover,
+        Servo_Press,
+
+        Save_Topology_Data,
     }
 }

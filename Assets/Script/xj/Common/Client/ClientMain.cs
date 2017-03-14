@@ -1,4 +1,5 @@
-﻿using Game.Platform;
+﻿//#define USE_TEST
+using Game.Platform;
 using Game.Scene;
 using System;
 using System.Collections;
@@ -128,11 +129,8 @@ public class ClientMain : SingletonBehaviour<ClientMain>
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -168,11 +166,8 @@ public class ClientMain : SingletonBehaviour<ClientMain>
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
 
     }
@@ -186,11 +181,8 @@ public class ClientMain : SingletonBehaviour<ClientMain>
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -204,11 +196,8 @@ public class ClientMain : SingletonBehaviour<ClientMain>
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -216,17 +205,26 @@ public class ClientMain : SingletonBehaviour<ClientMain>
     {
         try
         {
-            PlatformMgr.Instance.DisConnenctBuletooth();
-            PlatformMgr.Instance.CloseBluetooth();
+            if (PlatformMgr.Instance.GetBluetoothState())
+            {
+                Robot robot = SingletonObject<ConnectManager>.GetInst().GetConnectRobot();
+                
+                if (SingletonObject<UpdateManager>.GetInst().GetUpdateDeviceType() != TopologyPartType.None)
+                {
+                    SingletonObject<UpdateManager>.GetInst().CannelUpdate();
+                }
+                PlatformMgr.Instance.DisConnenctBuletooth();
+            }
+            /*if (PlatformMgr.Instance.IsOpenBluetooth())
+            {
+                PlatformMgr.Instance.CloseBluetooth();
+            }*/
             MyLog.CloseMyLog();
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -235,13 +233,31 @@ public class ClientMain : SingletonBehaviour<ClientMain>
     {
         if (null != PlatformMgr.Instance && PlatformMgr.Instance.GetBluetoothState())
         {
+            Robot robot = SingletonObject<ConnectManager>.GetInst().GetConnectRobot();
             if (!focusStatus)
             {
-                PlatformMgr.Instance.SetSendXTState(false, false);
+                PlatformMgr.Instance.SetSendXTState(false);
+                if (SingletonObject<UpdateManager>.GetInst().GetUpdateDeviceType() == TopologyPartType.None)
+                {
+                    if (null != robot)
+                    {
+                        robot.SetBLEOutTimeState(false);
+                    }
+                }
+                else
+                {
+                    SingletonObject<UpdateManager>.GetInst().CannelUpdate();
+                }
             }
             else
             {
+                //永不待机
+                Screen.sleepTimeout = SleepTimeout.NeverSleep;
                 PlatformMgr.Instance.SetSendXTState(true);
+                if (null != robot)
+                {
+                    robot.SetBLEOutTimeState(true);
+                }
             }
         }
     }

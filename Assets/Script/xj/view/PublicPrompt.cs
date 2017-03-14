@@ -40,7 +40,7 @@ public class PublicPrompt
         if (RobotManager.GetInst().IsCreateRobotFlag)
         {
             PlatformMgr.Instance.MobClickEvent(MobClickEventID.ModelPage_TappedConnectBluetoothButton);
-            SearchBluetoothMsg.ShowMsg();
+            ConnectBluetoothMsg.ShowMsg();
         }
         else
         {
@@ -104,11 +104,8 @@ public class PublicPrompt
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError("PublicPrompt" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
 
     }
@@ -122,8 +119,13 @@ public class PublicPrompt
         try
         {
             string name = obj.name;
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "点击断开蓝牙弹框按钮 name=" + name);
             if (name.Equals(PromptMsg.RightBtnName))
             {
+                if (null != RobotManager.GetInst().GetCurrentRobot())
+                {//有轮子在转动
+                    RobotManager.GetInst().GetCurrentRobot().StopRunTurn();
+                }
                 PlatformMgr.Instance.DisConnenctBuletooth();
                 if (SingletonObject<PopWinManager>.GetInst().IsExist(typeof(TopologyBaseMsg)))
                 {
@@ -134,11 +136,8 @@ public class PublicPrompt
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError("PublicPrompt" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -158,11 +157,8 @@ public class PublicPrompt
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError("PublicPrompt" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     #endregion

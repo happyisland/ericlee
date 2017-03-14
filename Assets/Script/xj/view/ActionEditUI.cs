@@ -186,11 +186,8 @@ public class ActionEditUI : BaseUI
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -569,27 +566,24 @@ public class ActionEditUI : BaseUI
         mUIResPath = "Prefab/UI/editFrameUI";
     }
 
-    public void OpenActions(string name)
+    public void OpenActions(string id)
     {
         try
         {
             mRobot = RobotManager.GetInst().GetCurrentRobot();
             if (null != mRobot)
             {
-                ActionSequence act = mRobot.GetActionsForName(name);
+                ActionSequence act = mRobot.GetActionsForID(id);
                 if (null != act)
                 {
-                    InitItems(new ActionSequence(act));
+                    InitItems(new ActionSequence(act, mRobot));
                 }
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -612,11 +606,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
 
     }
@@ -656,7 +647,7 @@ public class ActionEditUI : BaseUI
             }
             mFrameIndex = mFrameList.Count + 1;
             mFrameUseDjDict = new Dictionary<string, DuoJi>();
-            if (null != mActions && (ActionsManager.GetInst().IsOfficial(mActions.Id) || mActions.IsOfficial()))
+            if (null != mActions && (mActions.IsOfficial()))
             {//官方动作，不能编辑
                 isOfficial = true;
             }
@@ -670,7 +661,7 @@ public class ActionEditUI : BaseUI
                 if (null != tmpTrans)
                 {
                     mReadBackObj = tmpTrans.gameObject;
-                    UITexture tex = UIManager.AddUITexture(tmpTrans.Find("readbackbg").gameObject, 0.9f);
+                    UITexture tex = UIManager.AddUITexture(tmpTrans.Find("readbackbg").gameObject, 0.9f, Color.white);
                     if (null != tex)
                     {
                         BoxCollider box = tex.gameObject.AddComponent<BoxCollider>();
@@ -895,7 +886,7 @@ public class ActionEditUI : BaseUI
                             mPowerDownBtn = mPowerDownBtnTrans.GetComponent<UIButton>();
                             if (null != mPowerDownBtn)
                             {
-                                if (PlatformMgr.Instance.GetBluetoothState())
+                                if (PlatformMgr.Instance.GetBluetoothState() && null != mRobot && mRobot.GetAllDjData().GetAngleList().Count > 0)
                                 {
                                     mPowerDownBtn.OnAwake();
                                 }
@@ -1145,7 +1136,7 @@ public class ActionEditUI : BaseUI
                     mTimeHidePos = mTimeShowPos - new Vector3(0, height);
                     time.localPosition = mTimeHidePos;
                     mTimeBoxObj = time.Find("time").gameObject;
-                    UITexture tex = UIManager.AddUITexture(mTimeBoxObj, 0.01f);
+                    UITexture tex = UIManager.AddUITexture(mTimeBoxObj, 0.01f, Color.white);
                     mTimeBoxObj.GetComponent<BoxCollider>().size = new Vector2(tex.width, tex.height);
                     Camera cam = NGUITools.FindInParents<Camera>(mTrans);
                     if (null != cam)
@@ -1270,11 +1261,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1315,23 +1303,6 @@ public class ActionEditUI : BaseUI
             string name = obj.name;
             if (name.Equals("savebtn") || name.Equals("savebtn1"))
             {//保存
-             /*if (PlayerPrefs.HasKey("version") && 0 == PlayerPrefs.GetInt("version"))
-             {
-                 PlatformMgr.Instance.Robot_System_Version = "Jimu_p1.27";
-                 PlatformMgr.Instance.Robot_System_FilePath = Game.Resource.ResourcesEx.persistentDataPath + "/Jimu2primary_P1.27.bin";
-                 PlatformMgr.Instance.Robot_Servo_Version = "41161301";
-                 PlatformMgr.Instance.Robot_Servo_FilePath = Game.Resource.ResourcesEx.persistentDataPath + "/jimu2_app_41161301.bin";
-                 PlayerPrefs.SetInt("version", 1);
-             }
-             else
-             {
-                 PlatformMgr.Instance.Robot_System_Version = "Jimu_p1.26";
-                 PlatformMgr.Instance.Robot_System_FilePath = Game.Resource.ResourcesEx.persistentDataPath + "/Jimu2primary_P1.26.bin";
-                 PlatformMgr.Instance.Robot_Servo_Version = "41155201";
-                 PlatformMgr.Instance.Robot_Servo_FilePath = Game.Resource.ResourcesEx.persistentDataPath + "/jimu2_app_41155201.bin";
-                 PlayerPrefs.SetInt("version", 0);
-             }
-             Debuger.Log(string.Format("Robot_System_Version = {0} Robot_System_FilePath = {1} Robot_Servo_Version = {2} Robot_Servo_FilePath = {3}", PlatformMgr.Instance.Robot_System_Version, PlatformMgr.Instance.Robot_System_FilePath, PlatformMgr.Instance.Robot_Servo_Version, PlatformMgr.Instance.Robot_Servo_FilePath));*/
                 if (null != mRobot)
                 {
                     if (mFrameList.Count < 1)
@@ -1442,11 +1413,8 @@ public class ActionEditUI : BaseUI
                         }
                         catch (System.Exception ex)
                         {
-                            if (ClientMain.Exception_Log_Flag)
-                            {
-                                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                            }
+                            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
                         }
                     }
                     canelFrame = false;
@@ -1534,7 +1502,7 @@ public class ActionEditUI : BaseUI
                         FrameDataEx data = (FrameDataEx)mFrameCustomGrid.GetItemData(frameName);
                         if (null != data)
                         {
-                            if (data.showList.Count > 1)
+                            if (null != data.showList && data.showList.Count > 1)
                             {
                                 DelActionDuoJi(data, mSelectDuoJi);
                             }
@@ -1558,7 +1526,7 @@ public class ActionEditUI : BaseUI
                 if (null != mSelectFrameData)
                 {//可复制
                     canelFrame = false;
-                    mCopyFrameData = mSelectFrameData.OnCopy();
+                    mCopyFrameData = mSelectFrameData.OnCopy(mRobot);
                     HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("复制成功"), HUDTextTips.Color_Green, 1.5f);
                 }
                 if (null != mSelectDuoJi)
@@ -1755,11 +1723,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1925,11 +1890,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -1955,23 +1917,21 @@ public class ActionEditUI : BaseUI
                     if (null != mRobot)
                     {
                         mRobot.GetAllDjData().UpdateData((byte)ids.num2, (short)djdata.Angle);
-                        if (null != MoveSecond.Instance)
+                        SendRota(ids.num2, djdata.Angle, true);
+                        Dictionary<int, int> dict = MoveSecond.GetDJLianDongData(ids.num2, djdata.Angle);
+                        if (null != dict)
                         {
-                            Dictionary<int, int> dict = MoveSecond.Instance.GetDJLianDongData(ids.num2, djdata.Angle);
-                            if (null != dict)
+                            foreach (var kvp in dict)
                             {
-                                foreach (var kvp in dict)
+                                DuoJiData otherData = mRobot.GetAnDjData(kvp.Key);
+                                if (null != otherData)
                                 {
-                                    DuoJiData otherData = mRobot.GetAnDjData(kvp.Key);
-                                    if (null != otherData)
-                                    {
-                                        mRobot.GetAllDjData().UpdateData((byte)(otherData.id), (short)(otherData.rota + kvp.Value));
-                                        data.action.UpdateRota((byte)(otherData.id), (short)(otherData.rota + kvp.Value));
-                                    }
+                                    SetDuoJiAngle(otherData.id, otherData.rota);
+                                    data.action.UpdateRota((byte)(otherData.id), (short)(otherData.rota));
                                 }
                             }
                         }
-                        SendRota(ids.num2, djdata.Angle, true);
+
                     }
                     EventMgr.Inst.Fire(EventID.UI_Set_Save_Actions_Btn_State, new EventArg(true));
                     SetActionSaveFlag(true);
@@ -1996,23 +1956,21 @@ public class ActionEditUI : BaseUI
             {
                 SetDuoJiAngle(data.Id, data.Angle);
                 mRobot.GetAllDjData().UpdateData((byte)data.Id, (short)data.Angle);
-                if (null != MoveSecond.Instance)
+                SendRota(data.Id, data.Angle, finished);
+                Dictionary<int, int> dict = MoveSecond.GetDJLianDongData(data.Id, data.Angle);
+                if (null != dict)
                 {
-                    Dictionary<int, int> dict = MoveSecond.Instance.GetDJLianDongData(data.Id, data.Angle);
-                    if (null != dict)
+                    foreach (var kvp in dict)
                     {
-                        foreach (var kvp in dict)
+                        DuoJiData otherData = mRobot.GetAnDjData(kvp.Key);
+                        if (null != otherData)
                         {
-                            DuoJiData otherData = mRobot.GetAnDjData(kvp.Key);
-                            if (null != otherData)
-                            {
-                                mRobot.GetAllDjData().UpdateData((byte)(otherData.id), (short)(otherData.rota + kvp.Value));
-                                frameData.action.UpdateRota((byte)(otherData.id), (short)(otherData.rota + kvp.Value));
-                            }
+                            SetDuoJiAngle(otherData.id, otherData.rota);
+                            frameData.action.UpdateRota((byte)(otherData.id), (short)(otherData.rota));
                         }
                     }
                 }
-                SendRota(data.Id, data.Angle, finished);
+
             }
             EventMgr.Inst.Fire(EventID.UI_Set_Save_Actions_Btn_State, new EventArg(true));
             SetActionSaveFlag(true);
@@ -2044,7 +2002,7 @@ public class ActionEditUI : BaseUI
         Transform djNum = frame.Find("djNum");
         if (null != djlist)
         {
-            if (data.showList.Count == 1)
+            if (null != data.showList && data.showList.Count == 1)
             {
                 if (null != djNum)
                 {
@@ -2097,13 +2055,13 @@ public class ActionEditUI : BaseUI
             int count = 3;
             if (data.isOpen)
             {
-                count = data.showList.Count;
+                count = data.showList == null ? 0 : data.showList.Count;
             }
             else
             {
                 count = count > djlist.childCount ? djlist.childCount : count;
             }
-            if (null != djNum && data.showList.Count <= 3)
+            if (null != djNum && (null == data.showList ||data.showList.Count <= 3))
             {
                 djNum.gameObject.SetActive(false);
             }
@@ -2323,11 +2281,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -2405,11 +2360,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
         mDragStartFlag = false;
@@ -2654,11 +2606,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -2713,11 +2662,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -2743,11 +2689,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -2773,11 +2716,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -2892,11 +2832,8 @@ public class ActionEditUI : BaseUI
         catch (System.Exception ex)
         {
             mSwitchEditFlag = false;
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -3233,6 +3170,7 @@ public class ActionEditUI : BaseUI
                         }
                     }
                 }
+                
                 /*if (null != mDjlistGrid)
                 {
                     mDjlistGrid.repositionNow = true;
@@ -3242,11 +3180,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     DuoJi CreateDragDj(int id, int rota, Vector3 pos)
@@ -3459,7 +3394,7 @@ public class ActionEditUI : BaseUI
             for (int i = 0, imax = mFrameList.Count; i < imax; ++i)
             {
                 data = (FrameDataEx)mFrameList[i];
-                data.width = GetCloseFrameWidth(data.showList.Count);
+                data.width = GetCloseFrameWidth(data.showList == null ? 0 : data.showList.Count);
                 //data.width = Edit_Frame_Width;
                 data.height = Edit_Frame_Height;
                 data.isOpen = false;
@@ -3549,7 +3484,7 @@ public class ActionEditUI : BaseUI
             for (int i = 0, imax = mFrameList.Count; i < imax; ++i)
             {
                 data = (FrameDataEx)mFrameList[i];
-                data.width = GetCloseFrameWidth(data.showList.Count);
+                data.width = GetCloseFrameWidth(data.showList == null ? 0 : data.showList.Count);
                 data.isOpen = isOpen;
             }
         }
@@ -3634,7 +3569,7 @@ public class ActionEditUI : BaseUI
         if (-1 != index)
         {
             FrameDataEx data = CreateFrameData();
-            data.action.Copy(mCopyFrameData.action);
+            data.action.Copy(mCopyFrameData.action, mRobot);
             if (mFrameCustomGrid.IsEnd(mSelectFrameData))
             {//加在最后
                 mFrameCustomGrid.AddItem(data);
@@ -3669,11 +3604,8 @@ public class ActionEditUI : BaseUI
                 }
                 catch (System.Exception ex)
                 {
-                    if (ClientMain.Exception_Log_Flag)
-                    {
-                        System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                        Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                    }
+                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
                 }
             }
             if (null != mStartObj && mStartObj.activeSelf)
@@ -3825,11 +3757,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     void SetFrameAddState(Transform frame, FrameDataEx data)
@@ -4096,11 +4025,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -4120,11 +4046,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         return string.Empty;
     }
@@ -4151,11 +4074,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         return data;
     }
@@ -4257,11 +4177,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -4284,11 +4201,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -4340,19 +4254,19 @@ public class ActionEditUI : BaseUI
                     for (int i = 0, imax = list.Count; i < imax; ++i)
                     {
                         frame = CreateFrameData();
-                        frame.action.Copy(list[i]);
-                        mFrameList.Add(frame);
+                        frame.action.Copy(list[i], mRobot);
+                        if (null != frame.action.GetShowID() && frame.action.GetShowID().Count > 0)
+                        {
+                            mFrameList.Add(frame);
+                        }
                     }
                 }
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -4366,47 +4280,32 @@ public class ActionEditUI : BaseUI
         {
             return;
         }
-        if (mRobot.Connected)
+        if (PlatformMgr.Instance.GetBluetoothState())
         {
             if (finished)
             {
                 mLastSendDjRota = 0;
                 mRobot.CtrlActionForDjId(id, rota);
-                if (null != MoveSecond.Instance)
-                {
-                    Dictionary<int, int> dict = MoveSecond.Instance.GetDJLianDongData(id, rota);
-                    if (null != dict)
-                    {
-                        foreach (var kvp in dict)
-                        {
-                            DuoJiData otherData = mRobot.GetAnDjData(kvp.Key);
-                            if (null != otherData)
-                            {
-                                mRobot.CtrlActionForDjId((byte)(otherData.id), (short)(otherData.rota + kvp.Value));
-                            }
-                        }
-                    }
-                }
             }
             else if (Time.time - mLastSendDjRota >= 0.1f)
             {
                 mRobot.CtrlActionForDjId(id, rota);
-                if (null != MoveSecond.Instance)
+                mLastSendDjRota = Time.time;
+            }
+        }
+        else
+        {
+            Dictionary<int, int> dict = MoveSecond.GetDJLianDongData(id, rota);
+            if (null != dict)
+            {
+                foreach (var kvp in dict)
                 {
-                    Dictionary<int, int> dict = MoveSecond.Instance.GetDJLianDongData(id, rota);
-                    if (null != dict)
+                    DuoJiData otherData = mRobot.GetAnDjData(kvp.Key);
+                    if (null != otherData)
                     {
-                        foreach (var kvp in dict)
-                        {
-                            DuoJiData otherData = mRobot.GetAnDjData(kvp.Key);
-                            if (null != otherData)
-                            {
-                                mRobot.CtrlActionForDjId((byte)(otherData.id), (short)(otherData.rota + kvp.Value));
-                            }
-                        }
+                        mRobot.GetAllDjData().UpdateData((byte)(otherData.id), (short)(otherData.startRota + kvp.Value));
                     }
                 }
-                mLastSendDjRota = Time.time;
             }
         }
         EventMgr.Inst.Fire(EventID.Adjust_Angle_For_UI, new EventArg(id, rota));
@@ -4575,17 +4474,14 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     //开始播放
     void StartPlay(int startIndex)
     {
-        Debuger.Log("StartPlay startIndex =" + startIndex);
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "StartPlay startIndex =" + startIndex);
         if (isEditState)
         {//编辑状态播放全部展开
             SetEditAllFrameOpenState(true);
@@ -4720,11 +4616,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             isPause = false;
         }
 
@@ -4748,11 +4641,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -4854,18 +4744,16 @@ public class ActionEditUI : BaseUI
             actions.Save();
             if (null != mRobot)
             {
-                ActionSequence acopy = new ActionSequence(actions);
+                ActionSequence acopy = new ActionSequence(actions, mRobot);
+                acopy.SetOfficial(false);
                 RobotManager.GetInst().AddRobotActions(mRobot, acopy);
             }
             SetActionSaveFlag(false);
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     bool CheckNeedSave()
@@ -4891,11 +4779,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         return false;
     }
@@ -4944,11 +4829,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -4961,16 +4843,16 @@ public class ActionEditUI : BaseUI
     {
         try
         {
-            if (null != RobotEventListener.mJms)
+            /*if (null != RobotEventListener.mJms)
             {
                 #region  新建的空模型机器人
                 if (RobotMgr.Instance.newRobot == true)
                 {
-                    RobotDataMgr.Instance.SaveRobotMsg(RobotEventListener.mJms.robotName);
+                    RobotDataMgr.Instance.SaveRobotMsg(MoveSecond.robotName);
                     RobotMgr.Instance.newRobot = false;
                 }
                 #endregion
-            }
+            }*/
 
             GameObject oriGO = GameObject.Find("oriGO");
 
@@ -4986,7 +4868,6 @@ public class ActionEditUI : BaseUI
             }
             if (null != mRobot)
             {
-                mRobot.StopAllTurn();
                 mRobot.StopNowPlayActions();
             }
             SceneManager.GetInst().CloseCurrentScene();
@@ -5000,11 +4881,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -5063,11 +4941,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -5102,10 +4977,12 @@ public class ActionEditUI : BaseUI
                     }
                     FrameDataEx data = AddFrame(true);
                     mRobot.GetNowAction(data.action);
-                    
-                    for (int i = 0, imax = showList.Count; i < imax; ++i)
+                    if (null != showList)
                     {
-                        data.AddDj(showList[i]);
+                        for (int i = 0, imax = showList.Count; i < imax; ++i)
+                        {
+                            data.AddDj(showList[i]);
+                        }
                     }
                     ItemObjectEx item = mFrameCustomGrid.GetItemObject(data);
                     if (null != item)
@@ -5118,11 +4995,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -5134,11 +5008,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -5150,11 +5021,8 @@ public class ActionEditUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -5209,7 +5077,7 @@ public class ActionEditUI : BaseUI
 
         public List<byte> showList
         {
-            get { return action.showList; }
+            get { return action.GetShowID(); }
         }
 
         
@@ -5239,10 +5107,10 @@ public class ActionEditUI : BaseUI
         /// 用于复制
         /// </summary>
         /// <returns></returns>
-        public FrameDataEx OnCopy()
+        public FrameDataEx OnCopy(Robot robot)
         {
             FrameDataEx data = new FrameDataEx(action.index, name, width, height, action.sportTime);
-            data.action.Copy(action);
+            data.action.Copy(action, robot);
             data.alphaFlag = false;
             data.isOpen = false;
             return data;

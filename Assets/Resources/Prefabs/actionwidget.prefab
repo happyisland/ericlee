@@ -234,8 +234,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11400000, guid: 80cffdb59d2e419459cc679c12a75efa, type: 2}
-  mSpriteName: Button_b
+  mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
+  mSpriteName: OvalActionBoard@3x
   mFillCenter: 1
 --- !u!114 &11400002
 MonoBehaviour:
@@ -411,8 +411,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11400000, guid: 80cffdb59d2e419459cc679c12a75efa, type: 2}
-  mSpriteName: Button
+  mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
+  mSpriteName: OvalActionItem
   mFillCenter: 1
 --- !u!114 &11434010
 MonoBehaviour:
@@ -446,7 +446,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 164
   mHeight: 164
-  mDepth: 7
+  mDepth: 4
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -461,8 +461,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
-  mSpriteName: actionIconBoard@2x
+  mAtlas: {fileID: 11400000, guid: 80cffdb59d2e419459cc679c12a75efa, type: 2}
+  mSpriteName: Clean
   mFillCenter: 1
 --- !u!114 &11489798
 MonoBehaviour:
@@ -496,7 +496,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 200
   mHeight: 200
-  mDepth: 8
+  mDepth: 3
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0

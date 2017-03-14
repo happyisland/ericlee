@@ -43,7 +43,7 @@ public class GetpSpritesData
     public TextAsset GetXmlByPath()
     {
         //path = "Script/Test4/partsData/partsData";
-        path = Application.persistentDataPath + "/default/partsData";
+        path = PublicFunction.CombinePath(ResourcesEx.GetCommonRootPath(), "partsData");
       
         TextAsset tmp = Resources.Load(path) as TextAsset;
 
@@ -54,11 +54,7 @@ public class GetpSpritesData
     {
         string nameTemp = RobotMgr.Instance.rbtnametempt;
         string nameNoType = RobotMgr.NameNoType(nameTemp);
-        string pathfile = "";
-
-        pathfile = Application.persistentDataPath + "/default/" + nameNoType + "/partsData/partsData.xml";
-       // string pathfile = Application.persistentDataPath + "/default/Baby/partsData/partsData.xml";
-
+        string pathfile = PublicFunction.CombinePath(ResourcesEx.GetRobotCommonPath(nameTemp), "partsData/partsData.xml");
         return pathfile;
         
     }

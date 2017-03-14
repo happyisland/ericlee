@@ -13,6 +13,7 @@ using Game.Scene;
 using Game.UI;
 using System.IO;
 using Game.Event;
+using Game.Resource;
 
 
 public class JMSimulatorOnly : MonoBehaviour
@@ -212,7 +213,7 @@ public class JMSimulatorOnly : MonoBehaviour
          
          //userID = "local";
          //Debug.Log("userID:"+userID);
-         string pathfile = Application.persistentDataPath + "/data/partsImport/"+userID + ".json";
+         string pathfile = ResourcesEx.persistentDataPath + "/data/partsImport/"+userID + ".json";
 		//Debug.Log("pathfile："+pathfile);
         if (File.Exists(pathfile))
         {
@@ -464,7 +465,7 @@ public class JMSimulatorOnly : MonoBehaviour
         }
 
 
-        string pathT = Application.persistentDataPath + "/default/" + robotNameNoType + "/partsData";
+        string pathT = ResourcesEx.GetCommonPathForNoTypeName(robotNameNoType) + "/partsData";
 
         if (System.IO.Directory.Exists(pathT) != false)
         {
@@ -483,7 +484,7 @@ public class JMSimulatorOnly : MonoBehaviour
             noParts = true;
         }
 
-        string pathTT = Application.persistentDataPath + "/default/" + robotNameNoType + "/JuBuPic";
+        string pathTT = ResourcesEx.GetCommonPathForNoTypeName(robotNameNoType) + "/JuBuPic";
         if (System.IO.Directory.Exists(pathTT) == false)
         {
             juBuStep.SetActive(false);
@@ -594,7 +595,7 @@ public class JMSimulatorOnly : MonoBehaviour
                 animb.pic = animdata[id][12];
                 animb.firstPic = animdata[id][13];
                 animb.lvdaiNum =animdata[id][14];
-                //Debug.Log("anim.source:" + id + ";name:" + animb.firstPic);
+                animb.sensorID = animdata[id][15];
                 if (animDataT.anims.ContainsKey(id) == false)
                 {
                     animDataT.anims.Add(id, animb);
@@ -613,7 +614,7 @@ public class JMSimulatorOnly : MonoBehaviour
 
                 if(jubuSpritesName.Contains(animdata[id][12])==false)
                 {
-                    //Debug.Log("dffdsf:" + jubuSpritesName.Count);
+                
                     jubuSpritesName.Add(animdata[id][12]);
                 }
                 
@@ -636,7 +637,6 @@ public class JMSimulatorOnly : MonoBehaviour
                     if(outAddSprites.Contains(temp)==false)
                     {
                         outAddSprites.Add(temp);
-                        //Debug.Log("temp:" + temp + ";outAddSprites:" + outAddSprites.Count);
                     }
                 }
             }
@@ -679,31 +679,44 @@ public class JMSimulatorOnly : MonoBehaviour
         {
 
             //零件图片
-            string pathTemp = "file:///" + Application.persistentDataPath + "//default//" + robotNameNoType + "//JuBuPic//" + pics[pcount] + ".png";
+            string pathTemp = "file:///" + ResourcesEx.GetCommonPathForNoTypeName(robotNameNoType) + "//JuBuPic//" + pics[pcount] + ".png";
             //Debug.Log("dfsfdsf:" + pathTemp);
             WWW www = new WWW(pathTemp);
 
             Texture textureT = null;
             yield return www;
-            if (www != null && string.IsNullOrEmpty(www.error))
+            try
             {
-                //获取Texture
-                textureT = www.texture;
-                //更多操作...    
-                if (textureT != null && jubuPics.ContainsKey(pics[pcount]) == false)
+                if (www != null && string.IsNullOrEmpty(www.error))
                 {
+                    //获取Texture
+                    textureT = www.texture;
+                    //更多操作...    
+                    if (textureT != null && jubuPics.ContainsKey(pics[pcount]) == false)
+                    {
 
-                    //Debug.Log("dfsfdsf:"+pics[jubuPCount]);
-                    jubuPics.Add(pics[pcount], textureT);
+                        //Debug.Log("dfsfdsf:"+pics[jubuPCount]);
+                        jubuPics.Add(pics[pcount], textureT);
+                    }
+
                 }
-
-            }
-            else
+                else
+                {
+                    if (textureTT != null && jubuPics.ContainsKey(pics[pcount]) == false)
+                    {
+                        jubuPics.Add(pics[pcount], textureTT);
+                    }
+                }
+                }
+            catch (System.Exception ex)
             {
-                if (textureTT != null && jubuPics.ContainsKey(pics[pcount]) == false)
+                if (ClientMain.Exception_Log_Flag)
                 {
-                    jubuPics.Add(pics[pcount], textureTT);
+                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
                 }
+                //EnableBtnClick(btns["Return"],Color.white);
+                openReturnBtn = true;
             }
 
             pcount++;
@@ -744,30 +757,44 @@ public class JMSimulatorOnly : MonoBehaviour
         {
 
             //零件图片
-            string pathTemp = "file:///" + Application.persistentDataPath + "//partsPic//" + outNamT[i] + ".png";
+            string pathTemp = "file:///" + ResourcesEx.persistentDataPath + "//partsPic//" + outNamT[i] + ".png";
 
             WWW www = new WWW(pathTemp);
 
             Texture textureT = null;
             yield return www;
-            if (www != null && string.IsNullOrEmpty(www.error))
+            try
             {
-                //获取Texture
-                textureT = www.texture;
-                //更多操作...    
-                if (textureT != null && outPics.ContainsKey(outNamT[i]) == false)
-                {
-                    outPics.Add(outNamT[i], textureT);
-                }
 
-            }
-            else
-            {
-                if (textureTT != null)
+                if (www != null && string.IsNullOrEmpty(www.error))
                 {
-                    //Debug.Log("sfff:" + outNamT[i]);
-                    outPics.Add(outNamT[i], textureTT);
+                    //获取Texture
+                    textureT = www.texture;
+                    //更多操作...    
+                    if (textureT != null && outPics.ContainsKey(outNamT[i]) == false)
+                    {
+                        outPics.Add(outNamT[i], textureT);
+                    }
+
                 }
+                else
+                {
+                    if (textureTT != null)
+                    {
+                        //Debug.Log("sfff:" + outNamT[i]);
+                        outPics.Add(outNamT[i], textureTT);
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                if (ClientMain.Exception_Log_Flag)
+                {
+                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+                }
+                //EnableBtnClick(btns["Return"],Color.white);
+                openReturnBtn = true;
             }
             i++;
 
@@ -803,7 +830,7 @@ public class JMSimulatorOnly : MonoBehaviour
 
             string path = "Prefab/Test4/Anims/" + animtype[0];
             clipTemp = Resources.Load(path) as AnimationClip;
-
+          try{
             clipTemp.name = animtype[0];
 
             if (clipTemp != null)
@@ -813,6 +840,16 @@ public class JMSimulatorOnly : MonoBehaviour
             }
 
             clipCount = rbtAnim[robotIDTemp].anims.Count;
+
+          }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+        }
             SimulateStart(oriGO);
             oriGO.name = robotNameNoType;
             
@@ -823,19 +860,19 @@ public class JMSimulatorOnly : MonoBehaviour
 
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
-                path1 = "file:///" + Application.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/editor/" + robotIDTemp + ".assetbundle";
+                path1 = "file:///" + ResourcesEx.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/editor/" + robotIDTemp + ".assetbundle";
             }
             else if (Application.platform == RuntimePlatform.IPhonePlayer)
             {
-                path1 = "file:///" + Application.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/ios/" + robotIDTemp + ".assetbundle";
+                path1 = "file:///" + ResourcesEx.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/ios/" + robotIDTemp + ".assetbundle";
             }
             else if (Application.platform == RuntimePlatform.OSXEditor)
             {
-                path1 = "file:///" + Application.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/ios/" + robotIDTemp + ".assetbundle";
+                path1 = "file:///" + ResourcesEx.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/ios/" + robotIDTemp + ".assetbundle";
             }
             else if (Application.platform == RuntimePlatform.Android)
             {
-                path1 = "file:///" + Application.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/android/" + robotIDTemp + ".assetbundle";
+                path1 = "file:///" + ResourcesEx.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/android/" + robotIDTemp + ".assetbundle";
             }
 
             StartCoroutine(GetClip(robotIDTemp));
@@ -848,9 +885,12 @@ public class JMSimulatorOnly : MonoBehaviour
     /// </summary>
     /// <param name="idtemp"></param>
     /// <returns></returns>
+    /// 
+    bool openReturnBtn = false;
     IEnumerator GetClip(string idtemp)
     {
         clipTemp = null;
+        
         if (bundle1 != null)
         {
             bundle1.Dispose();
@@ -861,20 +901,36 @@ public class JMSimulatorOnly : MonoBehaviour
 
         yield return bundle1;
 
-        foreach (string temp in animtype)
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "加载外部模型动画clip资源");
+        try
         {
-            if (anims.ContainsKey(temp) == false)
+            foreach (string temp in animtype)
             {
-                UnityEngine.Object t = bundle1.assetBundle.Load(temp);
-
-                clipTemp = GameObject.Instantiate(t) as AnimationClip;
-                clipTemp.name = temp;
-                if(clipTemp != null)
+                if (anims.ContainsKey(temp) == false)
                 {
-                    anims.Add(temp, clipTemp);
+                    UnityEngine.Object t = bundle1.assetBundle.Load(temp);
+
+                    clipTemp = GameObject.Instantiate(t) as AnimationClip;
+                    clipTemp.name = temp;
+                    if(clipTemp != null)
+                    {
+                        anims.Add(temp, clipTemp);
+                    }
+                    bundle1.assetBundle.Unload(true);
                 }
-                bundle1.assetBundle.Unload(true);
             }
+          
+            
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+            //EnableBtnClick(btns["Return"],Color.white);
+            openReturnBtn = true;
         }
 
         if (jubuPics.ContainsKey("background"))
@@ -885,6 +941,7 @@ public class JMSimulatorOnly : MonoBehaviour
         clipCount = rbtAnim[robotIDTemp].anims.Count;
         SimulateStart(oriGO);
         oriGO.name = robotNameNoType;
+            
     }
 
 
@@ -955,7 +1012,7 @@ public class JMSimulatorOnly : MonoBehaviour
             startBtn.SetActive(true);
             partsPanel.SetActive(true);
            
-            string pathT = Application.persistentDataPath + "/default/" + robotNameNoType + "/partsData";
+            string pathT = ResourcesEx.GetCommonPathForNoTypeName(robotNameNoType) + "/partsData";
 
             if (System.IO.Directory.Exists(pathT) != false)
             {
@@ -1160,7 +1217,6 @@ public class JMSimulatorOnly : MonoBehaviour
         else
         {
             partsStep.GetComponent<TweenAlpha>().PlayReverse();
-
             partsControl.GetComponent<TweenRotation>().PlayReverse();
             pstepshow = true;
         }
@@ -1215,7 +1271,6 @@ public class JMSimulatorOnly : MonoBehaviour
 
                 tempValue = tempslider.value;
                 stepCount = Mathf.RoundToInt(tempslider.value * clipCount);
-                //Debug.Log("slider  000:" + stepCount);
                 UISprite backSprite = btns["Back"].transform.GetComponent<UISprite>();
              
                 if (stepTemp != stepCount)
@@ -1365,7 +1420,7 @@ public class JMSimulatorOnly : MonoBehaviour
             if (Application.platform != RuntimePlatform.WindowsEditor)
             {
                 isActionList = true;
-                SearchBluetoothMsg.ShowMsg();
+                ConnectBluetoothMsg.ShowMsg();
             }
             else
             {
@@ -1404,7 +1459,7 @@ public class JMSimulatorOnly : MonoBehaviour
             if (Application.platform != RuntimePlatform.WindowsEditor)
             {
                 isControl = true;
-                SearchBluetoothMsg.ShowMsg();
+                ConnectBluetoothMsg.ShowMsg();
             }
             else
             {
@@ -1679,7 +1734,11 @@ public class JMSimulatorOnly : MonoBehaviour
     {
         JustButtonsEnabled(stepTempT);
 
-        AnimBaseHandle(stepTempT);
+        if (!openReturnBtn)
+        {
+            AnimBaseHandle(stepTempT);
+        }
+        
 
         if (stepTempT == 0)
         {
@@ -1786,6 +1845,21 @@ public class JMSimulatorOnly : MonoBehaviour
             inputlabels["djnotice"].text = string.Format(nots["not1"], idnote);
 
             inputlabels["djnotice2"].text = nots["not2"];
+        }
+
+        if (source == "sensorID")
+        {
+            PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "sensor");
+            DJNotice.gameObject.SetActive(true);
+            DJNotice.GetComponent<TweenPosition>().PlayForward();
+            DJNotice.GetComponent<TweenAlpha>().PlayForward();
+            Debug.Log("id:" + id + ";dsfse:" + rbtAnim[robotid].anims[id].sensorID);
+            string sensorIDTemp = rbtAnim[robotid].anims[id].sensorID;
+            string[] sensorDataTemp = sensorIDTemp.Split(';');
+            string sensorName = LauguageTool.GetIns().GetText(sensorDataTemp[0]);
+            inputlabels["djnotice"].text = string.Format(nots["not25"], sensorName, sensorDataTemp[1]);
+
+            inputlabels["djnotice2"].text = string.Format(nots["not26"], sensorName);
         }
     }
 
@@ -1989,7 +2063,7 @@ public class JMSimulatorOnly : MonoBehaviour
 
             string source = rbtAnim[robotid].anims[id].source;
 
-            if (source == "djid" || source == "shape" || source == "line" || source == "pa" || source == "pa2"||source=="lvdai")
+            if (source == "djid" || source == "shape" || source == "line" || source == "pa" || source == "pa2"||source=="lvdai" || source == "sensorID")
             {
                 DisableBtnClick(btns["Forward"]);
                 DisableBtnClick(btns["Back"]);
@@ -2167,10 +2241,7 @@ public class JMSimulatorOnly : MonoBehaviour
             EnableBtnClick(btns["Forward"], Color.white);
 
         }
-        else
-        {
-
-        }
+   
 
         if (stepCount > 0)
         {

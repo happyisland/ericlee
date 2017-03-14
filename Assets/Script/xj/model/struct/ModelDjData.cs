@@ -430,12 +430,9 @@ public class DuoJiData
     /// <returns></returns>
     public bool NeedSendTurnMsg()
     {
-        if (isTurn)
+        if (turnData.turnDirection != lastTurnData.turnDirection || turnData.turnSpeed != lastTurnData.turnSpeed)
         {
-            if (turnData.turnDirection != lastTurnData.turnDirection || turnData.turnSpeed != lastTurnData.turnSpeed)
-            {
-                return true;
-            }
+            return true;
         }
         return false;
     }

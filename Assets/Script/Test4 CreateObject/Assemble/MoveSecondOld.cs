@@ -260,19 +260,19 @@ public class MoveSecondOld : MonoBehaviour
                 string path1 = "";
                 if (Application.platform == RuntimePlatform.WindowsEditor)
                 {
-                    path1 = "file:///" + Application.persistentDataPath + "/parts/editor/" + temp + ".assetbundle";
+                    path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/editor/" + temp + ".assetbundle";
                 }
                 else if (Application.platform == RuntimePlatform.IPhonePlayer)
                 {
-                    path1 = "file:///" + Application.persistentDataPath + "/parts/ios/" + temp + ".assetbundle";
+                    path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/ios/" + temp + ".assetbundle";
                 }
                 else if (Application.platform == RuntimePlatform.OSXEditor)
                 {
-                    path1 = "file:///" + Application.persistentDataPath + "/parts/ios/" + temp + ".assetbundle";
+                    path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/ios/" + temp + ".assetbundle";
                 }
                 else if (Application.platform == RuntimePlatform.Android)
                 {
-                    path1 = "file:///" + Application.persistentDataPath + "/parts/android/" + temp + ".assetbundle";
+                    path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/android/" + temp + ".assetbundle";
 
                 }
                 StartCoroutine(GetOutParts(temp, path1));
@@ -285,12 +285,22 @@ public class MoveSecondOld : MonoBehaviour
 
        WWW bundle1  = new WWW(path);
         yield return bundle1;
-        
-        UnityEngine.Object t = bundle1.assetBundle.mainAsset;
 
-        tempgo = t as GameObject;
+        try
+        {
+            UnityEngine.Object t = bundle1.assetBundle.mainAsset;
 
-        
+            tempgo = t as GameObject;
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+
+        }
 
         if(prefabgos.ContainsKey(tem)==false)
         {
@@ -298,6 +308,7 @@ public class MoveSecondOld : MonoBehaviour
             //PublicFunction.SetLayerRecursively(tempgo, LayerMask.NameToLayer("Robot"));
             prefabgos.Add(tem, tempgo);
         }
+
         
      
 
@@ -958,7 +969,8 @@ public class MoveSecondOld : MonoBehaviour
                 SettingColorByOne(robotName, newt);
                 if (prefabgo.name == "seivo")
                 {
-                    RobotMgr.Instance.ShowDJID(newt, robotName,djIDTexture);
+                    int djIDTemp = RobotMgr.Instance.rbt[robotName].gos[nameT].djID;
+                    RobotMgr.Instance.ShowID(newt, djIDTemp, djIDTexture);
                 }
 
                 //GTemp模型的局部整体

@@ -6,6 +6,8 @@ using System;
 using Game.Event;
 using Game.Scene;
 using Game.Resource;
+using System.IO;
+using Game.Platform;
 
 public class MoveSecond : MonoBehaviour
 {
@@ -58,7 +60,7 @@ public class MoveSecond : MonoBehaviour
     public List<GameObject> hideGOs=new List<GameObject>();//生成时需要隐藏的模型
 
     public Vector3 tempangle;
-    public string robotName;
+    public static string robotName;
 
     //已经生成的物体
     public List<GameObject> AddedAllGOs = new List<GameObject>();
@@ -91,7 +93,7 @@ public class MoveSecond : MonoBehaviour
     List<string> innerParts = new List<string>();  //模型需要的内置的零件
 	
 	Dictionary<string, string> wireJionts = new Dictionary<string, string>();     //<线的名称，joint后缀>
-    Dictionary<string, DJLianDongs> djld = new Dictionary<string, DJLianDongs>();//联动舵机
+    static Dictionary<string, DJLianDongs> djld = new Dictionary<string, DJLianDongs>();//联动舵机
     Dictionary<string, DJLianDongs> gosld = new Dictionary<string, DJLianDongs>();//舵机引起的模型联动
     Dictionary<string, LianDongGOs> ldgos = new Dictionary<string, LianDongGOs>();
 
@@ -99,6 +101,7 @@ public class MoveSecond : MonoBehaviour
     public GameObject Guanfang;//mainScene中的Guanfang按钮
 
    public static Material matT;//默认使用的材质
+   private string adsfilename = null;//广告动画名称
 
     bool createStart = true;
     int gonameCount;//所有零件的个数
@@ -171,12 +174,155 @@ public class MoveSecond : MonoBehaviour
     }
     void Start()
     {
+        adsfilename = RecordContactInfo.Instance.FindAds();
+       // Debug.Log("adsfilename:" + adsfilename);
+        string path = ReturnAnimPath("file");
+        //Debug.Log("path:" + path);
+        
+        if (File.Exists(path) == true&&adsfilename!=null)
+        {
+            PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "playAnim:" );
+            playAnim();
+        }
+
         RobotMgr.Instance.colliderCount = 0;
         if ("playerdata" == RecordContactInfo.Instance.openType)
         {
+            PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeInfo, "don't need 3D model");
             StartCoroutine(Test());
         }
     }
+
+    #region 加载广告动画
+
+    //  "file:///"只有WWW需要加
+    public string ReturnAnimPath(string prePath)
+    {
+        string nameNoType = RobotMgr.NameNoType(robotName);
+
+        string filepathPre = ResourcesEx.persistentDataPath + "/default/" + nameNoType + "/prebanim";//"/parts";  
+        string path1= null;
+
+        if (prePath == "load")
+        {
+            if (Application.platform == RuntimePlatform.WindowsEditor)
+            {
+
+                path1 = "file:///" + filepathPre+"/editor/" + adsfilename + ".assetbundle";
+            }
+            else if (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.OSXEditor)
+            {
+                path1 = "file:///" + filepathPre + "/ios/" + adsfilename + ".assetbundle";
+            }
+            else if (Application.platform == RuntimePlatform.Android)
+            {
+                path1 = "file:///" + filepathPre + "/android/" + adsfilename + ".assetbundle";
+
+            }
+        }
+        else
+        {
+            if (Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                path1 = filepathPre + "/editor/" + adsfilename + ".assetbundle";
+            }
+            else if (Application.platform == RuntimePlatform.IPhonePlayer || Application.platform == RuntimePlatform.OSXEditor)
+            {
+                path1 = filepathPre + "/ios/" + adsfilename + ".assetbundle";
+            }
+            else if (Application.platform == RuntimePlatform.Android)
+            {
+                path1 = filepathPre + "/android/" + adsfilename + ".assetbundle";
+
+            }
+        }
+
+        return path1;
+        
+    }
+
+
+    public void playAnim()
+    {
+        string path1 = ReturnAnimPath("load");
+       
+
+        StartCoroutine(GetAnimAssets(path1));
+    }
+
+    /// <summary>
+    /// 动画文件
+    /// </summary>
+    /// <param name="tem">零件预设名称</param>
+    /// <param name="path">加载路径</param>
+    /// <returns></returns>
+    /// 
+    WWW bundleAnim=null;
+    IEnumerator GetAnimAssets(string path)
+    {
+
+        bundleAnim = new WWW(path);
+        yield return bundleAnim;
+        try 
+        { 
+            if (bundleAnim.isDone==true)
+            {
+                PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "add adsfilename:"+adsfilename);
+                UnityEngine.Object t = bundleAnim.assetBundle.Load(adsfilename);
+
+                GameObject tempgot = t as GameObject;
+        
+                GameObject prebgo = Instantiate(tempgot, Vector3.zero, Quaternion.identity) as GameObject;
+                prebgo.transform.parent = GameObject.Find("MainUIRoot_new").transform;
+                prebgo.transform.localScale = new Vector3(1, 1, 1);
+
+                foreach(Transform animchild in prebgo.transform.GetComponentsInChildren<Transform>())
+                {
+                    if(animchild.name=="close")
+                    {
+                       UIEventListener.Get(animchild.gameObject).onClick += CloseAdvertAnim;
+                       GameObject camTemp = GameObject.Find("MainUIRoot_new/Camera");
+                       UISprite animTemp=animchild.GetComponent<UISprite>();
+
+                        if(camTemp!=null&&animTemp!=null)
+                        {
+                            animTemp.leftAnchor.Set(camTemp.transform,0,39);
+                           animTemp.bottomAnchor.Set(camTemp.transform, 1, -126);
+                           animTemp.rightAnchor.Set(camTemp.transform, 0, 129);
+                           animTemp.topAnchor.Set(camTemp.transform, 1, -36);
+                        }
+                       
+                    }
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+
+        }
+       
+    }
+
+    public void CloseAdvertAnim(GameObject go)
+    {
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "clear adsfilename assets:" + adsfilename);
+        Destroy(go.transform.parent.gameObject);
+
+        bundleAnim.assetBundle.Unload(false);
+
+        string nameNoType = RobotMgr.NameNoType(robotName);
+        string path1 = ReturnAnimPath("file");
+        File.Delete(path1);
+       // PublicFunction.DelDirector(path1, true);
+
+        
+    }
+#endregion
 
     void OnEnable()
     {
@@ -279,6 +425,7 @@ public class MoveSecond : MonoBehaviour
             if (outParts.Count == 0) 
             {
                 //Debug.Log("time1:" + Time.realtimeSinceStartup);
+                PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeInfo, "don't neet AddOutParts");
                 string robotType = RobotMgr.DataType(robotName);
                 prefabgos = RobotMgr.Instance.prefabgos;
                 if (robotType == "default")
@@ -291,6 +438,7 @@ public class MoveSecond : MonoBehaviour
             else
             {
                 //加载从外部零件
+                PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeInfo, "need AddOutParts");
                 AddOutParts();
             }
 
@@ -315,20 +463,20 @@ public class MoveSecond : MonoBehaviour
                 if (Application.platform == RuntimePlatform.WindowsEditor)
                 {
 
-                    path1 = "file:///" + Application.persistentDataPath + "/parts/editor/" + temp + ".assetbundle";
+                    path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/editor/" + temp + ".assetbundle";
                 }
                 else if (Application.platform == RuntimePlatform.IPhonePlayer)
                 {
-                    path1 = "file:///" + Application.persistentDataPath + "/parts/ios/" + temp + ".assetbundle";
+                    path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/ios/" + temp + ".assetbundle";
                 }
                 else if (Application.platform == RuntimePlatform.OSXEditor)
                 {
-                    path1 = "file:///" + Application.persistentDataPath + "/parts/ios/" + temp + ".assetbundle";
+                    path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/ios/" + temp + ".assetbundle";
                 }
 
                 else if (Application.platform == RuntimePlatform.Android)
                 {
-                    path1 = "file:///" + Application.persistentDataPath + "/parts/android/" + temp + ".assetbundle";
+                    path1 = "file:///" + ResourcesEx.persistentDataPath + "/parts/android/" + temp + ".assetbundle";
 
                 }
                 StartCoroutine(GetOutParts(temp, path1));
@@ -348,24 +496,36 @@ public class MoveSecond : MonoBehaviour
         WWW bundle1 = new WWW(path);
         yield return bundle1;
 
-        UnityEngine.Object t = bundle1.assetBundle.mainAsset;
-
-        tempgo = t as GameObject;
-
-        if (RobotMgr.Instance.prefabgos.ContainsKey(tem) == false)
+        try
         {
-            RobotMgr.Instance.prefabgos.Add(tem, tempgo);
-        }
+            PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "add outparts assets:" + tem);
+            UnityEngine.Object t = bundle1.assetBundle.mainAsset;
 
+            tempgo = t as GameObject;
 
-        //当零件预设加载完毕时，开始生成模型
-        if (RobotMgr.Instance.prefabgos.Count == typetemp.Count)
-        {
-            string robotType = RobotMgr.DataType(robotName);
-            prefabgos = RobotMgr.Instance.prefabgos;
-            if (robotType == "default")
+            if (RobotMgr.Instance.prefabgos.ContainsKey(tem) == false)
             {
-                CreateTheGO(robotName);
+                RobotMgr.Instance.prefabgos.Add(tem, tempgo);
+            }
+
+
+            //当零件预设加载完毕时，开始生成模型
+            if (RobotMgr.Instance.prefabgos.Count == typetemp.Count)
+            {
+                string robotType = RobotMgr.DataType(robotName);
+                prefabgos = RobotMgr.Instance.prefabgos;
+                if (robotType == "default")
+                {
+                    CreateTheGO(robotName);
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -387,15 +547,17 @@ public class MoveSecond : MonoBehaviour
         {
             if (storeParts.Contains(temp) == false && outParts.Contains(temp) == false)
             {
-                //Debug.Log("temp:"+temp+";robotname:"+robotName);
+                PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "add outpartspic:" + temp);
                 outParts.Add(temp);
+                
             }
 
             else if (storeParts.Contains(temp) == true && innerParts.Contains(temp) == false)
             {
                 //Debug.Log("add inner:"+temp);
-
+                //PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "add innerpartspic:" + temp);
                 innerParts.Add(temp);
+                
             }
         }
 
@@ -439,15 +601,8 @@ public class MoveSecond : MonoBehaviour
     /// </summary>
     public void AddCamRAC()
     {
-        if (SceneMgr.GetCurrentSceneType() == SceneType.MainWindow)
-        {
-            mainCamera = GameObject.Find("Camera");
-
-        }
-        else
-        {
-            mainCamera = GameObject.Find("MainCamera");
-        }
+        mainCamera = GameObject.Find("MainCamera");
+      
         if (null != mainCamera)
         {
             mainCamera.transform.position = new Vector3(-3.0f, 1.0f, -0.6799996f);
@@ -491,6 +646,7 @@ public class MoveSecond : MonoBehaviour
     {
         try
         {
+            PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "CreateTheGO:");
             AddCamRAC();
 
             oriGO = GameObject.Find("oriGO");
@@ -640,14 +796,14 @@ public class MoveSecond : MonoBehaviour
                         //Debug.Log("prefab:"+goType);
                         ProduceOfficalGO(prefabgos[goType], objPos, out newt, goNameTemp[i], objAngle, num, objScale);
                     }
-
+                   
                     goNameTemp.RemoveAt(i);
 
                 }
             }
 
         }
-
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeInfo, "finish produce go");
     }
 
 
@@ -700,7 +856,15 @@ public class MoveSecond : MonoBehaviour
                 //舵机连接处编号的显示
                 if (prefabgo.name == "seivo")
                 {
-                    RobotMgr.Instance.ShowDJID(newt, robotName, djIDTexture);
+                    int djIDTemp = RobotMgr.Instance.rbt[robotName].gos[nameT].djID;
+                    RobotMgr.Instance.ShowID(newt,djIDTemp, djIDTexture);
+                }
+
+                //显示传感器ID
+                if(RobotMgr.Instance.rbt[robotName].gos[nameT].sensorID!=null)
+                {
+                    int sensorIDT = int.Parse(RobotMgr.Instance.rbt[robotName].gos[nameT].sensorID);
+                    RobotMgr.Instance.ShowID(newt, sensorIDT, djIDTexture);
                 }
 
                 //模型的组模块隐藏
@@ -715,7 +879,7 @@ public class MoveSecond : MonoBehaviour
 
                 //对模型线的处理
                 HandleWireJionts(nameT);
-				
+
                 if (RobotMgr.Instance.AddedAllGOs.Contains(newt) == false)
                 {
                     RobotMgr.Instance.AddedAllGOs.Add(newt);
@@ -820,8 +984,8 @@ public class MoveSecond : MonoBehaviour
         djld = RecordContactInfo.Instance.FindLDDJ(robotName);
         ldgos = GetLianDongData.Inst.FindLDGOsData();
        // gosld = RecordContactInfo.Instance.FindLDGOs(robotName);
-        
 
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeInfo, "has 3D model");
         StartCoroutine(Test());
     }
  
@@ -883,10 +1047,11 @@ public class MoveSecond : MonoBehaviour
             loadingSprite.SetActive(false);  //关闭加载动画
         }
 
-        
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeInfo, "no model");
         StartCoroutine(Test());
         djld = RecordContactInfo.Instance.FindLDDJ(robotName);
         ldgos = GetLianDongData.Inst.FindLDGOsData();
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeInfo, "find djld ldgos");
        // gosld = RecordContactInfo.Instance.FindLDGOs(robotName);
     }
 
@@ -898,8 +1063,11 @@ public class MoveSecond : MonoBehaviour
     /// <returns></returns>
     IEnumerator Test()
     {
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "等待模型加载完毕后，关闭屏幕屏蔽物体 000");
         yield return new WaitForEndOfFrame();
         EventMgr.Inst.Fire(EventID.UI_MainRightbar_hide, new EventArg(true));
+
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "等待模型加载完毕后，关闭屏幕屏蔽物体 001");
         if(OnModelLoadOver != null)
             OnModelLoadOver();
         GameObject ttem = GameObject.Find("MainUIRoot_new/GameObject");  //模型加载完后才能继续操作
@@ -918,6 +1086,7 @@ public class MoveSecond : MonoBehaviour
     public void AddScript()
     {
 
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeInfo, "add ColliderGO script");
         bool colliderGO = RecordContactInfo.Instance.HasNode("ColliderGO");
         if (colliderGO)
         {
@@ -936,6 +1105,7 @@ public class MoveSecond : MonoBehaviour
                 }
             }
         }
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeInfo, "AddScript finish");
     }
 
     /// <summary>
@@ -1068,10 +1238,17 @@ public class MoveSecond : MonoBehaviour
 
             if (null != mDjInitRota)
             {
+                mDjRotaDict.Clear();
+                Robot robot = RobotManager.GetInst().GetCurrentRobot();
                 foreach (KeyValuePair<string, int> kvp in mDjInitRota)
                 {
                     mDjEulerDict[kvp.Key] = kvp.Value;
                     mDjRotaDict[kvp.Key] = RobotMgr.Instance.rbt[robotName].gos[kvp.Key].oriDJAngleX; //PublicFunction.DuoJi_Start_Rota;
+                    if (null != robot)
+                    {
+                        byte id = (byte)RobotMgr.Instance.FinddjIDBydjNam(robotName, kvp.Key);
+                        robot.SetStartRota(id, (int)mDjRotaDict[kvp.Key]);
+                    }
                 }
             }
         }
@@ -1191,7 +1368,7 @@ public class MoveSecond : MonoBehaviour
             {
                 return;
             }
-            if (ResFileType.Type_default != ResourcesEx.GetResFileType(RobotMgr.DataType(robot.Name)))
+            if (ResFileType.Type_default != ResourcesEx.GetRobotType(robot))
             {
                 return;
             }
@@ -1298,13 +1475,8 @@ public class MoveSecond : MonoBehaviour
                     {
                         //Debug.Log("test01:"+djName);
                         Rotate(djName, FindRotateGO(djName), rota);
-
                         
                        LDRotate(djName,rota);
-
-                        
-                       //LDGOsRotate(djName, rota);
-
                     }
                 }
             }
@@ -1514,14 +1686,38 @@ public class MoveSecond : MonoBehaviour
     /// </summary>
     /// <param name="id"></param>
     /// <returns></returns>
-    public Dictionary<int, int> GetDJLianDongData(int id, int targetRota)
+    public static Dictionary<int, int> GetDJLianDongData(int id, int targetRota)
     {
         try
         {
             string servoName = RobotMgr.Instance.FindDJBydjID(robotName, id);
             if (null != djld && djld.ContainsKey(servoName) && null != djld[servoName].djlds)
             {
-                if (mDjRotaDict.ContainsKey(servoName))
+                Robot robot = RobotManager.GetInst().GetCurrentRobot();
+                if (null != robot && robot.Name.Equals(robotName))
+                {
+                    int rota = targetRota - robot.GetStartRota((byte)id);
+                    Dictionary<int, int> dict = new Dictionary<int, int>();
+                    foreach (KeyValuePair<string, DJLianDong> kvp in djld[servoName].djlds)
+                    {
+                        int offset = 0;
+                        if (kvp.Value.difA == 0 && kvp.Value.difB == 0)
+                        {
+                            offset = (int)MathTool.MathResult(0, kvp.Value.symbol, rota);
+                        }
+                        else if (kvp.Value.difA != 0 && kvp.Value.difB == 0)
+                        {
+                            offset = (int)MathTool.MathResult(kvp.Value.difA, kvp.Value.symbol, rota);
+                        }
+                        else if (kvp.Value.difA == 0 && kvp.Value.difB != 0)
+                        {
+                            offset = (int)MathTool.MathResult(rota, kvp.Value.symbol, kvp.Value.difB);
+                        }
+                        dict[kvp.Value.djid] = offset;
+                    }
+                    return dict;
+                }
+                /*if (mDjRotaDict.ContainsKey(servoName))
                 {
                     float rota = targetRota - mDjRotaDict[servoName];
                     Dictionary<int, int> dict = new Dictionary<int, int>();
@@ -1543,7 +1739,7 @@ public class MoveSecond : MonoBehaviour
                         dict[kvp.Value.djid] = offset;
                     }
                     return dict;
-                }
+                }*/
                 
             }
         }
@@ -1552,7 +1748,7 @@ public class MoveSecond : MonoBehaviour
             if (ClientMain.Exception_Log_Flag)
             {
                 System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+                Debuger.LogError(st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
         return null;
@@ -1846,14 +2042,9 @@ public class MoveSecond : MonoBehaviour
     {
         try
         {
-            if (SceneMgr.GetCurrentSceneType() == SceneType.MainWindow)
-            {
-                mainCamera = GameObject.Find("Camera");
-            }
-            else
-            {
-                mainCamera = GameObject.Find("MainCamera");
-            }
+
+            mainCamera = GameObject.Find("MainCamera");
+            
             bool needProduce = false;
             foreach (Transform child in mainCamera.GetComponentInChildren<Transform>())
             {

@@ -6,6 +6,8 @@ using Game.Scene;
 using System;
 using Game.Platform;
 using Game.Event;
+//using System.IO;
+
 /// <summary>
 /// author: 孙宇
 /// describe:遥控器主界面
@@ -28,10 +30,24 @@ public class UserdefControllerUI : BaseUI
     protected UILabel editTitle;
     protected UILabel editDescribe;
     protected UISprite placedArea;
+    protected Transform topRightIcons;
+    protected Transform sliderBottoms;
+    protected Transform grayBackgrounds;
+    //protected Transform cleanBoxCollider;
 
     private SmartPlace smartPlace;  // 
 
     private Transform selectActionState;
+
+    public static int curVsliderServoNum;
+    public static int curHsliderServoNum;
+    private UISprite curVsliderSelectServo;
+    private UISprite curHsliderSelectServo;
+    private UISprite curVsliderShadow;
+    private UISprite curHsliderShadow;
+
+    private UICamera curCameraViews; // 当前相机
+    private GameObject curSelectControllerWidget; // 当前选中的控件
 
     private int isExitCollision = 0; //是否碰撞，当拖动时 没有碰撞的情况下绘制可拖动面积
     public static bool isTotalDataChange = false;  // 检测数据是否发生改变
@@ -40,7 +56,16 @@ public class UserdefControllerUI : BaseUI
     public bool isFirstSetting = false; //默认进入设置界面
     private bool _isSetting;
     private bool isZeroArea;
+    private bool isVsliderServo = false;
+    private bool isHsliderServo = false;
+    private bool isVsliderChange = false;
+    private bool isHsliderChange = false;
     private bool isFirstEdit = false;
+    private float positionXRatio = 1.0f;
+    private float positionYRatio = 1.0f;
+    private float scaleRatio = 1.0f;
+    private string curVsliderName;
+    private string curHsliderName;
     public static bool isSetting; 
     protected bool IsSetting  //遥控器设置
     {
@@ -93,6 +118,8 @@ public class UserdefControllerUI : BaseUI
     /// </summary>
     void OnBackbtnClicked()
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click back button in controller scene!!");
+
         //Debug.Log("MainWindow");
         Transform topL = GameObject.Find("userdefineControllerUI/Center/gridPanel").transform;
         if (topL != null && topL.childCount <= 1)
@@ -106,12 +133,44 @@ public class UserdefControllerUI : BaseUI
         SceneMgr.EnterScene(SceneType.MainWindow);
     }
     /// <summary>
+    /// 修改舵机类型界面
+    /// </summary>
+    /// <param name="go"></param>
+    public void ModifyServoTypeSetting(GameObject obj)
+    {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Modify servo type!!");
+
+        try
+        {
+            if (obj == null)
+            {
+                return;
+            }
+            string btnname = obj.name;
+            if (btnname.Equals(PromptMsg.LeftBtnName))
+            {
+                return;
+            }
+            else if (btnname.Equals(PromptMsg.RightBtnName))
+            {
+                // 进入修改舵机轮模式界面
+                SetServoTypeMsg.ShowMsg();
+                //PublicPrompt.ShowClickBlueBtnMsg();
+            }
+        }
+        catch (System.Exception ex)
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
+        }
+    }
+    /// <summary>
     /// 修改取消
     /// </summary>
     /// <param name="go"></param>
     void OnSecondbackClicked(GameObject obj)
     {
-        //Debug.Log("define IsSetting is " + IsSetting);
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Cancel modify controller data!!");
+
         try
         {
             //Debug.Log("SecondbackClicked is run");
@@ -154,13 +213,11 @@ public class UserdefControllerUI : BaseUI
                     //DataToWidget();
                 }    
             }
-            
-            //Debug.Log("Cancel Change!!");
-            //centerTip.gameObject.SetActive(false);
-            //centerStartTip.gameObject.SetActive(false);
         }
-        catch
-        { }
+        catch (System.Exception ex)
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
+        }
     }
 
     /// <summary>
@@ -168,37 +225,35 @@ public class UserdefControllerUI : BaseUI
     /// </summary>
     void DataToWidget()
     {
-        //Debug.Log("DataToWidget is run");
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Update controller data and widgets!!");
 
         isZeroArea = false;
 
-        // 充电保护
-        /*if (ActionLogic.GetIns().IsConnect) //
-        {
-            EventMgr.Inst.Fire(EventID.Read_Power_Msg_Ack);
-        }*/
-
         smartPlace.Clear();
-        smartPlace.SetBgBoard(new Vector4(-gridPanel.GetComponent<UIWidget>().width / 2.0f + (UserdefControllerScene.leftSpace * PublicFunction.GetWidth() / 1334.0f), gridPanel.GetComponent<UIWidget>().height / 2.0f, gridPanel.GetComponent<UIWidget>().width / 2.0f - (UserdefControllerScene.leftSpace * PublicFunction.GetWidth() / 1334.0f), -gridPanel.GetComponent<UIWidget>().height / 2.0f));
+        smartPlace.SetBgBoard(new Vector4(-gridPanel.GetComponent<UIWidget>().width / 2.0f + (UserdefControllerScene.leftSpace * positionXRatio), gridPanel.GetComponent<UIWidget>().height / 2.0f, gridPanel.GetComponent<UIWidget>().width / 2.0f - (UserdefControllerScene.leftSpace * positionXRatio), -gridPanel.GetComponent<UIWidget>().height / 2.0f));
         //Debug.Log((-Screen.width / 2.0f + (UserdefControllerScene.leftSpace * Screen.width / 1334.0f) + " " + (Screen.height / 2.0f) + " " + (Screen.width / 2.0f - (UserdefControllerScene.leftSpace * Screen.width / 1334.0f)) + " " + (-Screen.height / 2.0f)));
 
-        GameObject actionWidget = Resources.Load("Prefabs/actionWidget") as GameObject;
+        GameObject actionWidget = Resources.Load("Prefabs/actionWidget") as GameObject; 
         GameObject vsliderWidget = Resources.Load("Prefabs/vSlider") as GameObject;
-        GameObject hsliderWidget = Resources.Load("") as GameObject;
+        GameObject hsliderWidget = Resources.Load("Prefabs/hSlider") as GameObject;
         GameObject joystickWidget = Resources.Load("Prefabs/joystick") as GameObject;
 
         Transform leftItems = GameObject.Find("userdefineControllerUI/Left/leftBoard/ContainerLeft/EditScrollview/Grid").transform;
 
         if (leftItems != null)
         {
-            Debug.Log("leftItem is not null!!");
+            //Debug.Log("leftItem is not null!!");
             leftItems.GetChild(0).GetChild(4).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled = false;
+            leftItems.GetChild(2).GetChild(5).GetComponent<UISprite>().enabled = false;
+            leftItems.GetChild(2).GetChild(6).GetComponent<UISprite>().enabled = false;
+            //leftItems.GetChild(3).GetChild(1).GetChild(1).GetComponent<UISprite>().enabled = false;
+            leftItems.GetChild(3).GetChild(3).GetComponent<UISprite>().enabled = false;
+            leftItems.GetChild(3).GetChild(4).GetComponent<UILabel>().enabled = false;
         }
         
-        //Debug.Log("isTotalDataChange is " + isTotalDataChange);
         //将遥控器数据显示出来
         if (ControllerManager.GetInst().TurnShowTypeList() == null)
         {            
@@ -231,14 +286,13 @@ public class UserdefControllerUI : BaseUI
                 oo = GameObject.Instantiate(vsliderWidget) as GameObject;
                 oo.transform.GetChild(3).GetComponent<UISprite>().enabled = false;
                 oo.transform.GetChild(4).GetComponent<UILabel>().enabled = true;
-                Debug.Log("obj name is "+oo.tag);
-                /*if (!((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).isOK)
-                    oo.transform.GetChild(4).GetComponent<UILabel>().text = "";
-                else
-                {
-                    int servoIDs = ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).servoID;
-                    oo.transform.GetChild(4).GetComponent<UILabel>().text = LauguageTool.GetIns().GetText("舵机") + " " + servoIDs.ToString();
-                }*/
+            }
+            else if (tem.type == ControllerManager.WidgetShowType.widgetType.hSlider)
+            {
+                oo = GameObject.Instantiate(hsliderWidget) as GameObject;
+                //oo.transform.GetChild(1).GetChild(1).GetComponent<UISprite>().enabled = false;
+                oo.transform.GetChild(3).GetComponent<UISprite>().enabled = false;
+                oo.transform.GetChild(4).GetComponent<UILabel>().enabled = true;
             }
             else if (tem.type == ControllerManager.WidgetShowType.widgetType.joystick)
             {
@@ -250,7 +304,7 @@ public class UserdefControllerUI : BaseUI
             {
                 oo.transform.SetParent(gridPanel);
                 oo.transform.localScale = Vector3.one;
-                oo.transform.localPosition = tem.pos;
+                oo.transform.localPosition = new Vector3(tem.pos.x * positionXRatio, tem.pos.y * positionYRatio, 0.0f);
                 oo.name = tem.widgetID;
                 GetTCompent.GetCompent<DragdropItemEX>(oo.transform).enabled = false;
                 GetTCompent.AddCompent<BoxCollider>(oo.transform);
@@ -280,8 +334,9 @@ public class UserdefControllerUI : BaseUI
                             oo.transform.GetChild(0).GetComponent<UISprite>().spriteName = act.IconName;
                         }
                         string actionIcon = oo.transform.GetChild(0).GetComponent<UISprite>().spriteName;
-                        ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).actionNm = RobotManager.GetInst().GetCurrentRobot().GetActionNameForIcon(actionIcon);
-                        string actionName = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).actionNm;
+                        if (RobotManager.GetInst().GetCurrentRobot().GetActionsForID(actionId) != null)
+                            ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).actionNm = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(actionId).Name;
+                        //string actionName = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).actionNm;
                         //Debug.Log("Get actionIcon is " + actionIcon);
                         //Debug.Log("Get actionName is " + actionName);
                         /*if (actionId != "")
@@ -293,14 +348,51 @@ public class UserdefControllerUI : BaseUI
 
                 if (tem.type == ControllerManager.WidgetShowType.widgetType.vSlider)
                 {
-                    Debug.Log("obj name is " + oo.tag);
+                    //Debug.Log("obj name is " + oo.tag);
                     if (!((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).isOK)
+                    {
                         oo.transform.GetChild(4).GetComponent<UILabel>().text = "";
+                        curVsliderServoNum = 0;
+                    }
                     else
                     {
                         int servoIDs = ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).servoID;
                         oo.transform.GetChild(4).GetComponent<UILabel>().text = LauguageTool.GetIns().GetText("舵机") + " " + servoIDs.ToString();
+                        //curVsliderServoNum = servoIDs;
                     }
+                    oo.transform.GetChild(5).GetComponent<UISprite>().enabled = true;
+                    oo.transform.GetChild(6).GetComponent<UISprite>().enabled = true;
+                    if (((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).directionDisclock)
+                    {
+                        oo.transform.GetChild(5).GetComponent<UISprite>().spriteName = "nishi";
+                        oo.transform.GetChild(6).GetComponent<UISprite>().spriteName = "shunshi";
+                    }
+                    else
+                    {
+                        oo.transform.GetChild(5).GetComponent<UISprite>().spriteName = "shunshi";
+                        oo.transform.GetChild(6).GetComponent<UISprite>().spriteName = "nishi";
+                    }
+                }
+
+                if (tem.type == ControllerManager.WidgetShowType.widgetType.hSlider)
+                {
+                    //Debug.Log("obj name is " + oo.tag);
+                    //oo.transform.GetChild(1).GetChild(1).GetComponent<UISprite>().enabled = false;
+                    if (!((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).isOK)
+                    {
+                        oo.transform.GetChild(4).GetComponent<UILabel>().text = "";
+                        curHsliderServoNum = 0;
+                    }
+                    else
+                    {
+                        int servoIDs = ((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).servoID;
+                        oo.transform.GetChild(4).GetComponent<UILabel>().text = LauguageTool.GetIns().GetText("舵机") + " " + servoIDs.ToString();
+                        //curHsliderServoNum = servoIDs;
+                    }
+                    int minAngles = ((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).min_angle;
+                    int maxAngles = ((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(oo.name)).max_angle;
+                    oo.transform.GetChild(5).GetComponent<UILabel>().text = minAngles.ToString() + "°";
+                    oo.transform.GetChild(6).GetComponent<UILabel>().text = maxAngles.ToString() + "°";
                 }
                 //Debug.Log("DataToWidget Add Board");
                 smartPlace.AddBoard(new SmartPlace.RectBoard(oo.name, TurnWidgetRect(oo.GetComponentInChildren<UIWidget>())));
@@ -311,12 +403,19 @@ public class UserdefControllerUI : BaseUI
         if (isFirstController)
         {
             isFirstController = false;
-            IsSetting = false;
+            //IsSetting = false;
+            UICamera camGO = GameObject.Find("UIRoot(2D)(2)/UICamera").transform.GetComponent<UICamera>();
+            if (camGO != null)
+                camGO.allowMultiTouch = true;
             //ControllerManager.GetInst().CancelCurController();
             //UICamera.current.allowMultiTouch = true;
             //Debug.Log("第一次进入遥控器更新数据！！" + UICamera.current.allowMultiTouch);
         }
-        Debug.Log("Controller is Ready!!");
+        //Debug.Log("Controller is Ready!!");
+
+        //curSelectControllerWidget = null;
+
+        InitActionList();
     }
     Vector4 TurnWidgetRect(UIWidget widget)
     {
@@ -330,6 +429,8 @@ public class UserdefControllerUI : BaseUI
     /// <param name="go"></param>
     void OnConfirmClicked()
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Confirm modify controller data!!");
+
         IsSetting = false;
         //发通知出去  本地遥控器数据更新，动作列表更新
         if (isTotalDataChange)
@@ -364,6 +465,8 @@ public class UserdefControllerUI : BaseUI
     /// <param name="go"></param>
     void OnSettingbtnClicked()
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click setting button in controller scene!!");
+
         IsSetting = true;
         isActionDataChange = false;
         isTotalDataChange = false;
@@ -375,6 +478,8 @@ public class UserdefControllerUI : BaseUI
     /// <param name="go"></param>
     void OnStopbtnClicked(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click stop action button!!");
+
         ActionLogic.GetIns().DoStopAction(go);
     }
     
@@ -412,12 +517,8 @@ public class UserdefControllerUI : BaseUI
         HideOrShowTrans(isshow, leftTrans, directType.left);
         sliderToogle.transform.GetChild(0).transform.Rotate(new Vector3(0, 180, 0));
        // ClientMain.GetInst().StartCoroutine(DelayOneFrame(isshow));
-    }
-    IEnumerator DelayOneFrame(bool flag)
-    {
-        yield return null;
-        yield return new WaitForEndOfFrame();
-        HideOrShowTrans(flag, leftTrans, directType.left);
+        if (secBacks != null && IsSetting)
+            secBacks.gameObject.SetActive(!isshow);
     }
     /// <summary>
     /// 上侧面板显示与隐藏
@@ -432,8 +533,11 @@ public class UserdefControllerUI : BaseUI
         if (rightControl != null && rightSetting != null)
         {
             rightSetting.gameObject.SetActive(isshow);
+            //secBacks.gameObject.SetActive(isshow);
             rightControl.gameObject.SetActive(!isshow);
         }
+        if (secBacks != null)
+            secBacks.gameObject.SetActive(isshow);
         topTrans.FindChild("topLeft").gameObject.SetActive(!isshow);
     }
     /// <summary>
@@ -447,20 +551,25 @@ public class UserdefControllerUI : BaseUI
             return;
         bottomTrans.gameObject.SetActive(true);
         isBottomShow = isshow;
-        bottomTrans.GetChild(0).GetComponent<BoxCollider>().enabled = isBottomShow;
+
+        if (curSelectControllerWidget != null)
+        {
+            ChangeDepthCustom(isshow, curSelectControllerWidget);
+            //curSelectControllerWidget = null;
+        }
+
+        grayBackgrounds.gameObject.SetActive(isshow);
+        
         if (isshow && isLeftShow)
             ShowOrHideLeftboard(false);
+        
+
         HideOrShowTrans(isshow, bottomTrans, directType.bottom, 0.7f, OverHide);
-        if (!isshow && selectActionState != null)
-        {
-                selectActionState.GetComponent<UISprite>().enabled = false;
-                selectActionState.gameObject.SetActive(false);
-        }
+
         
         if (!isshow && curSettingAction != null)  //下弹出框消失时 取消动作选中状态
         {
-            //Debug.Log("取消动作选中");
-            curSettingAction.GetComponent<UISprite>().spriteName = "Button";
+            curSettingAction.GetComponent<UISprite>().spriteName = "OvalActionItem";
             //Debug.Log("Cancel isBottomShow is " + isBottomShow);
         }
         else if (isshow && curSettingAction != null) //动作选中
@@ -470,19 +579,168 @@ public class UserdefControllerUI : BaseUI
             //Debug.Log("Select isBottomShow is " + isBottomShow);
         }
     }
+    /// <summary>
+    /// 横竖杆配置左侧面板显示与隐藏
+    /// </summary>
+    /// <param name="isshow"></param>
+    //bool isSliderLeftShow = false;
+    void SliderShowOrHideLeftboard(bool isshow)
+    {
+        //Debug.Log("now isshow is " + isshow);
+        if (leftTrans == null || isshow == isLeftShow)
+            return;
+        isLeftShow = isshow;
+
+        //grayBackgrounds.gameObject.SetActive(isshow);
+        /*if (isshow && isSliderBottomShow)  //底部如果存在则消失
+            SliderShowOrHideBottmboard(false);*/
+        if (isshow)
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Display left items!!");
+        else
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Hide left items!!");
+
+        HideOrShowTrans(isshow, leftTrans, directType.left);
+        sliderToogle.transform.GetChild(0).transform.Rotate(new Vector3(0, 180, 0));
+        // ClientMain.GetInst().StartCoroutine(DelayOneFrame(isshow));
+    }
+    /// <summary>
+    /// 横竖杆配置底部面板显示与隐藏
+    /// </summary>
+    /// <param name="isshow"></param>
+    bool isSliderBottomShow = false;
+    void SliderShowOrHideBottmboard(bool isshow)
+    {
+        //Debug.Log("now isSliderBottomShow is " + isSliderBottomShow);
+        //Debug.Log("now bottom isshow is "+isshow);
+        if (sliderBottoms == null || isshow == isSliderBottomShow)
+            return;
+
+        sliderBottoms.gameObject.SetActive(true);
+        isSliderBottomShow = isshow;
+        sliderBottoms.GetChild(0).GetComponent<BoxCollider>().enabled = isSliderBottomShow;
+
+        if (curSelectControllerWidget != null)
+        {
+            ChangeDepthCustom(isshow, curSelectControllerWidget);
+            //curSelectControllerWidget = null;
+        }
+
+        grayBackgrounds.gameObject.SetActive(isshow);
+        /*if (isshow && isLeftShow)
+            SliderShowOrHideLeftboard(false);*/
+        if (isshow)
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Display slider servo list!!");
+        else
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Hide slider servo list!!");
+
+        float times;
+        if (isshow)
+            times = 1.0f;
+        else
+            times = 0.6f;
+
+        HideOrShowTrans(isshow, sliderBottoms, directType.bottom, times, OverBottomHide);
+        //HideOrShowTrans(isshow, bottomTrans, directType.bottom, 0.7f, OverHide);
+    }
+    void DelayShowSliderServo()
+    {
+        //cleanBoxCollider.gameObject.SetActive(false);
+        //Debug.Log("show slider servo!!");
+        SliderShowOrHideBottmboard(true);
+
+        if(isVsliderServo && (!isHsliderServo))
+            UserdefControllerScene.InitServoListV(GameObject.Find("userdefineControllerUI/sliderBottom/Sprite/grid").transform, curVsliderServoNum, OnVsliderButtonClick);
+        else if(isHsliderServo && (!isVsliderServo))
+            UserdefControllerScene.InitServoListH(GameObject.Find("userdefineControllerUI/sliderBottom/Sprite/grid").transform, curHsliderServoNum, OnHsliderButtonClick);
+    }
+    IEnumerator DelayHideSliderServo(float t)
+    {
+        //cleanBoxCollider.gameObject.SetActive(false); 
+        yield return new WaitForSeconds(t);
+
+        for (int l = 0; l < sliderBottoms.GetChild(1).GetChild(0).childCount; l++)
+        {
+            GameObject.Destroy(sliderBottoms.GetChild(1).GetChild(0).GetChild(l).gameObject);
+        }
+
+        sliderBottoms.gameObject.SetActive(false);
+
+        editTitle.enabled = true;
+        editDescribe.enabled = true;
+        ShowOrHideLines(true);
+        topRightIcons.gameObject.SetActive(true);
+
+        if (isVsliderServo && (!isHsliderServo))
+        {
+            isVsliderServo = false;
+
+            if (curVsliderShadow != null)
+                curVsliderShadow.enabled = false;
+
+            OpenVsliderSetting(curVsliderName);
+        }
+        else if (isHsliderServo && (!isVsliderServo))
+        {
+            isHsliderServo = false;
+
+            if (curHsliderShadow != null)
+                curHsliderShadow.enabled = false;
+
+            OpenHsliderSetting(curHsliderName);
+        }
+    }
+    IEnumerator DirectHideSliderServoList(float t)
+    {
+        //cleanBoxCollider.gameObject.SetActive(false); 
+        yield return new WaitForSeconds(t);
+
+        for (int l = 0; l < sliderBottoms.GetChild(1).GetChild(0).childCount; l++)
+        {
+            GameObject.Destroy(sliderBottoms.GetChild(1).GetChild(0).GetChild(l).gameObject);
+        }
+
+        sliderBottoms.gameObject.SetActive(false);
+
+        editTitle.enabled = true;
+        editDescribe.enabled = true;
+        ShowOrHideLines(true);
+        topRightIcons.gameObject.SetActive(true);
+
+        if (isVsliderServo && (!isHsliderServo))
+        {
+            isVsliderServo = false;
+
+            if (curVsliderShadow != null)
+                curVsliderShadow.enabled = false;
+
+            if (curVsliderServoNum != 0)
+                curVsliderServoNum = 0;
+            //OpenVsliderSetting(curVsliderName);
+        }
+        else if (isHsliderServo && (!isVsliderServo))
+        {
+            isHsliderServo = false;
+
+            if (curHsliderShadow != null)
+                curHsliderShadow.enabled = false;
+
+            if (curHsliderServoNum != 0)
+                curHsliderServoNum = 0;
+            //OpenHsliderSetting(curHsliderName);
+        }
+    }
     void OverHide()
     {
-        //Debug.Log("OverHide is run!!");
-        //Debug.Log("OverHide isActionChange is " + isActionDataChange);
         if (isActionDataChange)
         {
-            //Debug.Log("now isActionChange is " + isActionDataChange);
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Update action list and data!!");
+
             Transform grid = GameObject.Find("userdefineControllerUI/Bottom/bottomBoard/Sprite/grid").transform;
             for (int i = 0; i < grid.childCount; i++)
             {
                 GameObject.Destroy(grid.GetChild(i).gameObject);
             }
-            GameObject obj = Resources.Load("Prefabs/newActionItem1") as GameObject;
+            GameObject obj = Resources.Load("Prefabs/newActionItem2") as GameObject;
             GameObject none = GameObject.Instantiate(obj) as GameObject;
             none.transform.SetParent(grid);
             none.transform.localScale = Vector3.one;
@@ -494,19 +752,23 @@ public class UserdefControllerUI : BaseUI
                 for (int i = 0; i < showActionList.Count; i++)
                 {
                     GameObject oo = GameObject.Instantiate(obj) as GameObject;
+                    oo.name = "newActionItem_" + showActionList[i];
                     oo.transform.SetParent(grid);
                     oo.transform.localScale = Vector3.one;
                     oo.transform.localPosition = Vector3.zero;
+
                     ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(showActionList[i]);
                     if (act == null)
                     {
-                        oo.GetComponentInChildren<UILabel>().text = string.Empty;
-                        oo.transform.GetChild(0).GetComponent<UISprite>().spriteName = "add";
+                        Debug.Log("now the index is " + i);
+                        oo.transform.GetChild(0).GetComponent<UISprite>().spriteName = "add_action";
+                        oo.transform.GetChild(1).GetComponent<UILabel>().text = string.Empty;
                     }
                     else
                     {
-                        oo.GetComponentInChildren<UILabel>().text = act.Name;
+                        Debug.Log("now the real index is " + i + " " + act.IconName);
                         oo.transform.GetChild(0).GetComponent<UISprite>().spriteName = act.IconName;
+                        oo.transform.GetChild(1).GetComponent<UILabel>().text = act.Name;
                     }
                     
                     //Debug.Log("action name is " + oo.transform.GetChild(0).GetComponent<UISprite>().spriteName);
@@ -515,13 +777,130 @@ public class UserdefControllerUI : BaseUI
                     del.onClick = OnButtonClick;
                     GetTCompent.GetCompent<ButtonEvent>(oo.transform).SetDelegate(del);
                 }
+
+                isActionDataChange = false;
             }
             grid.GetComponent<UIGrid>().repositionNow = true;
         }
         //else
             //InitActionList();
         //Debug.Log("OverHide isBottomShow is " + isBottomShow);
-        bottomTrans.gameObject.SetActive(isBottomShow);
+        if (!isBottomShow)
+            bottomTrans.gameObject.SetActive(isBottomShow);
+        bottomTrans.GetChild(0).GetComponent<BoxCollider>().enabled = isBottomShow;
+        if (!isBottomShow && selectActionState != null)
+        {
+            selectActionState.GetComponent<UISprite>().enabled = false;
+            selectActionState.gameObject.SetActive(false);
+        }
+    }
+    void OverBottomHide()
+    {
+        Transform grid = GameObject.Find("userdefineControllerUI/sliderBottom/Sprite/grid").transform;
+        grid.GetComponent<UIGrid>().repositionNow = true;
+    }
+    // 修改控件渲染深度
+    public void ChangeDepthCustom(bool isAdd, GameObject obj)
+    {
+        if (obj.transform.GetComponent<UIWidget>() == null)
+            return;
+        else
+        {
+            if (isAdd)
+            {
+                obj.transform.GetComponent<UIWidget>().depth += 10;
+                for (int i=0; i < obj.transform.childCount; i++)
+                {
+                    obj.transform.GetChild(i).GetComponent<UIWidget>().depth += 10;
+                }
+                if (obj.transform.GetChild(1).childCount != 0)
+                    obj.transform.GetChild(1).GetChild(0).GetComponent<UIWidget>().depth += 10;
+            }
+            else
+            {
+                obj.transform.GetComponent<UIWidget>().depth -= 10;
+                for (int i = 0; i < obj.transform.childCount; i++)
+                {
+                    obj.transform.GetChild(i).GetComponent<UIWidget>().depth -= 10;
+                }
+                if (obj.transform.GetChild(1).childCount != 0)
+                    obj.transform.GetChild(1).GetChild(0).GetComponent<UIWidget>().depth -= 10;
+            }
+        }
+    }
+    protected void OnVsliderButtonClick(GameObject obj)
+    {
+        base.OnButtonClick(obj);
+        if (obj.name.Contains("servo_"))  //舵机被点击
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click vslider servo icon!!");
+
+            if (curVsliderSelectServo != null)
+            {
+                curVsliderSelectServo.enabled = false;
+            }
+            for (int p = 0; p < sliderBottoms.GetChild(1).GetChild(0).childCount; p++)
+            {
+                if (sliderBottoms.GetChild(1).GetChild(0).GetChild(p).GetComponentInChildren<UILabel>().text == curVsliderServoNum.ToString())
+                {
+                    sliderBottoms.GetChild(1).GetChild(0).GetChild(p).GetChild(6).GetComponent<UISprite>().enabled = false;
+                }
+            }
+            curVsliderSelectServo = obj.transform.GetChild(6).GetComponent<UISprite>();
+            curVsliderSelectServo.enabled = true;
+            UILabel text = obj.GetComponentInChildren<UILabel>();
+            
+            byte id = byte.Parse(text.text);
+            if (id != curVsliderServoNum)
+            {
+                isVsliderChange = true;
+                curVsliderServoNum = id;
+            }
+
+            SliderShowOrHideBottmboard(false);
+
+            //((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(curVsliderName)).servoID = (byte)curVsliderServoNum;
+
+            ClientMain.GetInst().StartCoroutine(DelayHideSliderServo(0.6f));
+            //GameObject.Find("HsliderSetting/sliderWiget").transform.GetChild(1).GetComponent<UILabel>().text = "Servo " + hsliderData.servoID;
+        }
+    }
+    protected void OnHsliderButtonClick(GameObject obj)
+    {
+        base.OnButtonClick(obj);
+        if (obj.name.Contains("servo_"))  //舵机被点击
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click hslider servo icon!!");
+
+            if (curHsliderSelectServo != null)
+            {
+                curHsliderSelectServo.enabled = false;
+            }
+            for (int p = 0; p < sliderBottoms.GetChild(1).GetChild(0).childCount; p++)
+            {
+                if (sliderBottoms.GetChild(1).GetChild(0).GetChild(p).GetComponentInChildren<UILabel>().text == curHsliderServoNum.ToString())
+                {
+                    sliderBottoms.GetChild(1).GetChild(0).GetChild(p).GetChild(6).GetComponent<UISprite>().enabled = false;
+                }
+            }
+            curHsliderSelectServo = obj.transform.GetChild(6).GetComponent<UISprite>();
+            curHsliderSelectServo.enabled = true;
+            UILabel text = obj.GetComponentInChildren<UILabel>();
+
+            byte id = byte.Parse(text.text);
+            if (id != curHsliderServoNum)
+            {
+                isHsliderChange = true;
+                curHsliderServoNum = id;
+            }
+
+            SliderShowOrHideBottmboard(false);
+
+            //((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(curHsliderName)).servoID = (byte)curHsliderServoNum;
+
+            ClientMain.GetInst().StartCoroutine(DelayHideSliderServo(0.6f));
+            //GameObject.Find("HsliderSetting/sliderWiget").transform.GetChild(1).GetComponent<UILabel>().text = "Servo " + hsliderData.servoID;
+        }
     }
     /// <summary>
     /// 面板伸缩
@@ -536,13 +915,21 @@ public class UserdefControllerUI : BaseUI
         TweenPosition tp = null;
         Vector3 from = Vector3.zero;
         Vector3 to = Vector3.zero;
+
+        //Debug.Log("Trans isshow is " + isShow);
         if (trans != null)
         {
             Transform nullTran = null;
             UIWidget temWidget = trans.GetComponentInChildren<UIWidget>();
-            temWidget.SetAnchor(nullTran);
-            int hh = temWidget.height;
-            int ww = temWidget.width;
+            int hh = 0;
+            int ww = 0;
+            if (temWidget != null)
+            {
+                temWidget.SetAnchor(nullTran);
+                hh = temWidget.height;
+                ww = temWidget.width;
+            }
+
             hh -= 40;
             ww -= 40;
             MyAnimtionCurve cur1 = new MyAnimtionCurve(MyAnimtionCurve.animationCurveType.position);
@@ -566,7 +953,6 @@ public class UserdefControllerUI : BaseUI
             if (isShow)
             {
                 tp.PlayForward();
-
             }
             else
             {
@@ -616,6 +1002,10 @@ public class UserdefControllerUI : BaseUI
     {
         UserdefControllerScene.Ins.OpenVsliderSettingUI(id);
     }
+    void OpenHsliderSetting(string id)
+    {
+        UserdefControllerScene.Ins.OpenHsliderSettingUI(id);
+    }
     /// <summary>
     /// 初始化动作列表
     /// </summary>
@@ -624,7 +1014,9 @@ public class UserdefControllerUI : BaseUI
         Transform grid = bottomTrans.FindChild("Sprite/grid");
         if (grid != null)
         {
-            List<string> actions = RobotManager.GetInst().GetCurrentRobot().GetActionsNameList();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Init action list in controller setting scene!!");
+
+            List<string> actionsidd = RobotManager.GetInst().GetCurrentRobot().GetActionsIdList();
             
             //Debug.Log("actions count is " + actions.Count+"Time:"+Time.fixedDeltaTime);
             
@@ -633,7 +1025,7 @@ public class UserdefControllerUI : BaseUI
                 GameObject.Destroy(grid.GetChild(i).gameObject);
             }
 
-            GameObject obj = Resources.Load("Prefabs/newActionItem1") as GameObject;
+            GameObject obj = Resources.Load("Prefabs/newActionItem2") as GameObject;
             GameObject none = GameObject.Instantiate(obj) as GameObject;
             none.transform.SetParent(grid);
             none.transform.localScale = Vector3.one;
@@ -641,28 +1033,30 @@ public class UserdefControllerUI : BaseUI
             del1.onClick = OnButtonClick;
             GetTCompent.GetCompent<ButtonEvent>(none.transform).SetDelegate(del1);
 
-            for (int i = 0; i < actions.Count; i++)
+            for (int i = 0; i < actionsidd.Count; i++)
             {
-                if (!ControllerManager.GetInst().IsActionExist(RobotManager.GetInst().GetCurrentRobot().GetActionsForName(actions[i]).Id))
+                if (!ControllerManager.GetInst().IsActionExist(actionsidd[i]))
                 {
                     //Debug.Log("IsActionExist is false");
-                    if (!showActionList.Contains(RobotManager.GetInst().GetCurrentRobot().GetActionsForName(actions[i]).Id)) //不存在
+                    if (!showActionList.Contains(actionsidd[i])) //不存在
                     {
                         //Debug.Log("actions is not exist!!");
-                        showActionList.Add(RobotManager.GetInst().GetCurrentRobot().GetActionsForName(actions[i]).Id);
+                        showActionList.Add(actionsidd[i]);
                     }
                     GameObject oo = GameObject.Instantiate(obj) as GameObject;
+                    oo.name = "newActionItem_" + actionsidd[i];
                     oo.transform.SetParent(grid);
                     oo.transform.localScale = Vector3.one;
-                    oo.GetComponentInChildren<UILabel>().text = actions[i];          //动作名称
+                    //oo.tag = actionsidd[i];
+                    oo.transform.GetChild(1).GetComponent<UILabel>().text = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(actionsidd[i]).Name;          //动作名称
                     
                     UISprite sp = oo.transform.GetChild(0).GetComponent<UISprite>();
                     if (null != sp)
                     {
-                        ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForName(actions[i]);
+                        ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(actionsidd[i]);
                         if (null == act)
                         {
-                            sp.spriteName = "add";
+                            sp.spriteName = "add_action";
                         }
                         else
                         {
@@ -686,6 +1080,7 @@ public class UserdefControllerUI : BaseUI
     private Transform rightSetting;
     private Transform rightControl;
     private Transform leftItems;
+    private Transform secBacks;
     protected override void AddEvent()
     {
         base.AddEvent();
@@ -694,6 +1089,7 @@ public class UserdefControllerUI : BaseUI
         leftTrans = GameObject.Find("userdefineControllerUI/Left/leftBoard").transform;
         bottomTrans = GameObject.Find("userdefineControllerUI/Bottom/bottomBoard").transform;
         topTrans = GameObject.Find("userdefineControllerUI/Up").transform;
+        topRightIcons = GameObject.Find("userdefineControllerUI/Up/topright_setting").transform;
         widgetsParent = GameObject.Find("userdefineControllerUI/Center/widgetsParent").transform;
         gridPanel = GameObject.Find("userdefineControllerUI/Center/gridPanel").transform;
         sliderToogle = GameObject.Find("userdefineControllerUI/Left/leftBoard/ContainerLeft/Backdrop/sliderToogleBtn");
@@ -702,6 +1098,8 @@ public class UserdefControllerUI : BaseUI
         centerTip = GameObject.Find("userdefineControllerUI/StartIcon").transform;
         centerStartTip = GameObject.Find("userdefineControllerUI/StartTip").transform;
         stopNowBtn = GameObject.Find("userdefineControllerUI/Up/topright_control/stopBtn").transform;
+        grayBackgrounds = GameObject.Find("userdefineControllerUI/GrayBg").transform;
+        //cleanBoxCollider = GameObject.Find("userdefineControllerUI/cleanBox").transform;
         
         #region 位置布局 
         Transform left = leftTrans.GetChild(0);
@@ -725,8 +1123,9 @@ public class UserdefControllerUI : BaseUI
         editDescribe.text = LauguageTool.GetIns().GetText("设置遥控器页面副标题");
         Transform bottom = bottomTrans.parent;
         Transform deleta = bottom.GetChild(1);
-        pos = UIManager.GetWinPos(bottomTrans, UIWidget.Pivot.Bottom, 0, -bottomTrans.GetComponentInChildren<UIWidget>().height-11f);
+        pos = UIManager.GetWinPos(bottomTrans, UIWidget.Pivot.Bottom, 0, -bottomTrans.GetComponentInChildren<UIWidget>().height-11.0f);
         bottomTrans.localPosition = pos;
+        
         pos = UIManager.GetWinPos(deleta, UIWidget.Pivot.BottomRight,34,34);
         deleta.localPosition = pos;
         deleta.gameObject.SetActive(false);  //隐藏
@@ -743,9 +1142,27 @@ public class UserdefControllerUI : BaseUI
         placedArea.enabled = false;
         IsSetting = false;
 
+        sliderBottoms = GameObject.Find("userdefineControllerUI/sliderBottom").transform;
+        Vector3 posB;
+        posB = UIManager.GetWinPos(sliderBottoms, UIWidget.Pivot.Bottom, 0, -sliderBottoms.GetComponentInChildren<UIWidget>().height - 11.0f);
+        sliderBottoms.localPosition = posB;
+        sliderBottoms.GetComponentInChildren<UISprite>().width = PublicFunction.GetWidth();
+
         centerTip.gameObject.SetActive(false);
         centerStartTip.gameObject.SetActive(false);
         stopNowBtn.gameObject.SetActive(false);
+        grayBackgrounds.gameObject.SetActive(false);
+        //cleanBoxCollider.gameObject.SetActive(false);
+
+        secBacks = GameObject.Find("userdefineControllerUI/Up/secBack").transform;
+        Vector3 posSS;
+        posSS = UIManager.GetWinPos(secBacks, UIWidget.Pivot.TopLeft, 34, 34);
+        secBacks.localPosition = posSS;
+
+        secBacks.gameObject.SetActive(false);
+        //topRightIcons.gameObject.SetActive(false);
+
+        curSelectControllerWidget = null;
 
         if (isFirstEdit)
         {
@@ -761,28 +1178,54 @@ public class UserdefControllerUI : BaseUI
             editDescribe.enabled = false;
         }
 
+        // 计算控件位置和缩放比例
+        float curScreenW = ControllerManager.GetInst().GetCurControllerSceneWidth() * 1.0f;
+        float curScreenH = ControllerManager.GetInst().GetCurControllerSceneHeight() * 1.0f;
+        if (curScreenW == 0)
+            curScreenW = 1334.0f;
+        if (curScreenH == 0)
+            curScreenH = 750.0f;
+
+        positionXRatio = PublicFunction.GetWidth() * 1.0f / curScreenW;
+        positionYRatio = PublicFunction.GetHeight() * 1.0f / curScreenH;
+
+        scaleRatio = Mathf.Min(positionXRatio, positionYRatio);
+
         leftItems = GameObject.Find("userdefineControllerUI/Left/leftBoard/ContainerLeft/EditScrollview/Grid").transform;
 
         if (leftItems != null)
         {
-            Debug.Log("leftItem is not null!!");
+            //Debug.Log("leftItem is not null!!");
             leftItems.GetChild(0).GetChild(4).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = false;
             leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled = false;
+            leftItems.GetChild(2).GetChild(5).GetComponent<UISprite>().enabled = false;
+            leftItems.GetChild(2).GetChild(6).GetComponent<UISprite>().enabled = false;
+            //leftItems.GetChild(3).GetChild(1).GetChild(1).GetComponent<UISprite>().enabled = false;
+            leftItems.GetChild(3).GetChild(3).GetComponent<UISprite>().enabled = false;
+            leftItems.GetChild(3).GetChild(4).GetComponent<UILabel>().enabled = false;
 
             // 设置长按反应时间
             leftItems.GetChild(0).GetComponent<UIDragDropItem>().pressAndHoldDelay = 0.1f;
             leftItems.GetChild(1).GetComponent<UIDragDropItem>().pressAndHoldDelay = 0.1f;
             leftItems.GetChild(2).GetComponent<UIDragDropItem>().pressAndHoldDelay = 0.1f;
+            leftItems.GetChild(3).GetComponent<UIDragDropItem>().pressAndHoldDelay = 0.1f;
         }
 
         isFirstController = true;
 
+        isVsliderServo = false;
+        isHsliderServo = false;
+
+        sliderBottoms.gameObject.SetActive(false);
+
         InitActionList();
         bottomTrans.gameObject.SetActive(false);
 
-        Debug.Log("注册充电保护中！！");
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Add event in controller setting scene!!");
+
+        //Debug.Log("注册充电保护中！！");
         EventMgr.Inst.Regist(EventID.Read_Power_Msg_Ack, GetPowerState);
 
         #endregion
@@ -790,6 +1233,10 @@ public class UserdefControllerUI : BaseUI
 
     public override void Release()
     {
+        UICamera camGO2 = GameObject.Find("UIRoot(2D)(2)/UICamera").transform.GetComponent<UICamera>();
+        if (camGO2 != null)
+            camGO2.allowMultiTouch = false;
+
         base.Release();
 
         EventMgr.Inst.UnRegist(EventID.Read_Power_Msg_Ack, GetPowerState);
@@ -807,7 +1254,9 @@ public class UserdefControllerUI : BaseUI
             }
         }
         catch (System.Exception ex)
-        { }
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
+        }
     }
 
     void GoHome()
@@ -821,10 +1270,6 @@ public class UserdefControllerUI : BaseUI
         {
             base.OnButtonPress(obj, press);
 
-            //GameObject setBtn0 = GameObject.Find("userdefineControllerUI/Up/topright_control/settingBtn");
-            
-            //Debug.Log("Now touchCount is " + ControlLogic.touchCount);
-
             try
             {
                 if (press)
@@ -833,15 +1278,19 @@ public class UserdefControllerUI : BaseUI
                     ControlLogic.touchCount--;
                 if (obj.tag.Contains("widget_action")) //动作之间互斥 ，不可同时按下两个动作
                 {
-                    string actionName = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).actionNm;
+                    if (press)
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "operate action controller!!");
 
-                    if (!PlatformMgr.Instance.GetBluetoothState())  //未连接的情况 模型运动 
+                    string actionName = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).actionNm;
+                    string actionId = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).actionId;
+
+                    if (!PlatformMgr.Instance.GetBluetoothState() && press)  //未连接的情况 模型运动 
                     {
                         HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
                     }     
                     else
                     {
-                        if (actionName == "")
+                        if (actionName == "" && press)
                         {
                             HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
                         }
@@ -852,7 +1301,8 @@ public class UserdefControllerUI : BaseUI
                                 if (!ControlLogic.actionTouch) //动作被按下时 不响应其它动作
                                 {
                                     ControlLogic.actionTouch = true;
-                                    ControlLogic.GetIns().PlayAction(actionName);
+                                    ControlLogic.GetIns().PlayAction(actionId);
+                                    //Debug.Log("now action id is " + actionId);
                                 }
                             }
                             else
@@ -863,29 +1313,112 @@ public class UserdefControllerUI : BaseUI
                         }                        
                     }
                 }
-                if (obj.tag.Contains("widget_vslider") && (!IsSetting)) //动作之间互斥 ，不可同时按下两个动作
+                if (obj.tag.Contains("widget_vslider") && (!IsSetting)) //使用模式下点击竖杆提示连接机器人
                 {
+                    if (press)
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "operate vslider controller!!");
+
                     //string actionName = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).actionNm;
-                    if (!PlatformMgr.Instance.GetBluetoothState())  //未连接的情况 模型运动 
+                    if(press)
                     {
-                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
-                    }
-                    else if (!((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).isOK)
-                    {
-                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
-                    }
-                    
+                        if ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name) != null)
+                            curVsliderServoNum = ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).servoID;
+
+                        if (!PlatformMgr.Instance.GetBluetoothState())  //未连接的情况 模型运动 
+                        {
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
+                        }
+                        else if (!((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).isOK)
+                        {
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
+                        }
+                        else if (curVsliderServoNum != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)curVsliderServoNum).modelType == ServoModel.Servo_Model_Angle)
+                        {
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("舵机属性已更改，不可使用"));
+                        }
+                    }                       
                 }
-                if (obj.tag.Contains("widget_joystick") && (!IsSetting)) //动作之间互斥 ，不可同时按下两个动作
+                if (obj.tag.Contains("widget_hslider") && (!IsSetting)) //使用模式下点击横杆提示连接机器人
                 {
+                    if (press)
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "operate hslider controller!!");
+
                     //string actionName = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).actionNm;
-                    if (!PlatformMgr.Instance.GetBluetoothState())  //未连接的情况 模型运动 
+                    if (press)
                     {
-                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
-                    }
-                    else if (!((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).isOK)
+                        if ((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name) != null)
+                            curHsliderServoNum = ((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).servoID;
+
+                        if (!PlatformMgr.Instance.GetBluetoothState())  //未连接的情况 模型运动 
+                        {
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
+                        }
+                        else if (!((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).isOK)
+                        {
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
+                        }
+                        else if (curHsliderServoNum != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)curHsliderServoNum).modelType == ServoModel.Servo_Model_Turn)
+                        {
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("舵机属性已更改，不可使用"));
+                        }
+                    }                    
+                }
+                if (obj.tag.Contains("widget_joystick") && (!IsSetting)) //使用模式下点击摇杆提示连接机器人
+                {
+                    if (press)
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "operate joystick controller!!");
+
+                    //string actionName = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).actionNm;
+                    if (press)
                     {
-                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
+                        int wheelServoID01 = 0;
+                        int wheelServoID02 = 0;
+                        int wheelServoID03 = 0;
+                        int wheelServoID04 = 0;
+
+                        if ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name) != null && ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).type == JockstickData.JockType.twoServo)
+                        {
+                            wheelServoID01 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftUpID;
+                            wheelServoID02 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightUpID;
+                            wheelServoID03 = 0;
+                            wheelServoID04 = 0;
+                        }
+                        else if ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name) != null && ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).type == JockstickData.JockType.fourServo)
+                        {
+                            wheelServoID01 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftUpID;
+                            wheelServoID02 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightUpID;
+                            wheelServoID03 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftBottomID;
+                            wheelServoID04 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightBottomID;
+                        }
+                        else
+                        {
+                            wheelServoID01 = 0;
+                            wheelServoID02 = 0;
+                            wheelServoID03 = 0;
+                            wheelServoID04 = 0;
+                        }
+                        
+                        if (!PlatformMgr.Instance.GetBluetoothState())  //未连接的情况 模型运动 
+                        {
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
+                        }
+                        else if (!((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).isOK)
+                        {
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
+                        }
+                        else if ((wheelServoID01 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID01).modelType == ServoModel.Servo_Model_Angle) ||
+                                 (wheelServoID02 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID02).modelType == ServoModel.Servo_Model_Angle) ||
+                                 (wheelServoID03 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID03).modelType == ServoModel.Servo_Model_Angle) ||
+                                 (wheelServoID04 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID04).modelType == ServoModel.Servo_Model_Angle))
+                        {
+                            Debug.Log("servo type is error!!");
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftBottomID = 0;
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftUpID = 0;
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightBottomID = 0;
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightUpID = 0;
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).type = JockstickData.JockType.none;
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置"));
+                        }
                     }
                 }
 
@@ -905,9 +1438,9 @@ public class UserdefControllerUI : BaseUI
                     backBox.enabled = false;
                 }
             }
-            catch (Exception ex)
+            catch (System.Exception ex)
             {
-
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
             }
         }
     }
@@ -925,10 +1458,13 @@ public class UserdefControllerUI : BaseUI
                 ShowOrHideLines(false);
                 ActionLogic.GetIns().DoStopAction(obj);
                 editDescribe.enabled = false;
+                
                 OnBackbtnClicked();
             }
             else if(name.Equals("secBack")) //设置返回
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Exit controller setting UI!!");
+
                 if (selectActionState != null)
                 {
                     selectActionState.GetComponent<UISprite>().enabled = false;
@@ -946,7 +1482,7 @@ public class UserdefControllerUI : BaseUI
                 }
                 editTitle.enabled = false;
                 ShowOrHideLines(false);
-                editDescribe.enabled = false; 
+                editDescribe.enabled = false;
                 //centerTip.gameObject.SetActive(false);
                 Transform topL2 = GameObject.Find("userdefineControllerUI/Center/gridPanel").transform;
                 if (!isTotalDataChange && topL2 != null && topL2.childCount <= 1)
@@ -963,7 +1499,7 @@ public class UserdefControllerUI : BaseUI
                     centerStartTip.gameObject.SetActive(false);
                     stopNowBtn.gameObject.SetActive(true);
                 }
-                UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("保存遥控器提示"), OnSecondbackClicked, isTotalDataChange);
+                UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("保存遥控器提示"), OnSecondbackClicked, isTotalDataChange);    
             }
             else if (name.Equals("stopBtn")) //动作停止
             {
@@ -985,13 +1521,15 @@ public class UserdefControllerUI : BaseUI
                         if (gridPanel.GetChild(i).tag.Contains("widget_action"))
                         {
                             gridPanel.GetChild(i).GetComponent<UIButtonScale>().enabled = false;
-                        }
+                        }                       
                     }
                 }  
                 OnSettingbtnClicked();
             }
             else if (name.Equals("confirm")) //确认修改
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Save modified controller data directly!!");
+
                 if (selectActionState != null)
                 {
                     selectActionState.GetComponent<UISprite>().enabled = false;
@@ -1010,42 +1548,67 @@ public class UserdefControllerUI : BaseUI
                 editTitle.enabled = false;
                 editDescribe.enabled = false;
                 ShowOrHideLines(false);
-                OnConfirmClicked();
+                OnConfirmClicked();              
             }
             else if (name.Equals("sliderToogleBtn"))  //伸缩按钮
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Click left items toogle button!!");
+
                 OnExplorebtnClicked();
             }
             else if (name.Equals("bg_down"))
             {
                 ShowOrHideBottmBoard(false);
             }
+            else if (name.Equals("sliderbg_down"))
+            {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Hide slider servo list!!");
+
+                //isVsliderServo = false;
+                //isHsliderServo = false;
+
+                if (isVsliderChange)
+                    isVsliderChange = false;
+                if (isHsliderChange)
+                    isHsliderChange = false;
+
+                SliderShowOrHideBottmboard(false);
+
+                ClientMain.GetInst().StartCoroutine(DirectHideSliderServoList(0.6f));
+            }
             else if (obj.name.Contains("newActionItem"))
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Click action icon when selected any action controller!!");
+
                 if (curSettingAction != null)
                 {
-                    //Debug.Log("curSettingAction is not null!!"); 
-                    curSettingAction.transform.GetChild(0).GetComponent<UISprite>().spriteName = obj.transform.GetChild(0).GetComponent<UISprite>().spriteName;
+                    if (obj.transform.GetChild(0).GetComponent<UISprite>().spriteName == "add_action")
+                        curSettingAction.transform.GetChild(0).GetComponent<UISprite>().spriteName = "add";
+                    else
+                        curSettingAction.transform.GetChild(0).GetComponent<UISprite>().spriteName = obj.transform.GetChild(0).GetComponent<UISprite>().spriteName;
+
                     // controllerdata 数据修改
                     string name1 = obj.GetComponentInChildren<UILabel>().text;
+
                     if (name1 == "")
                     {
                         name1 = "-1";
                     }
-                    //Debug.Log("name1 is " + name1);
+
+                    string id0 = obj.name.Remove(0, 14);
+
                     string name2 = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(curSettingAction.name)).actionNm;
-                    //Debug.Log("name2 is "+ name2);
+
                     string id1;
                     if (name1 == "" || name1 == "-1")
                         id1 = "-1";
                     else
-                        id1 = RobotManager.GetInst().GetCurrentRobot().GetActionsForName(name1).Id;
-                    //Debug.Log("id1 is " + id1);
+                        id1 = id0;
+
                     string id2 = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(curSettingAction.name)).actionId;             
 
-                    
                     //((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(curSettingAction.name)).actionId = RobotManager.GetInst().GetCurrentRobot().GetActionsForName(name2).Id;
-                    if (id2 != id1 || name2 != name1)
+                    if (id2 != id1/* || name2 != name1*/)
                     {
                         ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(curSettingAction.name)).actionNm = name1;
                         ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(curSettingAction.name)).actionId = id1;
@@ -1067,22 +1630,14 @@ public class UserdefControllerUI : BaseUI
                     else  //同时为空动作
                     {
                         return;
-                    }
-                    /*if (name2 != "")
-                    {
-                        if (!showActionList.Contains(name2))
-                            showActionList.Add(name2);
-                    }
-                    if (name1 != "")
-                    {
-                        if (showActionList.Contains(name1))
-                            showActionList.Remove(name1);
-                    }*/
+                    }                  
                 }                
                 ShowOrHideBottmBoard(false);
             }
             else if (obj.tag.Contains("widget_action")) //动作被点击
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Click action controller widget!!");
+
                 if (selectActionState != null)
                 {
                     selectActionState.GetComponent<UISprite>().enabled = false;
@@ -1093,6 +1648,9 @@ public class UserdefControllerUI : BaseUI
                 {
                     editTitle.enabled = false;
                     editDescribe.enabled = false;
+
+                    curSelectControllerWidget = obj;
+
                     selectActionState = obj.transform.GetChild(4);
                     selectActionState.gameObject.SetActive(true);
                     selectActionState.GetComponent<UISprite>().enabled = true;
@@ -1102,6 +1660,95 @@ public class UserdefControllerUI : BaseUI
             }
             else if (obj.tag.Contains("widget_vslider")) //竖杆被点击
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Click vslider controller widget!!");
+
+                if (selectActionState != null)
+                {
+                    selectActionState.GetComponent<UISprite>().enabled = false;
+                    selectActionState.gameObject.SetActive(false);
+                }
+                if (IsSetting && obj.transform.parent.name == "gridPanel")
+                {
+                    editTitle.enabled = true;
+                    editDescribe.enabled = true; 
+                    ShowOrHideLines(true);                 
+
+                    if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList().Count < 1)
+                    {
+                        editTitle.enabled = false;
+                        editDescribe.enabled = false;                       
+                        isSliderBottomShow = false;
+                        curVsliderServoNum = 0;
+
+                        if (RecordContactInfo.Instance.openType == "default")
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("轮模式舵机数量不足"));
+                        else
+                            UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("配置轮模式提示"), ModifyServoTypeSetting, true);
+                        //obj.transform.GetChild(3).gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        //bool isVsliderLeft = isLeftShow;
+                        
+                        isVsliderServo = true;
+                        
+                        //cleanBoxCollider.gameObject.SetActive(true);
+                        curVsliderName = obj.name;
+                        curVsliderServoNum = ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).servoID;
+
+                        curVsliderShadow = obj.transform.GetChild(3).GetComponent<UISprite>();
+                        curVsliderShadow.enabled = true;
+
+
+                        if (curVsliderServoNum == 0)
+                        {
+                            editTitle.enabled = false;
+                            editDescribe.enabled = false;
+
+                            curSelectControllerWidget = obj;
+
+                            sliderBottoms.gameObject.SetActive(true);
+
+                            SliderShowOrHideLeftboard(false);
+
+                            DelayShowSliderServo();
+                        }
+                        else if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)curVsliderServoNum).modelType == ServoModel.Servo_Model_Angle)
+                        {
+                            editTitle.enabled = false;
+                            editDescribe.enabled = false;
+
+                            curSelectControllerWidget = obj;
+
+                            sliderBottoms.gameObject.SetActive(true);
+
+                            SliderShowOrHideLeftboard(false);
+
+                            DelayShowSliderServo();
+                        }
+                        else
+                        {
+                            editTitle.enabled = true;
+                            editDescribe.enabled = true;
+                            ShowOrHideLines(true);
+                            topRightIcons.gameObject.SetActive(true);
+
+                            sliderBottoms.gameObject.SetActive(false);
+
+                            isVsliderServo = false;
+
+                            if (curVsliderShadow != null)
+                                curVsliderShadow.enabled = false;
+
+                            OpenVsliderSetting(curVsliderName);                                                   
+                        }
+                    }
+                }
+            }
+            else if (obj.tag.Contains("widget_hslider")) //横杆被点击
+            {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Click hslider controller widget!!");
+
                 if (selectActionState != null)
                 {
                     selectActionState.GetComponent<UISprite>().enabled = false;
@@ -1112,25 +1759,78 @@ public class UserdefControllerUI : BaseUI
                     editTitle.enabled = true;
                     editDescribe.enabled = true;
                     ShowOrHideLines(true);
-                    
-                    if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList().Count < 1)
+
+                    if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetAngleList().Count < 1)
                     {
                         editTitle.enabled = false;
-                        editDescribe.enabled = false;
-                        //ShowOrHideLines(false);
-                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("轮模式舵机数量不足"));
+                        editDescribe.enabled = false;                     
+                        isSliderBottomShow = false;
+
+                        if (RecordContactInfo.Instance.openType == "default")
+                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("角模式舵机数量不足"));
+                        else
+                            UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("配置角度模式提示"), ModifyServoTypeSetting, true);
+                        //obj.transform.GetChild(3).gameObject.SetActive(false);
                     }
                     else
                     {
-                        editTitle.enabled = true;
-                        editDescribe.enabled = true;
-                        ShowOrHideLines(true);
-                        OpenVsliderSetting(obj.name);
+                        isHsliderServo = true;
+
+                        curHsliderName = obj.name;
+                        curHsliderServoNum = ((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).servoID;
+
+                        curHsliderShadow = obj.transform.GetChild(3).GetComponent<UISprite>();
+                        curHsliderShadow.enabled = true;
+
+                        if (curHsliderServoNum == 0)
+                        {
+                            editTitle.enabled = false;
+                            editDescribe.enabled = false;
+
+                            curSelectControllerWidget = obj;
+
+                            sliderBottoms.gameObject.SetActive(true);
+
+                            SliderShowOrHideLeftboard(false);
+
+                            DelayShowSliderServo();
+                        }
+                        else if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)curHsliderServoNum).modelType == ServoModel.Servo_Model_Turn)
+                        {
+                            editTitle.enabled = false;
+                            editDescribe.enabled = false;
+
+                            curSelectControllerWidget = obj;
+
+                            sliderBottoms.gameObject.SetActive(true);
+
+                            SliderShowOrHideLeftboard(false);
+
+                            DelayShowSliderServo();
+                        }
+                        else
+                        {
+                            editTitle.enabled = true;
+                            editDescribe.enabled = true;
+                            ShowOrHideLines(true);
+                            topRightIcons.gameObject.SetActive(true);
+
+                            sliderBottoms.gameObject.SetActive(false);
+
+                            isHsliderServo = false;
+
+                            if (curHsliderShadow != null)
+                                curHsliderShadow.enabled = false;
+
+                            OpenHsliderSetting(curHsliderName);
+                        }
                     }
                 }
             }
             else if (obj.tag.Contains("widget_joystick"))   //摇杆被点击
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Click joystick controller widget!!");
+
                 if (selectActionState != null)
                 {
                     selectActionState.GetComponent<UISprite>().enabled = false;
@@ -1150,12 +1850,61 @@ public class UserdefControllerUI : BaseUI
                     }
                     else
                     {
+                        int wheelServoID01 = 0;
+                        int wheelServoID02 = 0;
+                        int wheelServoID03 = 0;
+                        int wheelServoID04 = 0;
+
+                        if ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name) != null && ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).type == JockstickData.JockType.twoServo)
+                        {
+                            wheelServoID01 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftUpID;
+                            wheelServoID02 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightUpID;
+                            wheelServoID03 = 0;
+                            wheelServoID04 = 0;
+                        }
+                        else if ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name) != null && ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).type == JockstickData.JockType.fourServo)
+                        {
+                            wheelServoID01 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftUpID;
+                            wheelServoID02 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightUpID;
+                            wheelServoID03 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftBottomID;
+                            wheelServoID04 = ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightBottomID;
+                        }
+                        else
+                        {
+                            wheelServoID01 = 0;
+                            wheelServoID02 = 0;
+                            wheelServoID03 = 0;
+                            wheelServoID04 = 0;
+                        }
+
                         if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList().Count < 2)
                         {
                             editTitle.enabled = false;
                             editDescribe.enabled = false;
                             //ShowOrHideLines(false);
-                            HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("轮模式舵机数量不足"));
+                            //HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("轮模式舵机数量不足"));
+                            
+                            if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList().Count == 0)
+                                UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("配置轮模式提示"), ModifyServoTypeSetting, true);
+                            else
+                                UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("配置摇杆轮模式提示"), ModifyServoTypeSetting, true);
+                        }
+                        else if ((wheelServoID01 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID01).modelType == ServoModel.Servo_Model_Angle) ||
+                                 (wheelServoID02 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID02).modelType == ServoModel.Servo_Model_Angle) ||
+                                 (wheelServoID03 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID03).modelType == ServoModel.Servo_Model_Angle) ||
+                                 (wheelServoID04 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID04).modelType == ServoModel.Servo_Model_Angle))
+                        {
+                            // 清空当前摇杆数据
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftBottomID = 0;
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).leftUpID = 0;
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightBottomID = 0;
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).rightUpID = 0;
+                            ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.transform.name)).type = JockstickData.JockType.none;
+
+                            editTitle.enabled = true;
+                            editDescribe.enabled = true;
+                            ShowOrHideLines(true);
+                            OpenJoystickSettingUI(obj.name);
                         }
                         else
                         {
@@ -1169,8 +1918,8 @@ public class UserdefControllerUI : BaseUI
             }
         }
         catch (Exception ex)
-        { 
-        
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
         }
     }
     /// <summary>
@@ -1208,7 +1957,6 @@ public class UserdefControllerUI : BaseUI
             GetTCompent.GetCompent<BoxCollider>(obj.transform).isTrigger = true;
 
             //Transform leftSelect = GameObject.Find("userdefineControllerUI/Left/leftBoard/ContainerLeft/EditScrollview/Grid").transform;
-
             bottomTrans.parent.GetChild(1).gameObject.SetActive(true);  //拖动时垃圾桶出现
             if (isBottomShow)
                 ShowOrHideBottmBoard(false);
@@ -1219,34 +1967,47 @@ public class UserdefControllerUI : BaseUI
                 
                 if (obj.tag.Contains("widget") && obj.transform.parent != gridPanel) // obj为控件库里的物体
                 {
+                    //bottomTrans.parent.GetChild(1).gameObject.SetActive(false);
                     //Debug.Log("isNewOperate is true");
                     isNewOperate = true;
+                    bottomTrans.parent.GetChild(1).gameObject.SetActive(false);
                     obj.transform.SetParent(gridPanel);
                     //Debug.Log(gridPanel);
 
                     if (obj.tag.Contains("widget_action"))
                     {
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Start build new action control widget!!");
+
                         obj.transform.GetChild(4).GetComponent<UISprite>().enabled = true;
                         leftItems.GetChild(0).GetChild(4).GetComponent<UISprite>().enabled = true;
                     }
                     else if (obj.tag.Contains("widget_joystick"))
                     {
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Start build new joystick control widget!!");
+
                         obj.transform.GetChild(3).GetComponent<UISprite>().enabled = true;
                         leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = true;
                     }
                     else if (obj.tag.Contains("widget_vslider"))
                     {
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Start build new vslider control widget!!");
+
                         obj.transform.GetChild(3).GetComponent<UISprite>().enabled = true;
                         leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = true;
                         leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled = false;
-                    }       
+                    }
+                    else if (obj.tag.Contains("widget_hslider"))
+                    {
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Start build new hslider control widget!!");
+
+                        obj.transform.GetChild(3).GetComponent<UISprite>().enabled = true;
+                        leftItems.GetChild(3).GetChild(3).GetComponent<UISprite>().enabled = true;
+                        leftItems.GetChild(3).GetChild(4).GetComponent<UILabel>().enabled = false;
+                    }
 
                     if (obj.GetComponent<UIDragScrollView>() != null)
                         GameObject.DestroyImmediate(obj.GetComponent<UIDragScrollView>());
 
-                    /*Vector4 currentIcon = TurnWidgetRect(obj.GetComponentInChildren<UIWidget>());
-                    smartPlace.ChangeCurPos(currentIcon);
-                    DrawCanPlacedArea(new Vector2((currentIcon.x + currentIcon.z) / 2.0f, (currentIcon.y + currentIcon.w) / 2.0f), (int)(currentIcon.z - currentIcon.x), (int)(currentIcon.y - currentIcon.w));*/
                 }
             }
             else
@@ -1254,10 +2015,9 @@ public class UserdefControllerUI : BaseUI
 
             if(!isNewOperate)
             {
-                //Debug.Log("SetCurRect is ready");
                 smartPlace.SetCurRect(obj.name);
             }
-            //Debug.Log("Drag isNewOperate is " + isNewOperate);
+
             if (isNewOperate)
             {
                 if (!(smartPlace.IsNewControl(currentSelect)))
@@ -1269,7 +2029,6 @@ public class UserdefControllerUI : BaseUI
                 }
                 else
                 {
-                    //Debug.Log("Drag isNewOperate is true");
                     isZeroArea = false;
                     placedArea.enabled = true;
                     DrawCanPlacedArea(new Vector2((currentSelect.x + currentSelect.z) / 2.0f, (currentSelect.y + currentSelect.w) / 2.0f), (int)(currentSelect.z - currentSelect.x), (int)(currentSelect.y - currentSelect.w));
@@ -1278,7 +2037,6 @@ public class UserdefControllerUI : BaseUI
             }
             else
             {
-                //Debug.Log("Drag isZeroArea is false");
                 isZeroArea = false;
                 placedArea.enabled = true;
                 DrawCanPlacedArea(new Vector2((currentSelect.x + currentSelect.z) / 2.0f, (currentSelect.y + currentSelect.w) / 2.0f), (int)(currentSelect.z - currentSelect.x), (int)(currentSelect.y - currentSelect.w));
@@ -1289,10 +2047,8 @@ public class UserdefControllerUI : BaseUI
 
     //松开选择的控件放置于界面上
     protected override void OnDragdropRelease(GameObject obj)
-    {
-        
+    {        
         base.OnDragdropRelease(obj);
-        //ShowOrHideLines(false);
 
         //ui状态更改
         if (flag1 != isLeftShow)  //拖动前后左侧面板状态还原
@@ -1313,50 +2069,83 @@ public class UserdefControllerUI : BaseUI
             leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = false;
         if (leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled)
             leftItems.GetChild(2).GetChild(4).GetComponent<UILabel>().enabled = false;
-        
+        if (leftItems.GetChild(3).GetChild(3).GetComponent<UISprite>().enabled)
+            leftItems.GetChild(3).GetChild(3).GetComponent<UISprite>().enabled = false;
+        if (leftItems.GetChild(3).GetChild(4).GetComponent<UILabel>().enabled)
+            leftItems.GetChild(3).GetChild(4).GetComponent<UILabel>().enabled = false;       
         
         bottomTrans.parent.GetChild(1).gameObject.SetActive(false);  //拖动时垃圾桶出现
         dragging = false;
         dragingTransform = null;
         //判断是否拖动成功
         if (!IsDragSuccess() || isZeroArea)
-        {
-            //Debug.Log("isZeroArea is " + isZeroArea);
-            if (isNewOperate)
-            {
-                isNewOperate = false;
-            }
-            
+        {            
             placedArea.enabled = false;
             if (isDeleta || isZeroArea)
             {
-                isZeroArea = false;
-                GameObject.Destroy(obj);
+                //Debug.Log("isDeleta is " + isDeleta);
                 if (obj.tag.Contains("widget_action") && ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)) != null)
                 {
-                   // string an = obj.GetComponentInChildren<UILabel>().text;
                     string an = ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).actionId;
-                    if (an != "")
+                    if (an != "" && an != "-1")
                     {
+                        Debug.Log("now delete act icon is" + an);
                         if (!showActionList.Contains(an))
                             showActionList.Add(an);
                     }
+
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Delete action control data!!");
+
                     ControllerManager.GetInst().RemoveAction(obj.name);
                     isActionDataChange = true;
-                    //leftItems.GetChild(0).GetChild(4).GetComponent<UISprite>().enabled = false;
                 }
                 else if (obj.tag.Contains("widget_vslider"))
                 {
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Delete vslider control data!!");
+
                     ControllerManager.GetInst().RemoveSliderBar(obj.name);
-                    //leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = false;
+                }
+                else if (obj.tag.Contains("widget_hslider"))
+                {
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Delete hslider control data!!");
+
+                    ControllerManager.GetInst().RemoveHSliderBar(obj.name);
                 }
                 else if (obj.tag.Contains("widget_joystick"))
                 {
-                    ControllerManager.GetInst().RemoveJoystick(obj.name);
-                    //leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = false;
+                    if (RecordContactInfo.Instance.openType == "default")
+                    {
+                        //Debug.Log("官方模型不可删除");
+                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("官方模型不可更改配置"));
+                    }
+                    else
+                    {
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Delete joystick control data!!");
+
+                        ControllerManager.GetInst().RemoveJoystick(obj.name);
+                    }
                 }
-                isDeleta = false;
-                isTotalDataChange = true;
+                if ((RecordContactInfo.Instance.openType == "default" && !(obj.tag.Contains("widget_joystick"))) || (RecordContactInfo.Instance.openType != "default") || (RecordContactInfo.Instance.openType == "default" && obj.tag.Contains("widget_joystick") && isZeroArea))
+                {
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Delete current control widget!!");
+
+                    isZeroArea = false;
+                    GameObject.Destroy(obj);
+                    isDeleta = false;
+                    isTotalDataChange = true;
+                }
+                else if (RecordContactInfo.Instance.openType == "default" && obj.tag.Contains("widget_joystick") && (!isZeroArea))
+                {
+                    isDeleta = false;
+                    isTotalDataChange = true;
+                    obj.transform.localPosition = finalPosition;
+                    if (((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)) != null)
+                        ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).localPos = obj.transform.localPosition;
+                }
+                if (isNewOperate)
+                {
+                    isNewOperate = false;
+                }
             }
             return;
         }
@@ -1378,21 +2167,38 @@ public class UserdefControllerUI : BaseUI
             }
             if (obj.tag.Contains("widget_action"))
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "New action control data successfully!!");
+
                 ControllerManager.GetInst().NewAction(obj.name, obj.transform.localPosition);
                 obj.transform.GetChild(4).GetComponent<UISprite>().enabled = false;
-                //leftItems.GetChild(0).GetChild(4).GetComponent<UISprite>().enabled = false;
             }
             else if (obj.tag.Contains("widget_vslider"))
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "New vslider control data successfully!!");
+
                 ControllerManager.GetInst().NewSliderBar(obj.name, obj.transform.localPosition);
                 obj.transform.GetChild(3).GetComponent<UISprite>().enabled = false;
                 obj.transform.GetChild(4).GetComponent<UILabel>().enabled = true;
                 obj.transform.GetChild(4).GetComponent<UILabel>().text = "";
-                //leftItems.GetChild(2).GetChild(3).GetComponent<UISprite>().enabled = false;
+                obj.transform.GetChild(5).GetComponent<UISprite>().enabled = true;
+                obj.transform.GetChild(6).GetComponent<UISprite>().enabled = true;
+                obj.transform.GetChild(5).GetComponent<UISprite>().spriteName = "shunshi";
+                obj.transform.GetChild(6).GetComponent<UISprite>().spriteName = "nishi";
+            }
+            else if (obj.tag.Contains("widget_hslider"))
+            {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "New hslider control data successfully!!");
+
+                ControllerManager.GetInst().NewHSliderBar(obj.name, obj.transform.localPosition);
+                obj.transform.GetChild(3).GetComponent<UISprite>().enabled = false;
+                obj.transform.GetChild(4).GetComponent<UILabel>().enabled = true;
+                obj.transform.GetChild(4).GetComponent<UILabel>().text = "";
+                obj.transform.GetChild(5).GetComponent<UILabel>().text = "-118°";
+                obj.transform.GetChild(6).GetComponent<UILabel>().text = "118°";
             }
             else if (obj.tag.Contains("widget_joystick"))
             {
-                if (ControllerManager.GetInst().widgetManager.joyStickManager.JoystickNum() > 0)
+                if (ControllerManager.GetInst().widgetManager.joyStickManager.JoystickNum() > 0 || RecordContactInfo.Instance.openType == "default")
                 {
                     //Debug.Log("摇杆数量上限！！");
                     placedArea.enabled = false;
@@ -1402,19 +2208,19 @@ public class UserdefControllerUI : BaseUI
                     isTotalDataChange = true;
                     dragging = false;
                     dragingTransform = null;
-                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("无法增加摇杆"));
-                    //leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = false;
+                    if (RecordContactInfo.Instance.openType == "default")
+                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("官方模型不可更改配置"));
+                    else
+                        HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("无法增加摇杆"));
                     return;
                 }
                 else
                 {
-                    //placedArea.enabled = true;
-                    //Debuger.Log(ControllerManager.GetInst().widgetManager.joyStickManager.JoystickNum());
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "New joystick control data successfully!!");
+
                     ControllerManager.GetInst().NewJoystick(obj.name, obj.transform.localPosition);
-                    //Debuger.Log("目前："+ControllerManager.GetInst().widgetManager.joyStickManager.JoystickNum());
                 }
                 obj.transform.GetChild(3).GetComponent<UISprite>().enabled = false;
-                //leftItems.GetChild(1).GetChild(3).GetComponent<UISprite>().enabled = false;
             }
         }
         else  //拖动操作
@@ -1422,15 +2228,27 @@ public class UserdefControllerUI : BaseUI
             //Debug.Log("Now Operate is Drag!!");
             if (obj.tag.Contains("widget_action"))
             {
-                ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).localPos = obj.transform.localPosition;//.NewAction(obj.name, obj.transform.localPosition);
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Change action control widget position!!");
+                if (((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)) != null)
+                    ((ActionWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).localPos = obj.transform.localPosition;//.NewAction(obj.name, obj.transform.localPosition);
             }
             else if (obj.tag.Contains("widget_vslider"))
             {
-                ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).localPos = obj.transform.localPosition;
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Change vslider control widget position!!");
+                if (((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)) != null)
+                    ((SliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).localPos = obj.transform.localPosition;
+            }
+            else if (obj.tag.Contains("widget_hslider"))
+            {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Change hslider control widget position!!");
+                if (((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)) != null)
+                    ((HSliderWidgetData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).localPos = obj.transform.localPosition;
             }
             else if (obj.tag.Contains("widget_joystick"))
             {
-                ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).localPos = obj.transform.localPosition;
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Change joystick control widget position!!");
+                if (((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)) != null)
+                    ((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(obj.name)).localPos = obj.transform.localPosition;
             }
         }
         
@@ -1493,21 +2311,15 @@ public class UserdefControllerUI : BaseUI
     //跟随拖拽显示网格
     protected override void OnButtonDrag(GameObject obj, Vector2 delta)
     {
-        //isZeroArea = false;
-        //Debug.Log("Now IsSetting is " + IsSetting);
         base.OnButtonDrag(obj, delta);
         if (isSetting && obj.tag.Contains("widget") && dragging)
         {
             if (smartPlace.IsEmptyBgboard())
             {
                 smartPlace.Clear();
-                smartPlace.SetBgBoard(new Vector4(-gridPanel.GetComponent<UIWidget>().width / 2.0f + (UserdefControllerScene.leftSpace * PublicFunction.GetWidth() / 1334.0f), gridPanel.GetComponent<UIWidget>().height / 2.0f, gridPanel.GetComponent<UIWidget>().width / 2.0f - (UserdefControllerScene.leftSpace * PublicFunction.GetWidth() / 1334.0f), -gridPanel.GetComponent<UIWidget>().height / 2.0f));
+                smartPlace.SetBgBoard(new Vector4(-gridPanel.GetComponent<UIWidget>().width / 2.0f + (UserdefControllerScene.leftSpace * positionXRatio), gridPanel.GetComponent<UIWidget>().height / 2.0f, gridPanel.GetComponent<UIWidget>().width / 2.0f - (UserdefControllerScene.leftSpace * positionXRatio), -gridPanel.GetComponent<UIWidget>().height / 2.0f));
             }
-            
-            //Debug.Log(TurnWidgetRect(obj.GetComponentInChildren<UIWidget>()).x);
-            //DrawCanPlacedArea(new Vector2(0, 0), 0, 0);
 
-            //Debug.Log("dragging is "+dragging);
             Vector4 curSelect = TurnWidgetRect(obj.GetComponentInChildren<UIWidget>());
             smartPlace.ChangeCurPos(curSelect);
 
@@ -1518,42 +2330,20 @@ public class UserdefControllerUI : BaseUI
                 placedArea.enabled = true;
                 DrawCanPlacedArea(new Vector2((curSelect.x + curSelect.z) / 2.0f, (curSelect.y + curSelect.w) / 2.0f), (int)(curSelect.z - curSelect.x), (int)(curSelect.y - curSelect.w));
             }
-            else
-            {
-
-                //Debug.Log("can't placed new controller");
-            }
             //smartPlace.SetCurRect(new SmartPlace.RectBoard(obj.name
             //smartPlace.SetCurRect(new Vector4(obj.transform.localPosition.x, obj.transform.localPosition.y, obj.GetComponentInChildren<UIWidget>().width, obj.GetComponentInChildren<UIWidget>().height));
-            if (smartPlace.IsPlaceable()/* || smartPlace.IsEmptyable()*/)
+            if (smartPlace.IsPlaceable())
             {
                 isZeroArea = false;
-                //Debug.Log("IsPlaceable is true");
+
                 //计算可放置区域大小
                 placedArea.enabled = true;
                 DrawCanPlacedArea(new Vector2((smartPlace.curRect.board.x + smartPlace.curRect.board.z) / 2.0f, (smartPlace.curRect.board.y + smartPlace.curRect.board.w) / 2.0f), (int)(smartPlace.curRect.board.z - smartPlace.curRect.board.x), (int)(smartPlace.curRect.board.y - smartPlace.curRect.board.w));//(new Vector2(smartPlace.curRect.board.x, smartPlace.curRect.board.y), (int)smartPlace.curRect.board.z, (int)smartPlace.curRect.board.w);
                 //smartPlace.AddBoard(new SmartPlace.RectBoard(obj.name, TurnWidgetRect(obj.GetComponentInChildren<UISprite>())));
             }
-            else
-            {
-                //DrawCanPlacedArea(new Vector2(0, 0), 0, 0);
-                //Debug.Log("can't placed exist controller");
-            }
         }
     }
 
-    /*void FiexedUpdate()
-    {
-        if (IsSetting && isExitCollision == 0) //设置界面 拖动过程
-        {
-            if (dragingTransform != null)
-            {
-                DrawCanPlacedArea(dragingTransform.localPosition, 200, 300);
-                //isExitCollision = true;
-
-            }
-        }
-    }*/
     public override void LateUpdate()
     {
         base.LateUpdate();
@@ -1561,16 +2351,7 @@ public class UserdefControllerUI : BaseUI
         if (IsSetting && dragging && isColliderCheck)
         {
 
-            //if(dragingTransform != null)
         }
-        //if (IsSetting && isExitCollision == 0) //设置界面 拖动过程
-        //{
-        //    if (dragingTransform != null)
-        //    {
-        //        DrawCanPlacedArea(dragingTransform.localPosition, 200, 300);
-        //        //isExitCollision = true;
-        //    }
-        //}
     }
     public override void Open()
     {

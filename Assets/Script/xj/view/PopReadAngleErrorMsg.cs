@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Game;
 using Game.Event;
+using Game.Platform;
 
 /// <summary>
 /// Author:xj
@@ -171,11 +172,8 @@ public class PopReadAngleErrorMsg : BasePopWin
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -224,11 +222,8 @@ public class PopReadAngleErrorMsg : BasePopWin
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -256,11 +251,8 @@ public class PopReadAngleErrorMsg : BasePopWin
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     protected override void OnDurationPress(GameObject obj)
@@ -387,7 +379,11 @@ public class PopReadAngleErrorMsg : BasePopWin
         {
             mRightBtnTrans.localPosition += new Vector3(addWidth / 2, 0);
         }
-
+        UISprite line = GameHelper.FindChildComponent<UISprite>(mTrans, "btn/line");
+        if (null != line)
+        {
+            line.width += addWidth;
+        }
         UISprite barBackground = GameHelper.FindChildComponent<UISprite>(mTrans, "framescrollbar/Background");
         if (null != barBackground)
         {

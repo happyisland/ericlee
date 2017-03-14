@@ -448,7 +448,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 156312}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -150, y: 0, z: 0}
+  m_LocalPosition: {x: -140, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 456316}
@@ -462,7 +462,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 156318}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 150, y: 0, z: 0}
+  m_LocalPosition: {x: 140, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 456320}
@@ -953,6 +953,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -1072,13 +1074,13 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: .223529413, g: .776470602, b: .917647064, a: 1}
   mPivot: 4
-  mWidth: 155
+  mWidth: 280
   mHeight: 50
   mDepth: 2
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
-  aspectRatio: 3.0999999
+  aspectRatio: 5.5999999
   keepCrispWhenShrunk: 1
   mTrueTypeFont: {fileID: 0}
   mFont: {fileID: 11412660, guid: c773a71627f33824f870e94394463105, type: 2}
@@ -1120,6 +1122,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -1239,13 +1243,13 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: .223529413, g: .776470602, b: .917647064, a: 1}
   mPivot: 4
-  mWidth: 155
+  mWidth: 280
   mHeight: 50
   mDepth: 2
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
-  aspectRatio: 3.0999999
+  aspectRatio: 5.5999999
   keepCrispWhenShrunk: 1
   mTrueTypeFont: {fileID: 0}
   mFont: {fileID: 11412660, guid: c773a71627f33824f870e94394463105, type: 2}

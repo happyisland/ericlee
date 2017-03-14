@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Game;
 using Game.Event;
+using Game.Platform;
 
 /// <summary>
 /// Author:xj
@@ -59,7 +60,7 @@ public class CreateActionsUI : BasePopWin
         mRobotId = robotId;
         mActions = actions;
         isSingle = true;
-        if (null != mActions && (ActionsManager.GetInst().IsOfficial(mActions.Id) || mActions.IsOfficial()))
+        if (null != mActions && mActions.IsOfficial())
         {//官方动作，不能编辑
             isOfficial = true;
         }
@@ -300,11 +301,8 @@ public class CreateActionsUI : BasePopWin
         }
         catch (System.Exception ex)
         {
-        	if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -400,11 +398,8 @@ public class CreateActionsUI : BasePopWin
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -420,11 +415,8 @@ public class CreateActionsUI : BasePopWin
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -566,11 +558,8 @@ public class CreateActionsUI : BasePopWin
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     byte tmpLenght = 0;

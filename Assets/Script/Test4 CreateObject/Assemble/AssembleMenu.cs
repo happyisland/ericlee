@@ -297,11 +297,8 @@ public class AssembleMenu : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
             
     }
@@ -319,25 +316,14 @@ public class AssembleMenu : MonoBehaviour
 #if UNITY_EDITOR
             if (PublicFunction.IsInteger(nameTemp))
             {
-                if (ClientMain.Simulation_Use_Third_App_Flag)
+                List<byte> list = new List<byte>();
+                int count = int.Parse(nameTemp);
+                for (byte i = 1; i <= count; ++i)
                 {
-                    PlatformMgr.Instance.GotoScene("{\"modelID\":\"" + nameTemp + "\",\"modelName\":\"" + nameTemp + "\",\"picPath\":\"" + ResourcesEx.persistentDataPath + "/data/customize/image\",\"modelType\":1}");
+                    list.Add(i);
                 }
-                else
-                {
-                    List<byte> list = new List<byte>();
-                    int count = int.Parse(nameTemp);
-                    for (byte i = 1; i <= count; ++i)
-                    {
-                        list.Add(i);
-                    }
-                    RobotManager.GetInst().IsCreateRobotFlag = false;
-
-
-                    CreateGO(list);
-                   
-                }
-                
+                RobotManager.GetInst().IsCreateRobotFlag = false;
+                CreateGO(list);
             }
             else
             {
@@ -345,21 +331,12 @@ public class AssembleMenu : MonoBehaviour
             }
 
 #else
-            if (ClientMain.Simulation_Use_Third_App_Flag)
+            if (PlatformMgr.Instance.GetBluetoothState())
             {
-                PlatformMgr.Instance.GotoScene("{\"modelID\":\"" + nameTemp + "\",\"modelName\":\"" + nameTemp + "\",\"picPath\":\"" + ResourcesEx.persistentDataPath + "/data/customize/image\",\"modelType\":1}");
+                PlatformMgr.Instance.DisConnenctBuletooth();
+                On_Connenct_Result(new EventArg(false));
             }
-            else
-            {
-                if (PlatformMgr.Instance.GetBluetoothState())
-                {
-                    PlatformMgr.Instance.DisConnenctBuletooth();
-                    On_Connenct_Result(new EventArg());
-                }
-                //PopWinManager.Inst.ShowPopWin(typeof(ConnenctBluetoothMsg));
-                SearchBluetoothMsg.ShowMsg();
-            }
-            
+            ConnectBluetoothMsg.ShowMsg();
 #endif
         }
         else if (RobotMgr.Instance.rbt.ContainsKey(namewithtype) == false && nameTemp == "")
@@ -725,7 +702,7 @@ public class AssembleMenu : MonoBehaviour
     IEnumerator SetPic(string picName,GameObject goT)
     {
             //零件图片
-            string pathTemp = "file:///" + Application.persistentDataPath + "//default//" + picName + "//" + picName + ".png";
+            string pathTemp = "file:///" + ResourcesEx.persistentDataPath + "/default/" + picName + "/" + picName + ".png";
             //Debug.Log("dfsfdsf:" + pathTemp);
             WWW www = new WWW(pathTemp);
 
@@ -750,6 +727,7 @@ public class AssembleMenu : MonoBehaviour
                // Debug.Log("dfsfdsf:" + textureOne);
                 goT.GetComponent<UITexture>().mainTexture = textureOne;
             }
+
         
     }
     //显示SaveMenu
@@ -782,7 +760,7 @@ public class AssembleMenu : MonoBehaviour
                 RobotDataMgr.Instance.ReadMsg(btn.name);
                 RobotManager.GetInst().CreateOrUpdateRobot(btn.name);
             }
-            PlatformMgr.Instance.Pic_Path = ResourcesEx.persistentDataPath + "/data/customize/image/" + RobotMgr.NameNoType(btn.name) + ".jpg";
+            PlatformMgr.Instance.Pic_Path = PublicFunction.CombinePath(ResourcesEx.GetRobotPath(btn.name), RobotMgr.NameNoType(btn.name)) + ".jpg";
             SelectRobot(btn);
 
 
@@ -831,53 +809,38 @@ public class AssembleMenu : MonoBehaviour
             RobotMgr.Instance.rbtnametempt = btn.name;
            // Debug.Log("btnName:"+btn.name);
             RobotManager.GetInst().IsCreateRobotFlag = false;
-            if (ClientMain.Simulation_Use_Third_App_Flag)
+            string robotname = RobotMgr.Instance.rbtnametempt;
+
+            //Debug.Log("dfsdf:" + btn.name + ":gos:" + RobotMgr.Instance.rb      t[btn.name].gos.Count);
+            RobotMgr.Instance.newRobot = false;
+            if (RobotMgr.Instance.rbt.ContainsKey(RobotMgr.Instance.rbtnametempt))
             {
-                string nameTemp = RobotMgr.NameNoType(RobotMgr.Instance.rbtnametempt);
-                string typestr = RobotMgr.GoType(btn.name);
-                int type = (int)ResourcesEx.GetResFileType(typestr);
-                PlatformMgr.Instance.GotoScene("{\"modelID\":\"" + nameTemp + "\",\"modelName\":\"" + nameTemp + "\",\"picPath\":\"" + ResourcesEx.persistentDataPath + "/data/customize/image\",\"modelType\":" + type + "}");
-            }
-            else
-            {
-                string robotname = RobotMgr.Instance.rbtnametempt;
-                
-                //Debug.Log("dfsdf:" + btn.name + ":gos:" + RobotMgr.Instance.rb      t[btn.name].gos.Count);
-                RobotMgr.Instance.newRobot = false;
-                if (RobotMgr.Instance.rbt.ContainsKey(RobotMgr.Instance.rbtnametempt))
+
+                Robot robot = RobotManager.GetInst().GetRobotForID(RobotMgr.Instance.rbt[RobotMgr.Instance.rbtnametempt].id);
+                if (null != robot)
                 {
-
-                    Robot robot = RobotManager.GetInst().GetRobotForID(RobotMgr.Instance.rbt[RobotMgr.Instance.rbtnametempt].id);
-                    if (null != robot)
-                    {
-                        if (PlatformMgr.Instance.GetBluetoothState())
-                        {//蓝牙是连接的
-                            Robot oldRobot = RobotManager.GetInst().GetCurrentRobot();
-                            if (null != oldRobot && oldRobot != robot)
-                            {//换了模型要断开蓝牙
-                                PlatformMgr.Instance.DisConnenctBuletooth();
-                            }
+                    if (PlatformMgr.Instance.GetBluetoothState())
+                    {//蓝牙是连接的
+                        Robot oldRobot = RobotManager.GetInst().GetCurrentRobot();
+                        if (null != oldRobot && oldRobot != robot)
+                        {//换了模型要断开蓝牙
+                            PlatformMgr.Instance.DisConnenctBuletooth();
                         }
-                        RobotManager.GetInst().SetCurrentRobot(robot);
                     }
+                    RobotManager.GetInst().SetCurrentRobot(robot);
                 }
-                ControlData.ClearData();
-                EventMgr.Inst.UnRegist(EventID.BLUETOOTH_MATCH_RESULT, On_Connenct_Result);
-             //   Debug.Log("come mainwindow");
-                SceneMgr.EnterScene(SceneType.MainWindow);
-
-                RobotMgr.Instance.startNum = true;
             }
-            
+            ControlData.ClearData();
+            EventMgr.Inst.UnRegist(EventID.BLUETOOTH_MATCH_RESULT, On_Connenct_Result);
+            //   Debug.Log("come mainwindow");
+            SceneMgr.EnterScene(SceneType.MainWindow);
 
+            RobotMgr.Instance.startNum = true;
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.Log(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 

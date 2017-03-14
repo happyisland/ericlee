@@ -59,24 +59,52 @@ public class SmartPlace
 
         if (!IsOutofBoards(new Vector2((emptyPoint.x + emptyPoint.z) / 2.0f, (emptyPoint.y + emptyPoint.w) / 2.0f)))// 矩形内
         {
-            //Debug.Log(((emptyPoint.x + emptyPoint.z) / 2.0f) + " " + ((emptyPoint.y + emptyPoint.w) / 2.0f));
-            //Debug.Log(bgboard.x + " " + bgboard.z + " " + bgboard.y + " " + bgboard.w);
-            //Debug.Log("IsOutofBoards is false");
             return false;
         }
 
         float cx = (emptyPoint.x + emptyPoint.z) / 2.0f + Math.Abs(emptyPoint.x - emptyPoint.z) / 2.0f;
         float cy = (emptyPoint.y + emptyPoint.w) / 2.0f + Math.Abs(emptyPoint.y - emptyPoint.w) / 2.0f;
 
-        //Debug.Log(cx + " " + cy + "xiaojuan1");
+        float dex = (emptyPoint.x + emptyPoint.z) / 2.0f + Math.Abs(emptyPoint.x - emptyPoint.z) / 2.0f;
+        float dey = (emptyPoint.y + emptyPoint.w) / 2.0f - Math.Abs(emptyPoint.y - emptyPoint.w) / 2.0f;
 
-        float mw = PublicFunction.GetWidth() * 1.0f * 400.0f / 1334.0f;
+        float ltx = (emptyPoint.x + emptyPoint.z) / 2.0f - Math.Abs(emptyPoint.x - emptyPoint.z) / 2.0f;
+
+        //Debug.Log(cx + " " + cy+"xiaojuan1");
+
+        float mw = PublicFunction.GetWidth() * 1.0f * 500.0f / 1334.0f;
         float mh = PublicFunction.GetHeight() * 1.0f * 230.0f / 750.0f;
+
+        float dew = PublicFunction.GetWidth() * 1.0f * 530.0f / 1334.0f;
+        float deh = PublicFunction.GetHeight() * 1.0f * (-230.0f) / 750.0f;
+
+        float rw = PublicFunction.GetWidth() * 1.0f * 630.0f / 1334.0f;
+        float uh = PublicFunction.GetHeight() * 1.0f * 340.0f / 750.0f;
+        float lw = PublicFunction.GetWidth() * 1.0f * (-630.0f) / 1334.0f;
+        float dh = PublicFunction.GetHeight() * 1.0f * (-340.0f) / 750.0f;
+
+        float lsw = PublicFunction.GetWidth() * 1.0f * (-500.0f) / 1334.0f;
 
         //Debug.Log(mw + " " + mh);
 
         //控件不与UI区域重叠
         if (cx >= mw && cy >= mh)
+        {
+            //Debug.Log("IsOverlapUI is false");
+            return false;
+        }
+
+        if (ltx <= lsw && cy >= mh)
+        {
+            return false;
+        }
+
+        if (cx > rw || ltx < lw || cy > uh || dey < dh)
+        {
+            return false;
+        }
+
+        if (dex >= dew && dey <= deh)
         {
             //Debug.Log("IsOverlapUI is false");
             return false;
@@ -161,10 +189,26 @@ public class SmartPlace
         float cx = (curPoint.board.x + curPoint.board.z) / 2.0f + Math.Abs(curPoint.board.x - curPoint.board.z) / 2.0f;
         float cy = (curPoint.board.y + curPoint.board.w) / 2.0f + Math.Abs(curPoint.board.y - curPoint.board.w) / 2.0f;
 
-        //Debug.Log(cx + " " + cy+"xiaojuan1");
+        float dex = (curPoint.board.x + curPoint.board.z) / 2.0f + Math.Abs(curPoint.board.x - curPoint.board.z) / 2.0f;
+        float dey = (curPoint.board.y + curPoint.board.w) / 2.0f - Math.Abs(curPoint.board.y - curPoint.board.w) / 2.0f;
 
-        float mw = PublicFunction.GetWidth() * 1.0f * 400.0f / 1334.0f;
-        float mh = PublicFunction.GetHeight() * 1.0f * 240.0f / 750.0f;
+        float ltx = (curPoint.board.x + curPoint.board.z) / 2.0f - Math.Abs(curPoint.board.x - curPoint.board.z) / 2.0f;
+
+        //Debug.Log(cx + " " + cy);
+        //Debug.Log(ltx + " " + dey);
+
+        float mw = PublicFunction.GetWidth() * 1.0f * 500.0f / 1334.0f;
+        float mh = PublicFunction.GetHeight() * 1.0f * 230.0f / 750.0f;
+
+        float dew = PublicFunction.GetWidth() * 1.0f * 530.0f / 1334.0f;
+        float deh = PublicFunction.GetHeight() * 1.0f * (-230.0f) / 750.0f;
+
+        float rw = PublicFunction.GetWidth() * 1.0f * 630.0f / 1334.0f;
+        float uh = PublicFunction.GetHeight() * 1.0f * 340.0f / 750.0f;
+        float lw = PublicFunction.GetWidth() * 1.0f * (-630.0f) / 1334.0f;
+        float dh = PublicFunction.GetHeight() * 1.0f * (-340.0f) / 750.0f;
+
+        float lsw = PublicFunction.GetWidth() * 1.0f * (-500.0f) / 1334.0f;
 
         //Debug.Log(mw + " " + mh);
 
@@ -175,13 +219,23 @@ public class SmartPlace
             return false;
         }
 
-        //Debug.Log((curPoint.board.x+curPoint.board.z)/2.0f+Math.Abs(curPoint.board.x - curPoint.board.z)/2.0f+" "+((curPoint.board.y+curPoint.board.w)/2.0f+Math.Abs(curPoint.board.y - curPoint.board.w)/2.0f)+"xiaojuan2");
-
-        /*if (!IsOverlapBoards(curPoint.board))
+        if (ltx <= lsw && cy >= mh)
         {
-            Debug.Log("IsOverlapBoards is false");
             return false;
-        }*/
+        }
+
+        if (cx > rw || ltx < lw || cy > uh || dey < dh)
+        {
+            return false;
+        }
+
+        //Debug.Log(dex + " " + dey);
+
+        if (dex >= dew && dey <= deh)
+        {
+            //Debug.Log("IsOverlapUI is false");
+            return false;
+        }
 
         //判断顶点是否在边界内部
         Vector2 point1 = new Vector2(curPoint.board.x, curPoint.board.y);
@@ -230,8 +284,7 @@ public class SmartPlace
     /// </summary>
     /// <returns></returns>
     bool IsOverlapBoards(Vector4 curboard)
-    {
-       
+    {       
         foreach (var tem in boards)
         {
             if (IsOverlapped(tem.board, curboard))
@@ -281,12 +334,8 @@ public class SmartPlace
         float dx = Math.Abs((rect1.x + rect1.z) / 2.0f - (rect2.x + rect2.z) / 2.0f);
         float dy = Math.Abs((rect1.y + rect1.w) / 2.0f - (rect2.y + rect2.w) / 2.0f);
 
-        if (dx >= mx || dy >= my)
+        if (dx >= (mx + 10.0f) || dy >= (my + 10.0f))
         {
-            //Debug.Log(rect1.x + " " + rect1.z + " " + rect1.y + " " + rect1.w);
-            //Debug.Log(rect2.x + " " + rect2.z + " " + rect2.y + " " + rect2.w);
-            //Debug.Log(mx + " " + my + " " + dx + " " + dy + " " + "false");
-            //Debug.Log(false);
             return false;
         }
         else

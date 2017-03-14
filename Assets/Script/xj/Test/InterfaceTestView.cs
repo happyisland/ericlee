@@ -117,7 +117,7 @@ public class InterfaceTestView : BaseUI
                 {
                     Timer.Cancel(mQueryIndex);
                 }
-                mQueryIndex = Timer.Add(0.5f, 0.1f, 0, OpenQueryAllSensor);
+                mQueryIndex = Timer.Add(0.5f, 0.05f, 0, OpenQueryAllSensor);
             }
             else
             {

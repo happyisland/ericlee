@@ -7,6 +7,7 @@ using System.Xml;
 using System;
 using System.IO;
 using Game.Resource;
+using Game.Platform;
 
 public class RecordContactInfo
 {
@@ -115,41 +116,28 @@ public class RecordContactInfo
 
     public string GetResourcesPath(string xmlName,string opentype)
     {
-        string pathfile = "";
-        string pathfileDownLoad = "";
-        string pathfileDefault = "";
-       // Debug.Log(Application.persistentDataPath);
-        pathfile = Application.persistentDataPath + "/"+opentype+"/" + xmlName;
-        pathfileDownLoad = Application.persistentDataPath + "/download";
-        pathfileDefault = Application.persistentDataPath + "/default";
+        string pathfile = string.Empty;
+        if (opentype.Equals("default"))
+        {
+            pathfile = ResourcesEx.GetCommonPathForNoTypeName(xmlName);
+        }
+        else if (opentype.Equals("playerdata"))
+        {
+            pathfile = ResourcesEx.GetRobotPathForNoTypeName(xmlName);
+        }
+        else
+        {
+            pathfile = ResourcesEx.persistentDataPath + "/download/" + xmlName;
+        }
+
+        
+        
         if (!Directory.Exists(pathfile))
         {
             Directory.CreateDirectory(pathfile);
         }
 
-        if (!Directory.Exists(pathfileDownLoad))
-        {
-            Directory.CreateDirectory(pathfileDownLoad);
-        }
-
-        if (!Directory.Exists(pathfileDefault))
-        {
-            Directory.CreateDirectory(pathfileDefault);
-        }
-
-
-        if (Application.platform == RuntimePlatform.IPhonePlayer)
-        {
-            return pathfile + "/" + xmlName + ".xml";
-        }
-        else if (Application.platform == RuntimePlatform.Android)
-        {
-            return pathfile + "/" + xmlName + ".xml";
-        }
-        else
-        {
-            return pathfile + "/" + xmlName + ".xml";
-        }
+        return pathfile + "/" + xmlName + ".xml";
     }
 
     public void CreateXElement(string nameTemp,string robotIDNum,string datatype,string level)
@@ -181,8 +169,8 @@ public class RecordContactInfo
         xel2.InnerText = level; //设置文本节点 机器人数据类型（玩家，默认，下载）
         xmlelem.AppendChild(xel2);
 
-        xele.Save(Path);  
-        
+        xele.Save(Path);
+        PlatformMgr.Instance.OperateSyncFile(nameTemp, ResFileType.Type_playerdata, Path, OperateFileType.Operate_File_Add);
     }
 
 
@@ -234,20 +222,9 @@ public class RecordContactInfo
     {
         string pathfile = "";
         List<string> existXMLNams = new List<string>();
-        if (Application.platform == RuntimePlatform.IPhonePlayer)
+        if (fileNameTemp.Equals("playerdata"))
         {
-            pathfile = Application.persistentDataPath + "/" + fileNameTemp;
-            //pathfile = Application.persistentDataPath+"/Raw/"+ "/RobotModel";
-            if (!Directory.Exists(pathfile))
-            {
-                Directory.CreateDirectory(pathfile);
-            }
-            dir = pathfile;
-        }
-        else if (Application.platform == RuntimePlatform.Android)
-        {
-            pathfile = Application.persistentDataPath + "/" + fileNameTemp;
-            //pathfile = Application.persistentDataPath + "/RobotModel";
+            pathfile = ResourcesEx.GetUserRootPath() + "/" + fileNameTemp;
             if (!Directory.Exists(pathfile))
             {
                 Directory.CreateDirectory(pathfile);
@@ -256,14 +233,14 @@ public class RecordContactInfo
         }
         else
         {
-            pathfile = Application.persistentDataPath + "/" + fileNameTemp;
-            //pathfile = Application.persistentDataPath + "/RobotModel";
+            pathfile = ResourcesEx.persistentDataPath + "/" + fileNameTemp;
             if (!Directory.Exists(pathfile))
             {
                 Directory.CreateDirectory(pathfile);
             }
             dir = pathfile;
         }
+        
 
 
         string[] filename = System.IO.Directory.GetDirectories(dir);
@@ -374,34 +351,18 @@ public class RecordContactInfo
     /// <param name="datatype"></param>
     public void DeleteXmlFile(string xmlname,string datatype)
     {
-       string pathfile = Application.persistentDataPath + "/" + datatype;
-
-        string[] filename = System.IO.Directory.GetDirectories(pathfile);
-        if (filename != null)
+        string pathfile = string.Empty;
+        if (datatype == "default")
         {
-            foreach (string fi in filename)
-            {
-                di = new DirectoryInfo(fi);
-                fis = di.GetFiles();
-
-                if (fis != null)
-                {
-                    foreach (FileInfo fil in fis)
-                    {
-                        string FileName = dir + fil.Name;
-                        
-                        if (System.IO.Path.GetExtension(FileName) == ".xml")
-                        {
-                           // Debug.Log("delete:" + fil.Name);
-                            string name = DeleteNameExtension(fil.Name);
-                            if (name == xmlname)
-                            {
-                                di.Delete(true);
-                            }
-                        }
-                    }
-                }
-            }
+            pathfile = PublicFunction.CombinePath(ResourcesEx.GetCommonPathForNoTypeName(xmlname), xmlname + ".xml");
+        }
+        else
+        {
+            pathfile = PublicFunction.CombinePath(ResourcesEx.GetRobotPathForNoTypeName(xmlname), xmlname + ".xml");
+        }
+        if (File.Exists(pathfile))
+        {
+            File.Delete(pathfile);
         }
     }
 
@@ -750,6 +711,28 @@ public class RecordContactInfo
             }
 
         return cGOs;
+    }
+
+    /// <summary>
+    /// 查找预设动画名称
+    /// </summary>
+    public string FindAds()
+    {
+        XmlNodeList nodeList = xele.GetElementsByTagName("Ads");
+        string ads =null;
+
+        if (nodeList != null)
+        {
+            XmlElement xe = (XmlElement)nodeList[0];
+     
+            if(xe!=null&&xe.InnerText !=null)
+            {
+                ads = xe.InnerText;
+            }
+                       
+        }
+
+        return ads;
     }
 
     /// <summary>
@@ -1451,7 +1434,14 @@ public class RecordContactInfo
                                 go.oriDJAngleX = 120.0f;
                             }
 
-
+                            if (xe.HasAttribute("sensorID"))
+                            {
+                                go.sensorID = xe.GetAttribute("sensorID");
+                            }
+                            else
+                            {
+                                go.sensorID = null;
+                            }
                             XmlNodeList childNodeList = xe.GetElementsByTagName("PrePos");
                             if (childNodeList != null && childNodeList.Count > 0)
                             {
@@ -1574,16 +1564,20 @@ public class RecordContactInfo
     public bool HasFile(string opentype, string filename)
     {
         bool hasFile=false;
+        string path = string.Empty;
+        if (opentype == "default")
+        {
+            path = PublicFunction.CombinePath(ResourcesEx.GetCommonPathForNoTypeName(filename), filename + ".xml");
+        }
+        else
+        {
+            path = PublicFunction.CombinePath(ResourcesEx.GetRobotPathForNoTypeName(filename), filename + ".xml");
+        }
 
-        string path = ResourcesEx.persistentDataPath;
-
-        string srcFileName = path + "/" + opentype + "/" + filename + "/" + filename + ".xml";
-  
-        if (System.IO.File.Exists(srcFileName))
+        if (System.IO.File.Exists(path))
         {
             hasFile = true;
         }
-
         return hasFile;
     }
 
@@ -1657,13 +1651,20 @@ public class RecordContactInfo
     /// <param name="newName"></param>
     public void ReviseFileNam(string opentype,string oldName,string newName)
     {
-		string path =Application.persistentDataPath;
+        string path = string.Empty;
+        if (opentype == "default")
+        {
+            path = ResourcesEx.GetCommonRootPath();
+        }
+        else
+        {
+            path = ResourcesEx.GetUserRootPath();
+        }
+        string srcFileName = path+"/"+oldName+"/"+oldName+".xml";
+		string destFileName = path+"/"+oldName+"/"+newName+".xml";
 
-        string srcFileName = path+"/"+opentype+"/"+oldName+"/"+oldName+".xml";
-		string destFileName = path+ "/"+opentype+"/"+oldName+"/"+newName+".xml";
-
-        string srcFolderPath = path + "/" + opentype + "/" + oldName;
-        string destFolderPath = path + "/" + opentype + "/" + newName;
+        string srcFolderPath = path + "/" + oldName;
+        string destFolderPath = path + "/" + newName;
         if (System.IO.File.Exists(srcFileName))
         {
             System.IO.File.Move(srcFileName, destFileName);

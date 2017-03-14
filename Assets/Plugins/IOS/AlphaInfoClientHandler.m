@@ -117,7 +117,7 @@
 
 -(void) sendXT :(BOOL)sendFlag{
     double currentTime = [[NSDate date] timeIntervalSince1970];
-    if (currentTime-_lastSendTime > 3){
+    if (currentTime-_lastSendTime > 2){
         
         if (sendFlag){
 			[self sendCmd:DV_XT datas:NULL lens:0];
@@ -225,11 +225,11 @@
     NSUInteger nLen = [data length];
     
     //NSLog(@"Rcv data lens = %lu", (unsigned long)nLen);
-//    NSMutableString* pTemp = [NSMutableString new];
-//    for (int i=0; i<nLen; i++) {
-//        [pTemp appendFormat:@"%02X ", pData[i]];
-//    }
-//    NSLog(pTemp);
+	NSMutableString* pTemp = [NSMutableString new];
+    for (int i=0; i<nLen; i++) {
+        [pTemp appendFormat:@"%02X ", pData[i]];
+    }
+    logEvent(@"receive:%@",pTemp);
     
     for (int i=0; i<nLen; i++) {
         if ([_protocalPacket setData:pData[i]] == true) {

@@ -19,31 +19,11 @@ namespace Game.Platform
         public static PlatformMgr Instance { get { return m_instance; } }
 
         public delegate void CallUnityDelegate(object arg);
-        /// <summary>
-        /// 系统主板版本
-        /// </summary>
-        public string Robot_System_Version = string.Empty;
-        /// <summary>
-        /// 系统主板程序路径
-        /// </summary>
-        public string Robot_System_FilePath = string.Empty;
-        /// <summary>
-        /// 系统舵机版本
-        /// </summary>
-        public string Robot_Servo_Version = string.Empty;
-        /// <summary>
-        /// 系统舵机程序路径
-        /// </summary>
-        public string Robot_Servo_FilePath = string.Empty;
 
         public ReadPowerMsgAck PowerData = new ReadPowerMsgAck();
 
-        public bool NeedUpdateFlag = false;
-        /*
-        #if UNITY_ANDROID
-                AndroidJavaClass m_javaClass = null;
-                AndroidJavaObject m_javaObj = null;
-        #endif*/
+        //public bool NeedUpdateFlag = false;
+        
         PlatformInterface mPlatInterface = null;
 
         BluetoothMgr m_blueMgr = new BluetoothMgr();
@@ -52,6 +32,8 @@ namespace Game.Platform
         /// 边充边玩,true表示可以边充边玩，false表示不可以
         /// </summary>
         bool isChargePlaying = true;
+
+        string mLastUser = string.Empty;
 
         public bool IsChargeProtected
         {
@@ -63,33 +45,20 @@ namespace Game.Platform
         public bool IsWaitUpdateFlag = false;
 
         Dictionary<string, CallUnityDelegate> mUnityDelegateDict;
-        int count = 0;
-
-        string error = "";
 
         public string Pic_Path;
-
-
-        string mConnectedMac;
-        string mConnectedName;
-        public float lastDicConnectedTime = 0;
-
-        bool isConnecting = false;
-        string mConnectingMac = string.Empty;
-
 
         string mConnectedSpeakerMac = string.Empty;
         string mConnectingSpeakerMac = string.Empty;
 
-        //要取消连接的设备
-        List<string> mCannelConDeviceList = null;
         public bool GetBluetoothState()
         {
 
+/*
 #if UNITY_EDITOR
             return true;
-#endif
-            return m_blueMgr.ConnenctState;
+#endif*/
+            return SingletonObject<ConnectManager>.GetInst().GetBluetoothState();
         }
         
         public void CleanUpBlue()
@@ -112,10 +81,10 @@ namespace Game.Platform
         public void SaveRobotLastConnectedData(string robotId, string mac)
         {
             PlayerPrefs.SetString(robotId, mac);
-            if (!PlayerPrefs.HasKey(mac))
+            /*if (!PlayerPrefs.HasKey(mac))
             {
-                PlayerPrefs.SetString(mac, mConnectedName);
-            }
+                PlayerPrefs.SetString(mac, SingletonObject<ConnectManager>.GetInst().GetConnectedName());
+            }*/
             PlayerPrefs.Save();
         }
         /// <summary>
@@ -144,7 +113,7 @@ namespace Game.Platform
             }
             if (GetBluetoothState())
             {
-                return mConnectedName;
+                return SingletonObject<ConnectManager>.GetInst().GetConnectedName();
             }
             return string.Empty;
         }
@@ -157,7 +126,7 @@ namespace Game.Platform
         {
             if (GetBluetoothState())
             {
-                return mConnectedMac;
+                return SingletonObject<ConnectManager>.GetInst().GetConnectedMac();
             }
             else if (PlayerPrefs.HasKey(robotId))
             {
@@ -174,15 +143,6 @@ namespace Game.Platform
             }
             return string.Empty;
         }
-        /// <summary>
-        /// 修改内存中缓存的名字
-        /// </summary>
-        /// <param name="name"></param>
-        public void MotherboardRename(string name)
-        {
-            m_blueMgr.BlueRename(name, mConnectedMac);
-        }
-        
 
         public void RegesiterCallUnityDelegate(CallUnityFuncID id, CallUnityDelegate dlgt)
         {
@@ -213,8 +173,11 @@ namespace Game.Platform
             RegesiterCallUnityDelegate(CallUnityFuncID.ConnectBLE, OpenBlueSearch);
             RegesiterCallUnityDelegate(CallUnityFuncID.JsShowExceptionCallback, JsShowExceptionCallback);
             RegesiterCallUnityDelegate(CallUnityFuncID.Destroy, QuitUnity);
+            RegesiterCallUnityDelegate(CallUnityFuncID.autoConnect, BlueAutoConnect);
+            RegesiterCallUnityDelegate(CallUnityFuncID.Screenshots, Screenshots);
+            RegesiterCallUnityDelegate(CallUnityFuncID.SensorProgramVersion, SensorProgramVersion);
+            RegesiterCallUnityDelegate(CallUnityFuncID.setServoMode, SetServoModel);
             
-            EventMgr.Inst.Regist(EventID.Connected_Jimu_Result, ReadDeviceResult);
             if (PlayerPrefs.HasKey("isChargePlaying"))
             {
                 int result = PlayerPrefs.GetInt("isChargePlaying");
@@ -227,18 +190,9 @@ namespace Game.Platform
                     isChargePlaying = false;
                 }
             }
-            /*Robot_System_Version = "Jimu_p1.30";
-            Robot_System_FilePath = "Jimu2primary_P1.30";*/
-            Robot_Servo_Version = "41161701";
-            Robot_Servo_FilePath = "jimu2_app_41161701";
-            /*Robot_System_Version = "Jimu_p1.29";
-            Robot_System_FilePath = "Jimu2primary_P1.29";
-            Robot_Servo_Version = "41155201";
-            Robot_Servo_FilePath = "jimu2_app_41155201";*/
         }
         void OnDestroy()
         {
-            EventMgr.Inst.UnRegist(EventID.Connected_Jimu_Result, ReadDeviceResult);
         }
         void FixedUpdate()
         {
@@ -276,11 +230,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
 
         }
@@ -294,11 +245,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
 
         }
@@ -314,11 +262,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
             return false;
         }
@@ -327,18 +272,15 @@ namespace Game.Platform
         {
             try
             {
-                /*m_blueMgr.OldMatchedFound();
-                m_blueMgr.OldNewFound();*/
+                Log(MyLogType.LogTypeEvent, "开启蓝牙搜索");
+                SingletonObject<ConnectManager>.GetInst().CleanConnectData();
                 m_blueMgr.ClearDevice();
                 mPlatInterface.StartScan();
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -346,15 +288,13 @@ namespace Game.Platform
         {
             try
             {
+                Log(MyLogType.LogTypeEvent, "停止蓝牙搜索");
                 mPlatInterface.StopScan();
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -363,26 +303,15 @@ namespace Game.Platform
         {
             try
             {
-                Debuger.Log(string.Format("ConnenctBluetooth mac = {0} name = {1}", mac, name));
-                isConnecting = true;
-                mConnectingMac = mac;
-                mConnectedMac = mac;
-                if (!string.IsNullOrEmpty(name))
-                {
-                    mConnectedName = name;
-                }
+                Log(MyLogType.LogTypeEvent, string.Format("ConnenctBluetooth mac = {0} name = {1}", mac, name));
+                SingletonObject<ConnectManager>.GetInst().OnConnect(mac, name);
                 mPlatInterface.DisConnenctBuletooth();
-                //RobotManager.GetInst().DisAllConnencted();
                 mPlatInterface.ConnenctBluetooth(mac);
             }
             catch (System.Exception ex)
             {
-                isConnecting = false;
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
 
         }
@@ -391,29 +320,24 @@ namespace Game.Platform
         /// </summary>
         public void DisConnenctBuletooth()
         {
-            if (GetBluetoothState())
-            {
-                lastDicConnectedTime = Time.time;
-            }
-            RobotManager.GetInst().DisAllConnencted();
-            m_blueMgr.DisConnenctBuletooth();
-            m_blueMgr.MatchResult(false);
-            NeedUpdateFlag = false;
-            NetWork.GetInst().ClearAllMsg();
-            DisConnectSpeaker();
+            SingletonObject<ConnectManager>.GetInst().OnDisconnect();
+            //NeedUpdateFlag = false;
+            OnlyDisConnectBluetooth();
+        }
+
+        public void OnlyDisConnectBluetooth()
+        {
             try
             {
+                m_blueMgr.ClearDevice();
+                DisConnectSpeaker();
                 mPlatInterface.DisConnenctBuletooth();
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
-            
         }
         /// <summary>
         /// 取消蓝牙连接
@@ -422,49 +346,12 @@ namespace Game.Platform
         {
             try
             {
-                Debuger.Log(string.Format("CannelConnectBluetooth mac = {0}", mConnectingMac));
-                Robot robot = null;
-                if (RobotManager.GetInst().IsSetDeviceIDFlag)
-                {
-                    robot = RobotManager.GetInst().GetSetDeviceRobot();
-                }
-                else if (RobotManager.GetInst().IsCreateRobotFlag)
-                {
-                    robot = RobotManager.GetInst().GetCreateRobot();
-                }
-                else
-                {
-                    robot = RobotManager.GetInst().GetCurrentRobot();
-                }
-                if (null != robot)
-                {
-                    robot.CannelConnect();
-                }
-                if (!isConnecting && string.IsNullOrEmpty(mConnectingMac))
-                {
-                    DisConnenctBuletooth();
-                    return;
-                }
-                
-                if (null == mCannelConDeviceList)
-                {
-                    mCannelConDeviceList = new List<string>();
-                }
-                if (!mCannelConDeviceList.Contains(mConnectingMac))
-                {
-                    mCannelConDeviceList.Add(mConnectingMac);
-                }
-                isConnecting = false;
-                //mPlatInterface.CancelConnectBluetooth();
+                SingletonObject<ConnectManager>.GetInst().CancelConnecting();
             }
             catch (System.Exception ex)
             {
-                isConnecting = false;
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
         public void SendMsg(byte cmd, byte[] param, int len)
@@ -476,11 +363,8 @@ namespace Game.Platform
             catch (System.Exception ex)
             {
                 //MyLog.Log("platform SendMsg Exception" + ex.ToString());
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
 
         }
@@ -493,11 +377,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -509,11 +390,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -521,16 +399,17 @@ namespace Game.Platform
         {
             try
             {
-                RobotMgr.Instance.rbtnametempt = string.Empty;
+                if (null != RobotMgr.Instance)
+                {
+                    RobotMgr.Instance.rbtnametempt = string.Empty;
+                }
+                Log(MyLogType.LogTypeEvent, "BackThirdApp");
                 Timer.Add(0.5f, 1, 1, mPlatInterface.BackThirdApp);
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
         /// <summary>
@@ -556,7 +435,8 @@ namespace Game.Platform
         /// <param name="name"></param>
         public void PublishModel(string name)
         {
-            SceneMgr.EnterScene(SceneType.EmptyScene);
+            Log(MyLogType.LogTypeEvent, "发布模型 name =" + name);
+            //SceneMgr.EnterScene(SceneType.EmptyScene);
             mPlatInterface.PublishModel(name);
         }
         /// <summary>
@@ -566,6 +446,7 @@ namespace Game.Platform
         /// <param name="sn"></param>
         public void ActivationRobot(string mcuId, string sn)
         {
+            Log(MyLogType.LogTypeEvent, string.Format("激活设备 mcu = {0}  sn = {1}", mcuId, sn));
             mPlatInterface.ActivationRobot(mcuId, sn);
         }
         /// <summary>
@@ -575,23 +456,18 @@ namespace Game.Platform
         /// <param name="arg"></param>
         public void CallPlatformFunc(CallPlatformFuncID funcId, string arg)
         {
+            Log(MyLogType.LogTypeEvent, arg);
             mPlatInterface.CallPlatformFunc(funcId.ToString(), arg);
         }
         /// <summary>
         /// 设置心跳开关
         /// </summary>
         /// <param name="state"></param>
-        public void SetSendXTState(bool state, bool needActive = true)
+        public void SetSendXTState(bool state)
         {
+            Log(MyLogType.LogTypeEvent, string.Format("设置心跳开关 state = {0}", state.ToString()));
             mPlatInterface.SetSendXTState(state);
             IsWaitUpdateFlag = !state;
-            if (needActive)
-            {
-                if (!state)
-                {//防止等待升级的过程中卡死
-                    Timer.Add(10, 1, 1, OpenSendXT);
-                }
-            }
         }
 
         void OpenSendXT()
@@ -626,7 +502,6 @@ namespace Game.Platform
             dict["eventName"] = id.ToString();
             dict["params"] = arg.ToString();
             string result = Json.Serialize(dict);
-            Debuger.Log("MobClickEvent = " + result);
             CallPlatformFunc(CallPlatformFuncID.MobClickEvent, result);
         }
 
@@ -652,66 +527,71 @@ namespace Game.Platform
             mConnectedSpeakerMac = string.Empty;
             mConnectingSpeakerMac = string.Empty;
         }
+        /// <summary>
+        /// 同步文件
+        /// </summary>
+        /// <param name="modelId"></param>
+        /// <param name="modelType"></param>
+        /// <param name="filePath"></param>
+        /// <param name="operateType"></param>
+        /// <returns></returns>
+        public bool OperateSyncFile(string modelId, ResFileType modelType, string filePath, OperateFileType operateType)
+        {
+            Log(MyLogType.LogTypeEvent, string.Format("同步文件 modelId = {0} modelType = {1} operateType = {2} filePath = {3}", modelId, modelType.ToString(), operateType.ToString(), filePath));
+            return mPlatInterface.OperateSyncFile(modelId, modelType, filePath, operateType);
+        }
+
+        /// <summary>
+        /// 同步文件
+        /// </summary>
+        /// <param name="robotName"></param>
+        /// <param name="filePath"></param>
+        /// <param name="operateType"></param>
+        /// <returns></returns>
+        public bool OperateSyncFile(string robotName, string filePath, OperateFileType operateType)
+        {
+            string[] ary = robotName.Split('_');
+            if (null != ary && ary.Length == 2)
+            {
+                return mPlatInterface.OperateSyncFile(ary[0], ResourcesEx.GetResFileType(ary[1]), filePath, operateType);
+            }
+            return false;
+        }
+
+        public void Log(MyLogType logType, string text)
+        {
+            switch (logType)
+            {
+                case MyLogType.LogTypeInfo:
+                    mPlatInterface.LogInfo(text);
+                    break;
+                case MyLogType.LogTypeDebug:
+                    mPlatInterface.LogDebug(text);
+                    break;
+                case MyLogType.LogTypeEvent:
+                    mPlatInterface.LogEvent(text);
+                    break;
+            }
+        }
+
+        public void PopWebErrorType(ConnectionErrorType errorType)
+        {
+            CallPlatformFunc(CallPlatformFuncID.NotificationNameConnectionError, ((byte)errorType).ToString());
+        }
         #endregion
 
         #region Platform回调Unity
         //蓝牙连接结果
         public void ConnenctCallBack(string str)
         {
-            Debuger.Log(string.Format("ConnenctCallBack str = {0} isConnecting = {1} mConnectingMac = {2}", str, isConnecting, mConnectingMac));
-            if (isConnecting)
+            Log(MyLogType.LogTypeEvent, string.Format("ConnenctCallBack = {0}", str));
+            if (string.IsNullOrEmpty(str))
             {
-                isConnecting = false;
-                mConnectingMac = string.Empty;
-                bool result = true;
-                NetWork.GetInst().ClearAllMsg();
-                if (string.IsNullOrEmpty(str))
-                {
-                    PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionFailed);
-                    result = false;
-                    /*if (StepManager.GetIns().OpenOrCloseGuide)
-                    {
-                        EventMgr.Inst.Fire(EventID.GuideNeedWait, new EventArg(StepManager.GetIns().BTSelectStep, false));
-                    }*/
-                    m_blueMgr.MatchResult(result);
-                }
-                else
-                {
-                    //mConnectedMac = str;
-                    //mConnectedName = m_blueMgr.GetNameForMac(str);
-                    Robot robot = null;
-                    if (RobotManager.GetInst().IsSetDeviceIDFlag)
-                    {
-                        robot = RobotManager.GetInst().GetSetDeviceRobot();
-                    }
-                    else if (RobotManager.GetInst().IsCreateRobotFlag)
-                    {
-                        robot = RobotManager.GetInst().GetCreateRobot();
-                    }
-                    else
-                    {
-                        robot = RobotManager.GetInst().GetCurrentRobot();
-                    }
-                    if (null != robot)
-                    {
-                        m_blueMgr.MatchResult(result);
-                        robot.ConnectRobotResult(str, result);
-                        robot.ReadDeviceType();
-                    }
-                    else
-                    {
-                        DisConnenctBuletooth();
-                    }
-                }
+                SingletonObject<ConnectManager>.GetInst().ConnectFail();
             }
             else
             {
-                PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionFailed);
-                DisConnenctBuletooth();
-                if (null != mCannelConDeviceList)
-                {
-                    mCannelConDeviceList.Clear();
-                }
+                SingletonObject<ConnectManager>.GetInst().ConnectSuccess(str);
             }
         }
 
@@ -761,54 +641,6 @@ namespace Game.Platform
             }
         }
 
-        void ReadDeviceResult(EventArg arg)
-        {
-            try
-            {
-                Robot robot = (Robot)arg[0];
-                bool result = (bool)arg[1];
-                Debuger.Log(string.Format("ReadDeviceResult robotMac = {0} result = {1}", robot.Mac, result));
-                //PopWinManager.GetInst().ClosePopWin(typeof(ConnenctBluetoothMsg));
-                if (result)
-                {
-                    robot.StartReadSystemPower();
-                    robot.SelfCheck(false);
-                    robot.HandShake();
-                    //2秒以后读取初始角度
-                    //ClientMain.GetInst().WaitTimeInvoke(2, robot.ReadMotherboardData);
-                    Timer.Add(2, 1, 1, robot.ReadMotherboardData);
-                    /*if (StepManager.GetIns().OpenOrCloseGuide)
-                    {
-                        StartCoroutine(GuideWaitSometime(2f, true));
-                    }*/
-                }
-                else
-                {
-                    PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionFailed);
-                    /*if (StepManager.GetIns().OpenOrCloseGuide)
-                    {
-                        EventMgr.Inst.Fire(EventID.GuideNeedWait, new EventArg(StepManager.GetIns().BTSelectStep, false));
-                    }*/
-                    DisConnenctBuletooth();
-                }
-            }
-            catch (System.Exception ex)
-            {
-                PlatformMgr.Instance.MobClickEvent(MobClickEventID.BluetoothConnectionPage_ConnectionFailed);
-                /*if (StepManager.GetIns().OpenOrCloseGuide)
-                {
-                    EventMgr.Inst.Fire(EventID.GuideNeedWait, new EventArg(StepManager.GetIns().BTSelectStep, false));
-                }*/
-                DisConnenctBuletooth();
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
-            }
-            
-        }
-
         //发现蓝牙已匹配过的设备
         public void OnMatchedDevice(string name)
         {
@@ -836,15 +668,12 @@ namespace Game.Platform
                 string macStr = Encoding.UTF8.GetString(mac);
                 int len = br.ReadByte();
                 byte cmd = br.ReadByte();
-                if (ClientMain.Exception_Log_Flag)
+                byte[] paramAry = new byte[bytes.Length - 3 - macLen];
+                for (int i = 0, imax = paramAry.Length; i < imax; ++i)
                 {
-                    byte[] paramAry = new byte[bytes.Length - 3 - macLen];
-                    for (int i = 0, imax = paramAry.Length; i < imax; ++i)
-                    {
-                        paramAry[i] = bytes[3 + macLen + i];
-                    }
-                    Debuger.Log("mac=" + macStr + ";len=" + len + ";cmd=" + cmd.ToString("X2") + " param = " + PublicFunction.BytesToHexString(paramAry));
+                    paramAry[i] = bytes[3 + macLen + i];
                 }
+                Log(MyLogType.LogTypeEvent, "mac=" + macStr + ";len=" + len + ";cmd=" + ((CMDCode)cmd).ToString() + " param = " + PublicFunction.BytesToHexString(paramAry));
 
 #if !Test
                 NetWork.GetInst().ReceiveMsg((CMDCode)cmd, len, macStr, br);
@@ -856,11 +685,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
             
         }
@@ -873,6 +699,7 @@ namespace Game.Platform
         {
             try
             {
+                Log(MyLogType.LogTypeEvent, "GotoScene msg = " + msg);
                 Dictionary<string, object> data = (Dictionary<string, object>)Json.Deserialize(msg);
                 if (null != data)
                 {
@@ -897,26 +724,61 @@ namespace Game.Platform
                     {
                         modelType = int.Parse(data["modelType"].ToString());
                     }
-                    
+                    if (!string.IsNullOrEmpty(mLastUser) && !GetUserData().Equals(mLastUser))
+                    {//切换了账号，清除模型数据
+                        Log(MyLogType.LogTypeDebug, "切换账号，清除数据");
+                        try
+                        {
+                            if (null != RobotMgr.Instance.rbt)
+                            {
+                                RobotMgr.Instance.rbt.Clear();
+                            }
+                            ActionsManager.GetInst().CleanUp();
+                            RobotManager.GetInst().CleanUp();
+                        }
+                        catch (System.Exception ex)
+                        {
+                            Log(MyLogType.LogTypeEvent, "切换账号时清除数据 error = " + ex.ToString());
+                        }
+                        
+                    }
+                    mLastUser = GetUserData();
                     ResFileType fileType = (ResFileType)modelType;
                     string namewithtype = RobotMgr.NameWithType(modelId, ResourcesEx.GetFileTypeString(fileType));
                     //RobotMgr.Instance.rbtnametempt = namewithtype;
                     Robot robot = RobotManager.GetInst().GetRobotForName(namewithtype);
                     if (null == robot)
                     {
-                        GetRobotData.GetInst().ReadOneRobot(namewithtype);
-                        robot = RobotManager.GetInst().GetRobotForName(namewithtype);
+                        string robotPath = string.Empty;
+                        if (fileType == ResFileType.Type_default)
+                        {
+                            robotPath = ResourcesEx.GetCommonPathForNoTypeName(modelId);
+                            GetRobotData.GetInst().ReadOneRobot(namewithtype);
+                            robot = RobotManager.GetInst().GetRobotForName(namewithtype);
+                        }
+                        else
+                        {
+                            robotPath = ResourcesEx.GetRobotPathForNoTypeName(modelId);
+                            if (!Directory.Exists(robotPath))
+                            {
+                                Directory.CreateDirectory(robotPath);
+                                PlatformMgr.Instance.SaveModel(modelId);
+                            }
+                            else
+                            {
+                                GetRobotData.GetInst().ReadOneRobot(namewithtype);
+                                robot = RobotManager.GetInst().GetRobotForName(namewithtype);
+                            }
+                        }
                     }
                     if (null != robot)
                     {
+                        Log(MyLogType.LogTypeEvent, string.Format("进入已有模型 modelId = {0}, madelName = {1}, modelType = {2}", modelId, modelName, fileType.ToString()));
                         RobotManager.GetInst().IsCreateRobotFlag = false;
                         robot.ShowName = modelName;
                         if (fileType == ResFileType.Type_default)
                         {
                             SingletonBehaviour<GetRobotData>.GetInst().SelectRobotDefault(modelId);
-#if UNITY_ANDROID
-                            ActionsManager.GetInst().ReadOfficialActionsXml();
-#endif
                         }
                         else if (fileType == ResFileType.Type_playerdata)
                         {
@@ -930,15 +792,7 @@ namespace Game.Platform
                     }
 					else if (fileType == ResFileType.Type_playerdata)
                     {//不存在，新建
-                        if (!string.IsNullOrEmpty(modelId))
-                        {
-                            string modelPath = Path.Combine(ResourcesEx.GetRootPath(ResFileType.Type_playerdata), modelId);
-                            if (!Directory.Exists(modelPath))
-                            {
-                                Directory.CreateDirectory(modelPath);
-                                PlatformMgr.Instance.SaveModel(modelId);
-                            }
-                        }
+                        Log(MyLogType.LogTypeEvent, "不存在模型，走新建流程");
                         RobotManager.GetInst().SetCurrentRobot(null);
                         RecordContactInfo.Instance.openType = "playerdata";
                         RobotMgr.Instance.rbtnametempt = RobotMgr.NameWithType(modelId, "playerdata");
@@ -946,38 +800,22 @@ namespace Game.Platform
                         Robot newRobot = RobotManager.GetInst().GetCreateRobot();
                         newRobot.SetRobotMacAndName(newRobot.Mac, namewithtype);
                         newRobot.ShowName = modelName;
-                        /*#if UNITY_EDITOR
-                        //用于模拟加入社区版本
-                        if (PublicFunction.IsInteger(modelId))
-                        {
-                            RobotManager.GetInst().IsCreateRobotFlag = false;
-                            List<byte> list = new List<byte>();
-                            int count = int.Parse(modelId);
-                            for (byte i = 1; i <= count; ++i)
-                            {
-                                list.Add(i);
-                            }
-                            SingletonBehaviour<GetRobotData>.Inst.CreateGO(list, namewithtype);
-                        }
-#else*/
+                        
                         if (PlatformMgr.Instance.GetBluetoothState())
                         {
                             PlatformMgr.Instance.DisConnenctBuletooth();
                         }
                         if (!PlatformMgr.Instance.IsOpenBluetooth())
                         {
-                            Timer.Add(0.2f, 1, 1, SearchBluetoothMsg.ShowMsg);
+                            Timer.Add(0.2f, 1, 1, ConnectBluetoothMsg.ShowMsg);
                         }
                         else
                         {
-                            SearchBluetoothMsg.ShowMsg();
+                            ConnectBluetoothMsg.ShowMsg();
                         }
                         
-                        //PopWinManager.Inst.ShowPopWin(typeof(ConnenctBluetoothMsg));
-                        //#endif
                     }
                 }
-                //ClientMain.GetInst().LoadTexture(Pic_Path, 5);
                 ClientMain.GetInst().LoadGameBgTexture();
                 if (SceneMgr.GetCurrentSceneType() != SceneType.MainWindow)
                 {
@@ -990,11 +828,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
             
         }
@@ -1004,6 +839,7 @@ namespace Game.Platform
         /// <param name="msg">图片路径</param>
         public void PhotographBack(string msg)
         {
+            Log(MyLogType.LogTypeEvent, "拍照返回 msg = " + msg);
             if (!string.IsNullOrEmpty(msg))
             {
                 Pic_Path = msg;
@@ -1036,8 +872,8 @@ namespace Game.Platform
                     if (fileType == ResFileType.Type_default)
                     {
                         RecordContactInfo.Instance.openType = "default";
-                        string robotName = SingletonBehaviour<GetRobotData>.GetInst().AddMoreFile(fileType, modelId);
-                        if (!string.IsNullOrEmpty(robotName))
+                        SingletonBehaviour<GetRobotData>.GetInst().AddMoreFile(fileType, modelId);
+                        /*if (!string.IsNullOrEmpty(robotName))
                         {//增加官方动作
                             Robot tmpRobot = RobotManager.GetInst().GetRobotForName(robotName);
                             if (null != tmpRobot)
@@ -1053,17 +889,14 @@ namespace Game.Platform
                                 }
                                 ActionsManager.GetInst().SaveOfficialActions();
                             }
-                        }
+                        }*/
                     }
                 }
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -1071,10 +904,15 @@ namespace Game.Platform
         {
             try
             {
+                Log(MyLogType.LogTypeEvent, "修改模型名字返回" + msg);
                 Robot robot = RobotManager.GetInst().GetCurrentRobot();
-                if (null != robot)
+                if (null != robot && ResourcesEx.GetRobotType(robot) == ResFileType.Type_playerdata)
                 {
                     robot.ShowName = msg;
+                }
+                else
+                {
+                    return;
                 }
                 EventMgr.Inst.Fire(EventID.Change_Robot_Name_Back, new EventArg(msg));
                 if (SceneMgr.GetCurrentSceneType() != SceneType.MainWindow)
@@ -1084,11 +922,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
         /// <summary>
@@ -1126,11 +961,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -1142,6 +974,7 @@ namespace Game.Platform
         {
             try
             {
+                Log(MyLogType.LogTypeDebug, msg);
                 Dictionary<string, object> data = (Dictionary<string, object>)Json.Deserialize(msg);
                 if (null != data)
                 {
@@ -1163,11 +996,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
         /// <summary>
@@ -1176,40 +1006,9 @@ namespace Game.Platform
         /// <param name="mac"></param>
         public void OnDisConnenct(string mac)
         {
-            if (!isConnecting)
-            {
-                if (PlatformMgr.Instance.GetBluetoothState())
-                {
-                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("蓝牙断开"));
-                    LogicCtrl.GetInst().NotifyLogicDicBlue();
-                }
-                RobotManager.GetInst().DisAllConnencted();
-                m_blueMgr.DisConnenctBuletooth();
-                m_blueMgr.MatchResult(false);
-                NeedUpdateFlag = false;
-                if (null != mCannelConDeviceList)
-                {
-                    mCannelConDeviceList.Clear();
-                }
-            }
-            Robot robot = null;
-            if (RobotManager.GetInst().IsSetDeviceIDFlag)
-            {
-                robot = RobotManager.GetInst().GetSetDeviceRobot();
-            }
-            else if (RobotManager.GetInst().IsCreateRobotFlag)
-            {
-                robot = RobotManager.GetInst().GetCreateRobot();
-            }
-            else
-            {
-                robot = RobotManager.GetInst().GetCurrentRobot();
-            }
-            if (null != robot)
-            {
-                robot.CannelConnect();
-            }
-            NetWork.GetInst().ClearAllMsg();
+            SingletonObject<ConnectManager>.GetInst().DisconnectNotify();
+            m_blueMgr.ClearDevice();
+            //NeedUpdateFlag = false;
         }
 #endregion
 
@@ -1257,7 +1056,10 @@ namespace Game.Platform
         private void ModifyServoId(object arg)
         {
             ClientMain.GetInst().LoadGameBgTexture();
-            SetScene.GotoSetScene(SetSceneType.SetSceneTypeDevice);
+            if (SceneManager.GetInst().GetCurrentScene() == null || SceneManager.GetInst().GetCurrentScene().GetType() != typeof(SetScene))
+            {
+                SetScene.GotoSetScene(SetSceneType.SetSceneTypeDevice);
+            }
         }
 
 
@@ -1265,6 +1067,7 @@ namespace Game.Platform
         {
             if (null != arg)
             {
+                
                 Dictionary<string, object> dict = (Dictionary<string, object>)arg;
                 string version = string.Empty;
                 string filePath = string.Empty;
@@ -1279,11 +1082,9 @@ namespace Game.Platform
                         filePath = dict["FilePath"].ToString();
                     }
                 } while (false);
-                if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(filePath))
-                {
-                    Robot_System_Version = version;
-                    Robot_System_FilePath = filePath;
-                }
+                Log(MyLogType.LogTypeEvent, string.Format("主板本地程序:version={0}  filePath={1}", version, filePath));
+                SingletonObject<UpdateManager>.GetInst().Robot_System_Version = version;
+                SingletonObject<UpdateManager>.GetInst().Robot_System_FilePath = filePath;
             }
         }
 
@@ -1305,10 +1106,65 @@ namespace Game.Platform
                         filePath = dict["FilePath"].ToString();
                     }
                 } while (false);
-                if (!string.IsNullOrEmpty(version) && !string.IsNullOrEmpty(filePath))
+                Log(MyLogType.LogTypeEvent, string.Format("舵机本地程序:version={0}  filePath={1}", version, filePath));
+                SingletonObject<UpdateManager>.GetInst().Robot_Servo_Version = version;
+                SingletonObject<UpdateManager>.GetInst().Robot_Servo_FilePath = filePath;
+            }
+        }
+
+
+        private void SensorProgramVersion(object arg)
+        {
+            if (null != arg)
+            {
+                try
                 {
-                    Robot_Servo_Version = version;
-                    Robot_Servo_FilePath = filePath;
+                    Dictionary<string, object> dict = (Dictionary<string, object>)arg;
+                    int sensorType = 0;
+                    string version = string.Empty;
+                    string filePath = string.Empty;
+                    do
+                    {
+                        if (dict.ContainsKey("sensorType"))
+                        {
+                            sensorType = int.Parse(dict["sensorType"].ToString());
+                            if (sensorType > 100 && sensorType < 200)
+                            {
+                                sensorType -= 100;
+                            }
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        if (dict.ContainsKey("Version"))
+                        {
+                            version = dict["Version"].ToString();
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        if (dict.ContainsKey("FilePath"))
+                        {
+                            filePath = dict["FilePath"].ToString();
+                        }
+                        else
+                        {
+                            break;
+                        }
+                        TopologyPartType partType = (TopologyPartType)sensorType;
+                        SingletonObject<UpdateManager>.GetInst().SetSensorUpdateData(partType, version, filePath);
+                        string sensorInfo = string.Format("{0}|{1}", version, filePath);
+                        PlayerPrefs.SetString(partType.ToString(), sensorInfo);
+                        Log(MyLogType.LogTypeDebug, "保存传感器数据 sensorTyoe = " + partType.ToString() + " sensorInfo = " + sensorInfo);
+                        PlayerPrefs.Save();
+                    } while (false);
+                }
+                catch (System.Exception ex)
+                {
+                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
                 }
             }
         }
@@ -1317,27 +1173,33 @@ namespace Game.Platform
         {
             try
             {
+                Log(MyLogType.LogTypeEvent, "逻辑编程结果返回 = " + (string)arg);
                 LogicCtrl.GetInst().CallUnityCmd((string)arg);
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
             
         }
 
         private void ExitLogicView(object arg)
         {
+            Log(MyLogType.LogTypeEvent, "退出逻辑编程");
             LogicCtrl.GetInst().ExitLogic();
         }
 
         private void OpenBlueSearch(object arg)
         {
+            Log(MyLogType.LogTypeEvent, "打开蓝牙搜索页面");
             LogicCtrl.GetInst().OpenBlueSearch();
+        }
+
+        private void SetServoModel(object arg)
+        {
+            Log(MyLogType.LogTypeEvent, "设置舵机模式");
+            SingletonObject<LogicCtrl>.GetInst().OpenSetServoModel();
         }
 
 
@@ -1345,6 +1207,7 @@ namespace Game.Platform
         {
             try
             {
+                Log(MyLogType.LogTypeEvent, "设置充电保护 result = " + arg.ToString());
                 int result = int.Parse(arg.ToString());
                 if (result >= 1)
                 {
@@ -1358,11 +1221,8 @@ namespace Game.Platform
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
         //js异常提示点击按钮返回
@@ -1370,16 +1230,14 @@ namespace Game.Platform
         {
             try
             {
+                Log(MyLogType.LogTypeEvent, "js异常提示点击按钮返回" + arg.ToString());
                 int result = int.Parse(arg.ToString());
                 LogicCtrl.GetInst().JsExceptionOnClick(1 == result ? true : false);
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -1387,16 +1245,34 @@ namespace Game.Platform
         {
             try
             {
+                Log(MyLogType.LogTypeEvent, "退出unity");
                 SceneMgr.EnterScene(SceneType.EmptyScene);
                 SingletonObject<SceneManager>.GetInst().CloseCurrentScene();
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString()); 
+            }
+        }
+
+        void BlueAutoConnect(object arg)
+        {
+            Log(MyLogType.LogTypeEvent, "设置自动连接" + arg.ToString());
+            int result = int.Parse(arg.ToString());
+            SingletonObject<ConnectManager>.GetInst().SetAutoConnectFlag(result == 1 ? true : false);
+        }
+
+        void Screenshots(object arg)
+        {
+            try
+            {
+                SingletonBehaviour<Screenshots>.GetInst().SaveScreenshots();
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 
@@ -1423,6 +1299,10 @@ namespace Game.Platform
         //CurrentStopPlaying,//当前状态是停止录制
         CurrentSaveVideo,//当前状态可以保存视频
         ReplayVideoState,//重拍当前预览的视频
+        autoConnect,//自动连接开关
+        SensorProgramVersion,//传感器版本
+        Screenshots,//截图
+        setServoMode,//设置舵机模式
     }
 
     /// <summary>
@@ -1449,6 +1329,8 @@ namespace Game.Platform
         JsExceptionWaitResult,//异常等待返回
         ExitPlayVideoMode,//充电保护下注销拍摄视频模式
         OpenAndroidBLESetting,//打开android蓝牙设置
+        NotificationNameConnectionError,
+        refreshAllServo,//设置舵机返回
     }
     /// <summary>
     /// 用户数据
@@ -1470,6 +1352,27 @@ namespace Game.Platform
         ModelPage_TappedControllerButton,
         BluetoothConnectionPage_ConnectionSucceeded,
         BluetoothConnectionPage_ConnectionFailed,
+        ModelPage_CreateActionCount,    //新建模型动作数量
+    }
+
+    public enum MyLogType : byte
+    {
+        LogTypeEvent = 0,//重要日志
+        LogTypeInfo,//一般日志
+        LogTypeDebug,//调试日志
+    }
+    /// <summary>
+    /// 连接异常
+    /// </summary>
+    public enum ConnectionErrorType : byte
+    {
+        ConnectionUnknowErrorType = 0,
+        ConnectionSearchJimuType = 1,
+        ConnectionServoIdRepeatType = 2,
+        ConnectionServoVSLineType = 3,
+        ConnectionServoNumVsLineType = 4,
+        ConnectionServoLineErrorType = 5,
+        ConnectionFirmwareUpdateErrorType = 6,
     }
 }
 

@@ -18,6 +18,7 @@ public class DragdropItemEX : UIDragDropItem {
         ActionWidget,
         JoystickWidget,
         VsliderWidget,
+        HsliderWidget,
     }
 
     public ControllerType controllerType = ControllerType.None;
@@ -70,7 +71,7 @@ public class DragdropItemEX : UIDragDropItem {
             if (restriction == Restriction.PressAndHold)
             {
                 //Debug.Log("可以拖动");
-                if (controllerType == ControllerType.ActionWidget || controllerType == ControllerType.JoystickWidget || controllerType == ControllerType.VsliderWidget)
+                if (controllerType == ControllerType.ActionWidget || controllerType == ControllerType.JoystickWidget || controllerType == ControllerType.VsliderWidget || controllerType == ControllerType.HsliderWidget)
                 {
                     if (leftKit != null)
                         leftKit.enabled = true;
@@ -82,7 +83,7 @@ public class DragdropItemEX : UIDragDropItem {
             if (restriction == Restriction.PressAndHold)
             {
                 //Debug.Log("不可拖动");
-                if (controllerType == ControllerType.ActionWidget || controllerType == ControllerType.JoystickWidget || controllerType == ControllerType.VsliderWidget)
+                if (controllerType == ControllerType.ActionWidget || controllerType == ControllerType.JoystickWidget || controllerType == ControllerType.VsliderWidget || controllerType == ControllerType.HsliderWidget)
                 {
                     if (leftKit != null)
                         leftKit.enabled = false;

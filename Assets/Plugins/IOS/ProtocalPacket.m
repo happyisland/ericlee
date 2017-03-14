@@ -109,6 +109,9 @@
         case HEADER2:
             if (data != 0XBF) {
                 mState = HEADER1;
+                if (data == 0xfb) {
+                    [self setData:data];
+                }
                 break;
             }
             
@@ -149,6 +152,9 @@
             Byte nCheckSum =[self getCheckSum:pDataToCheck start:2 end:((int)datalen-1)];
             if (nCheckSum != data) {
                 mState = HEADER1;
+                if (data == 0xfb) {
+                    [self setData:data];
+                }
                 break;
             }
             
@@ -160,6 +166,9 @@
         case END:
             if (data != 0xED) {
                 mState = HEADER1;
+                if (data == 0xfb) {
+                    [self setData:data];
+                }
                 break;
             }
             

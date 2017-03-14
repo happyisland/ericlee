@@ -239,14 +239,14 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 364
-  mHeight: 364
+  mWidth: 370
+  mHeight: 370
   mDepth: 4
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
   aspectRatio: 1
-  mType: 0
+  mType: 1
   mFillDirection: 4
   mFillAmount: 1
   mInvert: 0
@@ -257,7 +257,7 @@ MonoBehaviour:
   bottomType: 1
   topType: 1
   mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
-  mSpriteName: jockBg3x
+  mSpriteName: MaskJoystickBoard@3x
   mFillCenter: 1
 --- !u!114 &11400004
 MonoBehaviour:
@@ -369,7 +369,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 400
   mHeight: 400
-  mDepth: 8
+  mDepth: 3
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -419,7 +419,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 364
   mHeight: 364
-  mDepth: 7
+  mDepth: 4
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -434,8 +434,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
-  mSpriteName: jockstickIconBoard@2x
+  mAtlas: {fileID: 11400000, guid: 80cffdb59d2e419459cc679c12a75efa, type: 2}
+  mSpriteName: Clean
   mFillCenter: 1
 --- !u!1001 &100100000
 Prefab:

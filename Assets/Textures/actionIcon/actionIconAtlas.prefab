@@ -42,8 +42,8 @@ MonoBehaviour:
   material: {fileID: 2100000, guid: e65796e9abed7704092981d47d4c292b, type: 2}
   mSprites:
   - name: add
-    x: 2
-    y: 716
+    x: 0
+    y: 311
     width: 100
     height: 100
     borderLeft: 0
@@ -54,9 +54,22 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
+  - name: add_action
+    x: 808
+    y: 422
+    width: 90
+    height: 90
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
   - name: icon_acrobatic
-    x: 2
-    y: 614
+    x: 0
+    y: 210
     width: 100
     height: 100
     borderLeft: 0
@@ -68,8 +81,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_actshameless
-    x: 410
-    y: 512
+    x: 0
+    y: 109
     width: 100
     height: 100
     borderLeft: 0
@@ -81,8 +94,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_angry
-    x: 308
-    y: 512
+    x: 0
+    y: 8
     width: 100
     height: 100
     borderLeft: 0
@@ -94,8 +107,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_below
-    x: 206
-    y: 512
+    x: 101
+    y: 412
     width: 100
     height: 100
     borderLeft: 0
@@ -107,8 +120,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_childacting
-    x: 104
-    y: 512
+    x: 101
+    y: 311
     width: 100
     height: 100
     borderLeft: 0
@@ -120,8 +133,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_coquetry
-    x: 2
-    y: 512
+    x: 101
+    y: 210
     width: 100
     height: 100
     borderLeft: 0
@@ -133,8 +146,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_crawl
-    x: 410
-    y: 410
+    x: 101
+    y: 109
     width: 100
     height: 100
     borderLeft: 0
@@ -146,8 +159,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_crazydance
-    x: 308
-    y: 410
+    x: 101
+    y: 8
     width: 100
     height: 100
     borderLeft: 0
@@ -159,8 +172,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_dance
-    x: 206
-    y: 410
+    x: 202
+    y: 412
     width: 100
     height: 100
     borderLeft: 0
@@ -172,8 +185,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_eat
-    x: 104
-    y: 410
+    x: 202
+    y: 311
     width: 100
     height: 100
     borderLeft: 0
@@ -185,8 +198,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_getdown
-    x: 2
-    y: 410
+    x: 202
+    y: 210
     width: 100
     height: 100
     borderLeft: 0
@@ -198,8 +211,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_greeting
-    x: 410
-    y: 308
+    x: 202
+    y: 109
     width: 100
     height: 100
     borderLeft: 0
@@ -211,8 +224,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_handshake
-    x: 308
-    y: 308
+    x: 202
+    y: 8
     width: 100
     height: 100
     borderLeft: 0
@@ -224,8 +237,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_handstand
-    x: 206
-    y: 308
+    x: 303
+    y: 412
     width: 100
     height: 100
     borderLeft: 0
@@ -237,8 +250,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_jump
-    x: 104
-    y: 308
+    x: 0
+    y: 412
     width: 100
     height: 100
     borderLeft: 0
@@ -250,8 +263,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_kicking
-    x: 2
-    y: 308
+    x: 303
+    y: 210
     width: 100
     height: 100
     borderLeft: 0
@@ -263,8 +276,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_left
-    x: 410
-    y: 206
+    x: 303
+    y: 109
     width: 100
     height: 100
     borderLeft: 0
@@ -276,8 +289,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_loudly
-    x: 308
-    y: 206
+    x: 303
+    y: 8
     width: 100
     height: 100
     borderLeft: 0
@@ -289,8 +302,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_punching
-    x: 206
-    y: 206
+    x: 404
+    y: 412
     width: 100
     height: 100
     borderLeft: 0
@@ -302,8 +315,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_right
-    x: 104
-    y: 206
+    x: 404
+    y: 311
     width: 100
     height: 100
     borderLeft: 0
@@ -315,8 +328,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_shake
-    x: 2
-    y: 206
+    x: 404
+    y: 210
     width: 100
     height: 100
     borderLeft: 0
@@ -328,8 +341,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_squat
-    x: 410
-    y: 104
+    x: 404
+    y: 109
     width: 100
     height: 100
     borderLeft: 0
@@ -341,8 +354,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_stamp
-    x: 308
-    y: 104
+    x: 404
+    y: 8
     width: 100
     height: 100
     borderLeft: 0
@@ -354,8 +367,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_stretch
-    x: 206
-    y: 104
+    x: 505
+    y: 412
     width: 100
     height: 100
     borderLeft: 0
@@ -367,8 +380,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_stunt
-    x: 104
-    y: 104
+    x: 505
+    y: 311
     width: 100
     height: 100
     borderLeft: 0
@@ -380,8 +393,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_swing
-    x: 2
-    y: 104
+    x: 505
+    y: 210
     width: 100
     height: 100
     borderLeft: 0
@@ -393,8 +406,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_swing0
-    x: 410
-    y: 2
+    x: 505
+    y: 109
     width: 100
     height: 100
     borderLeft: 0
@@ -406,8 +419,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_top
-    x: 308
-    y: 2
+    x: 505
+    y: 8
     width: 100
     height: 100
     borderLeft: 0
@@ -419,8 +432,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_twist
-    x: 206
-    y: 2
+    x: 606
+    y: 412
     width: 100
     height: 100
     borderLeft: 0
@@ -432,8 +445,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_twistedass
-    x: 104
-    y: 2
+    x: 707
+    y: 412
     width: 100
     height: 100
     borderLeft: 0
@@ -445,8 +458,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_walk
-    x: 2
-    y: 2
+    x: 303
+    y: 311
     width: 100
     height: 100
     borderLeft: 0

@@ -8,6 +8,7 @@
 
 #import "SdkConector.h"
 #import "UserEntity.h"
+#import "SyncDataManager.h"
 #import "sys/utsname.h"
 
 #include <sys/sysctl.h>
@@ -154,11 +155,11 @@ extern "C"{
 		if (strcmp(dataType, "userId")==0)
 		{
 			NSString* nsString =  [UserEntity shareEntity].userId;
-			if (nsString)
+			if (nsString && nsString.length>0)
 			{
 				return MakeStringCopy([nsString UTF8String]);
 			}
-			return MakeStringCopy("local");
+			return MakeStringCopy([DefaultUserID UTF8String]);
 		}
 		return MakeStringCopy("");
 	}
@@ -171,6 +172,64 @@ extern "C"{
         {
             [[UIApplication sharedApplication] openURL:url];
         }
+    }
+    
+    void IosLogEvent(char *str)
+    {
+        NSString *log=[[NSString alloc] initWithUTF8String:str];
+        logEvent(@"%@", log);
+        [log release];
+    }
+    
+    void IosLogInfo(char *str)
+    {
+        NSString *log=[[NSString alloc] initWithUTF8String:str];
+        logInfo(@"%@", log);
+        [log release];
+    }
+    
+    void IosLogDebug(char *str)
+    {
+        NSString *log=[[NSString alloc] initWithUTF8String:str];
+        logDebug(@"%@", log);
+        [log release];
+    }
+    
+    /** 
+     unity文件操作记录
+     modelId:与文件关联的模型id
+     modelType:与文件关联的模型类型,0:官方模型;1:自建模型;
+     filePath:文件绝对路径
+     oType:操作类型,1:新增;2:修改;3:删除;
+     */
+    bool operateFile(char *modelId, int modelType, char *filePath, int oType)
+    {
+        BOOL succeed=NO;
+        
+        if(modelId!=NULL && strlen(modelId)>0 && filePath!=NULL && strlen(filePath)>0)
+        {
+            if(modelType==0)
+                modelType=1;
+            else if(modelType==1)
+                modelType=2;
+            
+            NSString *mid=[[NSString alloc] initWithCString:modelId encoding:NSUTF8StringEncoding];
+            NSString *path=[[NSString alloc] initWithCString:filePath encoding:NSUTF8StringEncoding];
+            SyncDataManager *dataManager=[[SyncDataManager alloc] init];
+            if(oType==1 || oType==2)
+            {
+                succeed=[dataManager localAddOrUpdateFileInfoWithFilePath:path modifyTime:nil foreignKey:mid foreignServerKey:[Common currentUnityModelServerId] foreignType:modelType];
+            }
+            else if(oType==3)
+            {
+                succeed=[dataManager localDeleteFileInfoWithFilePath:path];
+            }
+            [mid release];
+            [path release];
+            [dataManager release];
+        }
+        
+        return succeed;
     }
 #if defined(__cplusplus)
 }

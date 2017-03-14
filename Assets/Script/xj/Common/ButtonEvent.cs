@@ -117,12 +117,9 @@ public class ButtonEvent : MonoBehaviour
 
     void OnClick()
     {
-        if (mPressType != PressType.Pressing)
+        if (mDelegate != null && mDelegate.onClick != null)
         {
-            if (mDelegate != null && mDelegate.onClick != null)
-            {
-                mDelegate.onClick(this.gameObject);
-            }
+            mDelegate.onClick(this.gameObject);
         }
         mPressType = PressType.None;
     }

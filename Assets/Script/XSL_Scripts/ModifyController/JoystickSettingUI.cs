@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using Game.Platform;
+using Game.Event;
 /// <summary>
 /// author: 孙宇
 /// describe:摇杆设置界面
@@ -44,8 +46,7 @@ public class JoystickSettingUI :BaseUI
             data.leftUpID = copyD.leftUpID;
             data.leftBottomID = copyD.leftBottomID;
             data.rightBottomID = copyD.rightBottomID;
-            data.rightUpID = copyD.rightUpID;
-            
+            data.rightUpID = copyD.rightUpID;            
         }
     }
 
@@ -60,23 +61,26 @@ public class JoystickSettingUI :BaseUI
     {
         base.AddEvent();
         curSelectServo = false;
-        Transform p = GameObject.Find("joystickSettingUI/settingUI2/Bottom/bottomBoard/Sprite/grid").transform;
+        /*Transform p = GameObject.Find("joystickSettingUI/settingUI2/Bottom/bottomBoard/Sprite/grid").transform;
 
         List<byte> turnModelList = RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList();
         List<byte> engelModelList = RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetAngleList();
 
         if (turnModelList.Count > 0)
         {
-            Debug.Log("当前轮模式");
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Turn servo exist!!");
+            //Debug.Log("当前轮模式");
             UserdefControllerScene.InitServoList(p, OnButtonClick, true);
         }
         else if (turnModelList.Count == 0 && engelModelList.Count > 0)
         {
-            Debug.Log("当前角度模式");
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Angle servo exist!!");
+            //Debug.Log("当前角度模式");
             UserdefControllerScene.InitServoList(p, null, true);
         }
         else
-            Debug.Log("当前无舵机");
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "No servo exist!!");
+            //Debug.Log("当前无舵机");*/
         
         
         //UserdefControllerScene.InitServoList(p,null); //舵机列表
@@ -118,14 +122,18 @@ public class JoystickSettingUI :BaseUI
         {
             hasJoysickData = false;
             settingUI2.SetActive(false);
-            Title.text = LauguageTool.GetIns().GetText("select model type");
+            Title.text = LauguageTool.GetIns().GetText("选择车子类型");
             settingUI1.transform.GetChild(1).GetChild(0).GetComponentInChildren<UILabel>().text = LauguageTool.GetIns().GetText("two-wheels");
             settingUI1.transform.GetChild(1).GetChild(1).GetComponentInChildren<UILabel>().text = LauguageTool.GetIns().GetText("four-wheels");
             Details.enabled = false;
             bottomTrans.gameObject.SetActive(false); //隐藏底部面板
+
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Enter joystick setting UI1!!");
         }
         else    // 配置界面
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Enter joystick setting UI2!!");
+
             hasJoysickData = true;
             //settingUI1.SetActive(false);
             
@@ -236,11 +244,51 @@ public class JoystickSettingUI :BaseUI
             }
         }
     }
+    void UpdateServoList()
+    {
+        Transform p = GameObject.Find("joystickSettingUI/settingUI2/Bottom/bottomBoard/Sprite/grid").transform;
+
+        List<byte> turnModelList = RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList();
+        List<byte> engelModelList = RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetAngleList();
+
+        if (p.childCount != 0)
+        {
+            for (int i = 0; i < (turnModelList.Count + engelModelList.Count); i++)
+                GameObject.Destroy(p.GetChild(i).gameObject);
+        }
+
+        if (turnModelList.Count > 0)
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Turn servo exist!!");
+            //Debug.Log("当前轮模式");
+            UserdefControllerScene.InitServoList(p, OnButtonClick, true);
+        }
+        else if (turnModelList.Count == 0 && engelModelList.Count > 0)
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Angle servo exist!!");
+            //Debug.Log("当前角度模式");
+            UserdefControllerScene.InitServoList(p, null, true);
+        }
+        else
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "No servo exist!!");
+        //Debug.Log("当前无舵机");
+
+        for (int i = 0; i < (turnModelList.Count + engelModelList.Count); i++)
+        {
+            p.GetChild(i).GetChild(2).GetComponent<UISprite>().enabled = false;
+            p.GetChild(i).GetChild(3).GetComponent<UISprite>().enabled = false;
+            p.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
+            p.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = false;
+            p.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
+        }
+    }
     /// <summary>
     /// 显示舵机列表
     /// </summary>
     void ShowDuojiList()
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Display joystick servo list!!");
+
         //Debug.Log("hasJoysickData is " + hasJoysickData);
         bottomTrans.gameObject.SetActive(true);
         UserdefControllerUI.HideOrShowTrans(true, bottomTrans, UserdefControllerUI.directType.bottom);
@@ -296,11 +344,10 @@ public class JoystickSettingUI :BaseUI
         Transform grid = bottomTrans.GetChild(1).GetChild(0);
         //Transform marks = GameObject.Find("UI Root/mark0").transform;
         byte b = 0;
-        char[] sp = new char[1];
-        sp[0] = ' ';
+
         for (int i = 0; i < grid.childCount; i++)
         {
-            byte.TryParse(grid.GetChild(i).GetComponentInChildren<UILabel>().text.Split(sp)[1], out b);
+            byte.TryParse(grid.GetChild(i).GetComponentInChildren<UILabel>().text, out b);
             grid.GetChild(i).GetChild(2).GetComponent<UISprite>().enabled = false;
             grid.GetChild(i).GetChild(3).GetComponent<UISprite>().enabled = false;
             grid.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
@@ -308,11 +355,6 @@ public class JoystickSettingUI :BaseUI
             grid.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
             if (takenList.Contains(b) && selected != b) //被占用的状态
             {
-                Debug.Log("leftUpID is " + joyData.leftUpID);
-                Debug.Log("rightUpID is " + joyData.rightUpID);
-                Debug.Log("leftBottomID is " + joyData.leftBottomID);
-                Debug.Log("rightBottomID is " + joyData.rightBottomID);
-
                 if (joyData.leftUpID != 0 && joyData.leftUpID == b)
                 {
                     grid.GetChild(i).GetChild(2).GetComponent<UISprite>().enabled = true;
@@ -320,7 +362,7 @@ public class JoystickSettingUI :BaseUI
                     grid.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
-                    Debug.Log("舵机：" + b + "被占用状态");
+                    //Debug.Log("舵机：" + b + "被占用状态");
                 }
                 else if (joyData.rightUpID != 0 && joyData.rightUpID == b)
                 {
@@ -329,7 +371,7 @@ public class JoystickSettingUI :BaseUI
                     grid.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
-                    Debug.Log("舵机：" + b + "被占用状态");
+                    //Debug.Log("舵机：" + b + "被占用状态");
                 }
                 else if (joyData.leftBottomID != 0 && joyData.leftBottomID == b)
                 {
@@ -338,7 +380,7 @@ public class JoystickSettingUI :BaseUI
                     grid.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = true;
                     grid.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
-                    Debug.Log("舵机：" + b + "被占用状态");
+                    //Debug.Log("舵机：" + b + "被占用状态");
                 }
                 else if (joyData.rightBottomID != 0 && joyData.rightBottomID == b)
                 {
@@ -347,22 +389,17 @@ public class JoystickSettingUI :BaseUI
                     grid.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = true;
                     grid.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
-                    Debug.Log("舵机：" + b + "被占用状态");
+                    //Debug.Log("舵机：" + b + "被占用状态");
                 }
                 else
                 {
-                    Debug.Log("舵机：" + i + "未被激活");
+                    //Debug.Log("舵机：" + i + "未被激活");
                     grid.GetChild(i).GetChild(2).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(3).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = false;
                     grid.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
                 }
-                
-                //grid.GetChild(i).GetChild(3).GetComponent<UISprite>().enabled = true;
-                //selectServo = grid.GetChild(i).GetChild(2).GetComponent<UISprite>();
-                
-                //selectServo.enabled = false;
             }
             else if (selected == b)  //选中的状态 
             {
@@ -414,9 +451,57 @@ public class JoystickSettingUI :BaseUI
                 }
                 //selectServo = grid.GetChild(i).GetChild(2).GetComponent<UISprite>();
                 selectServoID = b;
-                Debug.Log("舵机：" + selectServoID + "被选择状态");
-                
+
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "servo" + selectServoID + " is selected!!");         
             }
+        }
+    }
+
+    void CheckServoTypes(int types)
+    {
+        int wheelServoID01 = 0;
+        int wheelServoID02 = 0;
+        int wheelServoID03 = 0;
+        int wheelServoID04 = 0;
+
+        if (types == 2) //双轮模式
+        {
+            wheelServoID01 = joyData.leftUpID;
+            wheelServoID02 = joyData.rightUpID;
+            wheelServoID03 = 0;
+            wheelServoID04 = 0;
+        }
+        else if (types == 4) //四轮模式
+        {
+            wheelServoID01 = joyData.leftUpID;
+            wheelServoID02 = joyData.rightUpID;
+            wheelServoID03 = joyData.leftBottomID;
+            wheelServoID04 = joyData.rightBottomID;
+        }
+        else
+        {
+            wheelServoID01 = 0;
+            wheelServoID02 = 0;
+            wheelServoID03 = 0;
+            wheelServoID04 = 0;
+        }
+
+        if ((wheelServoID01 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID01).modelType == ServoModel.Servo_Model_Angle) ||
+            (wheelServoID02 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID02).modelType == ServoModel.Servo_Model_Angle) ||
+            (wheelServoID03 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID03).modelType == ServoModel.Servo_Model_Angle) ||
+            (wheelServoID04 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID04).modelType == ServoModel.Servo_Model_Angle))
+        {
+            Debug.Log("舵机属性已更改，不可使用");
+
+            //清除摇杆数据
+            joyData.leftUpID = 0;
+            joyData.rightUpID = 0;
+            joyData.UpID = 0;
+            joyData.leftBottomID = 0;
+            joyData.rightBottomID = 0;
+            joyData.type = JockstickData.JockType.none;
+
+            CopyData((JockstickData)ControllerManager.GetInst().GetWidgetdataByID(widgetID), joyData);
         }
     }
 
@@ -427,51 +512,30 @@ public class JoystickSettingUI :BaseUI
         string name = obj.name;
         if (name.Contains("backM"))  //返回 取消修改
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Cancel change joystick control data!!");
+
+            CheckServoTypes(wheelType);
+
             UserdefControllerScene.Ins.CloseJoystickSettingUI();
-            UserdefControllerScene.Ins.BackControllerSettingUI();
+            UserdefControllerScene.Ins.BackControllerSettingUI(UserdefControllerScene.curControlT.joystick_w);
             //UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
         }
         else if (name.Contains("backS"))
         {
-            ShowSetting_1();
-            /*if (joyData.type == JockstickData.JockType.twoServo)
-            {
-                if (joyData.leftUpID == 0)
-                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
-                else if (joyData.rightUpID == 0)
-                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
-                else
-                    ShowSetting_1();
-            }
-            else if (joyData.type == JockstickData.JockType.fourServo)
-            {
-                if (joyData.leftUpID == 0)
-                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
-                else if (joyData.rightUpID == 0)
-                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
-                else if (joyData.leftBottomID == 0)
-                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
-                else if (joyData.rightBottomID == 0)
-                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("未完成配置提示"), AbandonSetting, isChange);
-                else
-                    ShowSetting_1();
-            }*/
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Back joystick setting UI1!!");
 
-            //UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("not save wheel tip"), AbandonSetting, isChange);
-            /*if (selectServo != null)
-            {
-                selectServo.enabled = true;
-            }*/
-            //UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("not save Controller tip"), OnSecondbackClicked, isTotalDataChange);
+            ShowSetting_1();
         }
         else if (name.Contains("save")) //保存数据
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Save current joystick control data!!");
+
             if (joyData.type == JockstickData.JockType.twoServo)
             {
                 if (joyData.leftUpID == 0)
-                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置提示"));
+                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("舵机配置提示"));
                 else if (joyData.rightUpID == 0)
-                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置提示"));
+                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("舵机配置提示"));
                 else
                 {
                     if (isChange)
@@ -480,20 +544,20 @@ public class JoystickSettingUI :BaseUI
                         UserdefControllerUI.isTotalDataChange = true;
                     }
                     UserdefControllerScene.Ins.CloseJoystickSettingUI();
-                    UserdefControllerScene.Ins.BackControllerSettingUI();
+                    UserdefControllerScene.Ins.BackControllerSettingUI(UserdefControllerScene.curControlT.joystick_w);
                 }
                     //ShowSetting_1();
             }
             else if (joyData.type == JockstickData.JockType.fourServo)
             {
                 if (joyData.leftUpID == 0)
-                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置提示"));
+                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("舵机配置提示"));
                 else if (joyData.rightUpID == 0)
-                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置提示"));
+                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("舵机配置提示"));
                 else if (joyData.leftBottomID == 0)
-                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置提示"));
+                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("舵机配置提示"));
                 else if (joyData.rightBottomID == 0)
-                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("未完成配置提示"));
+                    HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("舵机配置提示"));
                 else
                 {
                     if (isChange)
@@ -502,22 +566,30 @@ public class JoystickSettingUI :BaseUI
                         UserdefControllerUI.isTotalDataChange = true;
                     }
                     UserdefControllerScene.Ins.CloseJoystickSettingUI();
-                    UserdefControllerScene.Ins.BackControllerSettingUI();
+                    UserdefControllerScene.Ins.BackControllerSettingUI(UserdefControllerScene.curControlT.joystick_w);
                 }
                     //ShowSetting_1();
             }
         }
         else if (name.Contains("type1"))  //双轮模式
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Select two-wheels model!!");
+
             selectWheelID = 1;
-            Debug.Log("two-wheels");
+            //Debug.Log("two-wheels");
             wheelType = 2;
             if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList().Count < 2)
             {
-                HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("轮模式舵机数量不足"));
+                //HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("轮模式舵机数量不足"));
+                if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList().Count == 0)
+                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("配置轮模式提示"), ModifyServoTypeSetting, true);
+                else
+                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("配置摇杆轮模式提示"), ModifyServoTypeSetting, true);
             }
             else
             {
+                CheckServoTypes(wheelType);
+
                 ShowSetting_2();
                 if (joyData.type != JockstickData.JockType.twoServo)
                 {
@@ -562,13 +634,47 @@ public class JoystickSettingUI :BaseUI
                     if (selectServo != null)
                     {
                         selectServo.enabled = false;
+                        selectServo = null;
                     }
                 }
                 else
                 {
+                    /*isChange = false;
+
+                    Transform grid1p = bottomTrans.GetChild(1).GetChild(0);
+
+                    if (grid1p != null)
+                    {
+                        for (int i = 0; i < grid1p.childCount; i++)
+                        {
+                            grid1p.GetChild(i).GetChild(2).GetComponent<UISprite>().enabled = false;
+                            grid1p.GetChild(i).GetChild(3).GetComponent<UISprite>().enabled = false;
+                            grid1p.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
+                            grid1p.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = false;
+                            grid1p.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
+                        }
+                    }*/
+
+                    Debug.Log("same type!!");
+
                     if (selectServo != null)
                     {
                         selectServo.enabled = true;
+                    }
+                    else
+                    {
+                        Transform grid1p = bottomTrans.GetChild(1).GetChild(0);
+                        if (grid1p != null)
+                        {
+                            for (int i = 0; i < grid1p.childCount; i++)
+                            {
+                                grid1p.GetChild(i).GetChild(2).GetComponent<UISprite>().enabled = false;
+                                grid1p.GetChild(i).GetChild(3).GetComponent<UISprite>().enabled = false;
+                                grid1p.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
+                                grid1p.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = false;
+                                grid1p.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
+                            }
+                        }
                     }
                 }
                 settingUI2.transform.GetChild(1).GetChild(0).gameObject.SetActive(true);
@@ -576,15 +682,23 @@ public class JoystickSettingUI :BaseUI
         }
         else if (name.Contains("type2")) //四轮模式
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Select four-wheels model!!");
+
             selectWheelID = 1;
-            Debug.Log("four-wheels");
+            //Debug.Log("four-wheels");
             wheelType = 4;
             if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList().Count < 4)
             {
-                HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("轮模式舵机数量不足"));
+                //HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("轮模式舵机数量不足"));
+                if (RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetTurnList().Count == 0)
+                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("配置轮模式提示"), ModifyServoTypeSetting, true);
+                else
+                    UserdefControllerScene.PopWin(LauguageTool.GetIns().GetText("配置摇杆轮模式提示"), ModifyServoTypeSetting, true);
             }
             else
             {
+                CheckServoTypes(wheelType);
+
                 ShowSetting_2();
                 if (joyData.type != JockstickData.JockType.fourServo)
                 {
@@ -633,13 +747,46 @@ public class JoystickSettingUI :BaseUI
                     if (selectServo != null)
                     {
                         selectServo.enabled = false;
+                        selectServo = null;
                     }
                 }
                 else
                 {
+                    /*isChange = false;
+
+                    Transform grid2p = bottomTrans.GetChild(1).GetChild(0);
+
+                    if (grid2p != null)
+                    {
+                        for (int i = 0; i < grid2p.childCount; i++)
+                        {
+                            grid2p.GetChild(i).GetChild(2).GetComponent<UISprite>().enabled = false;
+                            grid2p.GetChild(i).GetChild(3).GetComponent<UISprite>().enabled = false;
+                            grid2p.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
+                            grid2p.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = false;
+                            grid2p.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
+                        }
+                    }*/
+
                     if (selectServo != null)
                     {
                         selectServo.enabled = true;
+                    }
+
+                    else
+                    {
+                        Transform grid2p = bottomTrans.GetChild(1).GetChild(0);
+                        if (grid2p != null)
+                        {
+                            for (int i = 0; i < grid2p.childCount; i++)
+                            {
+                                grid2p.GetChild(i).GetChild(2).GetComponent<UISprite>().enabled = false;
+                                grid2p.GetChild(i).GetChild(3).GetComponent<UISprite>().enabled = false;
+                                grid2p.GetChild(i).GetChild(4).GetComponent<UISprite>().enabled = false;
+                                grid2p.GetChild(i).GetChild(5).GetComponent<UISprite>().enabled = false;
+                                grid2p.GetChild(i).GetChild(6).GetComponent<UISprite>().enabled = false;
+                            }
+                        }
                     }
                 }
                 settingUI2.transform.GetChild(1).GetChild(1).gameObject.SetActive(true);
@@ -662,7 +809,8 @@ public class JoystickSettingUI :BaseUI
         }
         else if (name.Contains("wheel1"))   // 前左 点击后记录当前设置的轮子，同时背景选中状态
         {
-            Debug.Log("wheel1 is selected");
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "wheel1 is selected!!");
+
             SetWheelID = 1;
             selectWheelID = 1;
             Details.enabled = true;
@@ -672,7 +820,8 @@ public class JoystickSettingUI :BaseUI
         }
         else if (name.Contains("wheel2"))  //前右
         {
-            Debug.Log("wheel2 is selected");
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "wheel2 is selected!!");
+
             SetWheelID = 2;
             selectWheelID = 2;
             Details.enabled = true;
@@ -682,7 +831,8 @@ public class JoystickSettingUI :BaseUI
         }
         else if (name.Contains("wheel3"))   //后左 或第三个轮子
         {
-            Debug.Log("wheel3 is selected");
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "wheel3 is selected!!");
+
             SetWheelID = 3;
             selectWheelID = 3;
             Details.enabled = true;
@@ -692,7 +842,8 @@ public class JoystickSettingUI :BaseUI
         }
         else if (name.Contains("wheel4"))   //后右
         {
-            Debug.Log("wheel4 is selected");
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "wheel4 is selected!!");
+
             SetWheelID = 4;
             selectWheelID = 4;
             Details.enabled = true;
@@ -702,6 +853,8 @@ public class JoystickSettingUI :BaseUI
         }
         else if (name.Contains("servo_"))  //选择对应的舵机 servo_num 
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "select this turn servo!!");
+
             UILabel text = obj.GetComponentInChildren<UILabel>();
             if (text != null)
             {
@@ -715,16 +868,12 @@ public class JoystickSettingUI :BaseUI
                 {
                     curSelectServo = false;
                 }
-                char[] sp = new char[1];
-                sp[0] = ' ';
-                selectServoID = byte.Parse(text.text.Split(sp)[1]);
-                Debug.Log("curSelectServo is " + curSelectServo);
-                Debug.Log("curSelectedServo is " + selectServoID);
+
+                selectServoID = byte.Parse(text.text);
 
                 if (curSelectServo)
                 {
                     curSelectServo = false;
-                    Debug.Log("curSelectServo is true!!");
                     if (joyData.type == JockstickData.JockType.twoServo)
                     {
                         tra = settingUI2.transform.GetChild(1).GetChild(0);
@@ -794,21 +943,51 @@ public class JoystickSettingUI :BaseUI
 
                     selectServo = obj.transform.GetChild(5).GetComponent<UISprite>();
                 }
-                SetWheelServoID(byte.Parse(text.text.Split(sp)[1]));
+                SetWheelServoID(byte.Parse(text.text));
             }
             if (selectServo != null)  //选中模式
             {
                 selectServo.enabled = true;
             }
-            Debug.Log("selectWheelID is " + selectWheelID);
 
             ShowServosState();
             
-            //selectServo = obj.transform.GetChild(2).GetComponent<UISprite>();
-            
+            //selectServo = obj.transform.GetChild(2).GetComponent<UISprite>();            
         }
     }
-   
+
+    /// <summary>
+    /// 修改舵机类型界面
+    /// </summary>
+    /// <param name="go"></param>
+    public void ModifyServoTypeSetting(GameObject obj)
+    {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Modify servo type!!");
+
+        try
+        {
+            if (obj == null)
+            {
+                return;
+            }
+            string btnname = obj.name;
+            if (btnname.Equals(PromptMsg.LeftBtnName))
+            {
+                return;
+            }
+            else if (btnname.Equals(PromptMsg.RightBtnName))
+            {
+                // 进入修改舵机轮模式界面
+                SetServoTypeMsg.ShowMsg();
+                //PublicPrompt.ShowClickBlueBtnMsg();
+            }
+        }
+        catch (System.Exception ex)
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
+        } 
+    }
+
     /// <summary>
     /// 丢弃修改
     /// </summary>
@@ -820,18 +999,20 @@ public class JoystickSettingUI :BaseUI
             if (obj == null) //没有改动时直接退出
             {
                 UserdefControllerScene.Ins.CloseJoystickSettingUI();
-                UserdefControllerScene.Ins.BackControllerSettingUI();
+                UserdefControllerScene.Ins.BackControllerSettingUI(UserdefControllerScene.curControlT.joystick_w);
                 return;
             }
             string name = obj.name;
             if (name.Equals(PromptMsg.RightBtnName)) //确定丢弃修改
             {
                 UserdefControllerScene.Ins.CloseJoystickSettingUI();
-                UserdefControllerScene.Ins.BackControllerSettingUI();
+                UserdefControllerScene.Ins.BackControllerSettingUI(UserdefControllerScene.curControlT.joystick_w);
             }
         }
         catch (System.Exception ex)
-        {}
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
+        }
     }
     /// <summary>
     /// 通过结构和轮子设定对应的舵机id
@@ -892,7 +1073,7 @@ public class JoystickSettingUI :BaseUI
         }
         settingUI2.SetActive(false);
         settingUI1.SetActive(true);
-        Title.text = LauguageTool.GetIns().GetText("select model type");
+        Title.text = LauguageTool.GetIns().GetText("选择车子类型");
     }
     void ShowSetting_2()
     {
@@ -918,6 +1099,7 @@ public class JoystickSettingUI :BaseUI
         }
         
         ShowDuojiList();
+        UpdateServoList();
         ShowServosState(); // 对应的状态
         Details.enabled = true;
         Details.text = string.Format(LauguageTool.GetIns().GetText("设置轮子副标题"), "1");

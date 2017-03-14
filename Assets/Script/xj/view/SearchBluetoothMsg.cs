@@ -217,7 +217,7 @@ public class SearchBluetoothMsg : BasePopWin
             InitUi();
             if (PlatformMgr.Instance.IsOpenBluetooth())
             {
-                float waitTime = Time.time - PlatformMgr.Instance.lastDicConnectedTime;
+                float waitTime = Time.time - SingletonObject<ConnectManager>.GetInst().LastDicConnectedTime;
                 if (waitTime >= 3)
                 {
                     SearchBlue();

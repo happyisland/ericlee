@@ -12,6 +12,7 @@ using Game.Platform;
 using Game.Event;
 using System.Text;
 using Game;
+using Game.Resource;
 
 public class ModelDetailsWindow_new : MonoBehaviour
 {
@@ -21,6 +22,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     bool IsFirstVideo;
     bool IsActionScene;
     bool hasSelectAction;
+    bool IsCameraExitSS;
     string RobotName;
     public Transform officialTrans;
     public Transform defaultTrans;
@@ -100,6 +102,8 @@ public class ModelDetailsWindow_new : MonoBehaviour
             Back_button.localPosition = new Vector3(to.x - 160, to.y, to.z);
             Back_button.gameObject.SetActive(false);
         }
+
+
         yield return null;
         yield return new WaitForEndOfFrame();
 
@@ -133,8 +137,17 @@ public class ModelDetailsWindow_new : MonoBehaviour
         if (IsActionScene)
             IsActionScene = false;
 
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Exit unity scene!!");
+
         isBackCommunity = true;
-        RobotMgr.Instance.GoToCommunity();
+        try
+        {
+            RobotMgr.Instance.GoToCommunity();
+        }
+        catch (System.Exception ex)
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
+        }
 
         //  GameObjectManage.Ins.ClearData(); //进入社区时 清除图片数据
         //   PlatformMgr.Instance.Pic_Path = string.Empty;
@@ -152,6 +165,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     //EventDelegate.Callback EnterOtherMode;
     void LogicProgramIN(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click logic program button!!");
         //HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("暂不开放"));
         //return;
         PlatformMgr.Instance.MobClickEvent(MobClickEventID.ModelPage_TappedCodingButton);
@@ -193,8 +207,8 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     public void BlueTooClick(GameObject go)
     {
-        Debug.Log("GetBluetoothCurrentState is taken!!");
-        Debug.Log("进入蓝牙时相机状态 is " + IsCameraState);
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click bluetooth connect!!");
+
         if (IsCameraState && !PlatformMgr.Instance.IsChargeProtected)
         {
 #if UNITY_ANDROID
@@ -222,6 +236,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     public void BuildClick(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click build animation button!!");
         PlatformMgr.Instance.MobClickEvent(MobClickEventID.ModelPage_TappedBuildModelButton);
         if (RobotManager.GetInst().GetCurrentRobot() == null)
         {
@@ -267,13 +282,16 @@ public class ModelDetailsWindow_new : MonoBehaviour
                     UIEventListener.Get(Back_button.gameObject).onClick = BackEffect;
               //  BT_button.gameObject.SetActive(false);
 
-                Debug.Log("动作列表显示！！");
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, "Display action list!!");
 
                 if (!IsActionScene)
                     IsActionScene = true;
 
                 if (Power_button != null && IsActionScene)
+                {
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "now power icon is hidded for action list is show!!");
                     Power_button.gameObject.SetActive(false);
+                }
 
                 robotName.gameObject.SetActive(false);
 
@@ -317,7 +335,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 
                 OnBlueConnectResult(new EventArg(PlatformMgr.Instance.GetBluetoothState())); //蓝牙
 
-                Debug.Log("动作列表消失！！");
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, "Hide action list!!");
                 //Power_button.gameObject.SetActive(true);
 
                 if (Power_button != null && PlatformMgr.Instance.GetBluetoothState())
@@ -346,7 +364,9 @@ public class ModelDetailsWindow_new : MonoBehaviour
     }
     public void CameraClick(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click video button!!");
         IsCameraState = true;
+        //IsCameraExitSS = true;
 
         CameraBgPanel.gameObject.SetActive(true);
         CameraAreas.gameObject.SetActive(false);
@@ -389,6 +409,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
 
         if (hasSelectAction)
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "Have selected any action!!");
             Edit_button.gameObject.SetActive(false);
             GameObject eroo = null;
             Play_button.gameObject.GetComponent<UISprite>().SetAnchor(eroo);
@@ -468,7 +489,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
         Vector3 pos3 = ScrollActionItems.localPosition;
         
         pos3.x = pos3.x - (179.0f * PublicFunction.GetWidth() / 1334.0f);
-        Debug.Log("scrollaction is " + pos3.x);
+        //Debug.Log("scrollaction is " + pos3.x);
         ScrollActionItems.localPosition = pos3;
 
         //ScrollActionItems.GetComponent<UIPanel>().SetAnchor(GameObject.Find("MainUIRoot_new/ModelDetails/Bottom/ActionList"));
@@ -502,6 +523,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     }
     public void EnterVideoPlayScene(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Enter video scene(only android)!!");
         if (FirstVideoEnter != null && FirstVideoEnter.gameObject.activeSelf)
         {
             IsFirstVideo = false;
@@ -514,23 +536,20 @@ public class ModelDetailsWindow_new : MonoBehaviour
     }
     public void GiveupCurrentVideo(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Give up video!!");
         PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.GiveupCurrentVideo, ""); 
     }
     public void GiveupVideoState(object go)
     {
-        IsCameraState = false;  
-        
-        CameraBgPanel.gameObject.SetActive(false);
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Exit video scene!!");
 
-        //Delete_button.gameObject.SetActive(false);
-        //Play_button.gameObject.SetActive(false);
-        //Edit_button.gameObject.SetActive(false);
-
-        /*PlayAcionTool = GameObject.Find("MainUIRoot_new/ModelDetails/Top/toolBars");
-        if (PlayAcionTool != null && PlayAcionTool.activeSelf)
+        if (IsCameraState)
         {
-            PlayAcionTool.SetActive(false);
-        }*/
+            IsCameraExitSS = true;
+            IsCameraState = false;
+        }
+                
+        CameraBgPanel.gameObject.SetActive(false);
 
         if (Power_button != null)
         {
@@ -579,11 +598,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
         size3.x = size3.x - (100.0f * PublicFunction.GetWidth() / 1334.0f);
         ScrollActionItems.GetComponent<UIPanel>().baseClipRegion = size3;
 
-        //GameObject ddo = null;
-        //ScrollActionItems.GetComponent<UIPanel>().SetAnchor(ddo);
-
         Vector3 pos3 = ScrollActionItems.localPosition;
-
         if (pos3.x < (-500.0f * PublicFunction.GetWidth() / 1334.0f))
             pos3.x = pos3.x + (179.0f * PublicFunction.GetWidth() / 1334.0f);
         ScrollActionItems.localPosition = pos3;
@@ -607,7 +622,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
             pos24.x = pos24.x - (261.0f * PublicFunction.GetWidth() / 1334.0f);
             Delete_button.localPosition = pos24;
             Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(GameObject.Find("MainUIRoot_new"));
-            if (RecordContactInfo.Instance.openType != "default" && RobotManager.GetInst().GetCurrentRobot().GetActionsNameList().Count != 0 && hasSelectAction)
+            if (RecordContactInfo.Instance.openType != "default" && RobotManager.GetInst().GetCurrentRobot().GetActionsIdList().Count != 0 && hasSelectAction)
             {
                 Delete_button.gameObject.SetActive(true);
             }
@@ -629,7 +644,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
             pos27.x = pos27.x - (132.0f * PublicFunction.GetWidth() / 1334.0f);
             Delete_button.localPosition = pos27;
             Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(GameObject.Find("MainUIRoot_new"));
-            if (RecordContactInfo.Instance.openType != "default" && RobotManager.GetInst().GetCurrentRobot().GetActionsNameList().Count != 0 && hasSelectAction)
+            if (RecordContactInfo.Instance.openType != "default" && RobotManager.GetInst().GetCurrentRobot().GetActionsIdList().Count != 0 && hasSelectAction)
             {
                 Delete_button.gameObject.SetActive(true);
             }
@@ -639,6 +654,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     }
     public void PlayingCurrentVideo(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Start playing video!!");
         if (StartPlay_Button.GetChild(1).GetComponent<UISprite>().spriteName == "icon_startplay")
         {
             //Debug.Log("start play video!!");
@@ -665,7 +681,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     }
     public void ReplayVideoState(object go)
     {
-        Debug.Log("重新录制！！");
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Replay video!!");
         IsCameraState = true;
 
         CameraBgPanel.gameObject.SetActive(true);
@@ -683,52 +699,9 @@ public class ModelDetailsWindow_new : MonoBehaviour
         {
             Camera_button.gameObject.SetActive(false);
         }
-        /*if (hasSelectAction)
-        {
-            Edit_button.gameObject.SetActive(false);
-            GameObject ero = null;
-            Play_button.gameObject.GetComponent<UISprite>().SetAnchor(ero);
-            Vector2 pos22 = Play_button.localPosition;
-            pos22.x = pos22.x + (132.0f * PublicFunction.GetWidth() / 1334.0f);
-            Play_button.localPosition = pos22;
-
-            if (RecordContactInfo.Instance.openType == "default")
-            {
-                Delete_button.gameObject.SetActive(false);
-            }
-            else
-            {
-                Delete_button.gameObject.SetActive(true);
-                GameObject ccf = null;
-                Delete_button.gameObject.GetComponent<UISprite>().SetAnchor(ccf);
-                Vector2 pos24 = Delete_button.localPosition;
-                pos24.x = pos24.x + (132.0f * PublicFunction.GetWidth() / 1334.0f);
-                Delete_button.localPosition = pos24;
-                Delete_button.gameObject.SetActive(false);
-            }
-        }*/
 
 #if UNITY_ANDROID
-        CameraClick(null);
-        /*if (Giveup_button != null)
-        {
-            Giveup_button.gameObject.SetActive(true);
-            //UIEventListener.Get(Giveup_button.gameObject).onClick = GiveupCurrentVideo;
-        }
-        if (StartPlay_Button != null)
-        {
-            StartPlay_Button.gameObject.SetActive(true);
-            StartPlay_Button.GetChild(0).gameObject.SetActive(false);
-            StartPlay_Button.GetChild(1).gameObject.SetActive(true);
-            StartPlay_Button.GetChild(2).gameObject.SetActive(false);
-            //UIEventListener.Get(StartPlay_Button.gameObject).onClick = PlayingCurrentVideo;
-        }*/
-        /*Vector3 pos6 = ScrollActionItems.localPosition;
-        if (pos6.x > (-480.0f * PublicFunction.GetWidth() / 1334.0f))
-        {
-            pos6.x = pos6.x - (179.0f * PublicFunction.GetWidth() / 1334.0f);
-            ScrollActionItems.localPosition = pos6;
-        }*/        
+        CameraClick(null);        
 #endif
     }
     public void CurrentStartPlaying(object go)
@@ -768,8 +741,8 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     public void ExitCameraBTConnect(EventArg arg)
     {
-        Debug.Log("ExitBluetoothCurrentState is taken!!");
-        Debug.Log("退出蓝牙时相机状态 is "+IsCameraState);
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Exit bluetooth connect in camera scene!!");
+
         if (IsCameraState && !PlatformMgr.Instance.IsChargeProtected)
         {
             if (Power_button != null)
@@ -792,12 +765,12 @@ public class ModelDetailsWindow_new : MonoBehaviour
         {
             if (!Reset_button.gameObject.activeSelf)
                 StartCoroutine(ShowResetIcons(0.3f));
-        }
-        
+        }  
     }
 
     public void EffectClick(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click effect button!!");
         PlatformMgr.Instance.MobClickEvent(MobClickEventID.ModelPage_TappedActionListButton);
         if (IsProtected())
         {
@@ -807,10 +780,16 @@ public class ModelDetailsWindow_new : MonoBehaviour
         IsActionScene = true;
         ShowPlaylist = true;
 
+        if (IsCameraExitSS)
+        {
+            IsCameraExitSS = false;           
+        }     
+
         StartCoroutine(DisplayCameraGuide(1.0f));
     }
     IEnumerator DisplayCameraGuide(float t)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "display camera guide!!");
         yield return new WaitForSeconds(t);
         if (IsFirstCamera) //  读取文件 文件不存在需要开启指引pages
         {
@@ -843,28 +822,31 @@ public class ModelDetailsWindow_new : MonoBehaviour
     }
     void BackEffect(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click back button in effect scene!!");
         if (IsActionScene)
             IsActionScene = false;
         OnActionClick(null);
         ShowPlaylist = false;
-        if (Reset_button != null && !Reset_button.gameObject.activeSelf)
+        if (IsCameraExitSS && Reset_button != null && !Reset_button.gameObject.activeSelf)
         {
+            //IsCameraExitSS = true;
             StartCoroutine(ShowResetIcons(0.2f));
         }
-        IsCameraState = false;
+        
         ResetClick(null);
 
-        //StartCoroutine(ShowResetIcons(0.5f));
-        
+        //StartCoroutine(ShowResetIcons(0.5f));      
         //Power_button.gameObject.SetActive(true);
     }
     IEnumerator ShowResetIcons(float t)
     {
         yield return new WaitForSeconds(t);
         Reset_button.gameObject.SetActive(true);
+        Connect_button.GetComponent<UIWidget>().SetAnchor(Reset_button);
     }
     public void EnterCameraPlayScene(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click sure button in guide panel!!");
         if (FirstCameraEnter != null && FirstCameraEnter.gameObject.activeSelf)
         {
             FirstCameraEnter.gameObject.SetActive(false);
@@ -876,6 +858,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     public void ControlClick(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click controller button!!");
         PlatformMgr.Instance.MobClickEvent(MobClickEventID.ModelPage_TappedControllerButton);
         if (RobotManager.GetInst().GetCurrentRobot() == null)
         {
@@ -915,6 +898,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     public void CommunityClick(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click community button!!");
         if (null != RobotManager.GetInst().GetCurrentRobot())
         {
             PlatformMgr.Instance.PublishModel(RobotMgr.NameNoType(RobotManager.GetInst().GetCurrentRobot().Name));
@@ -927,6 +911,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
 
     public void AddNewAction(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click new effect button!!");
         
         if (null != RobotManager.GetInst().GetCurrentRobot())
         {
@@ -1088,6 +1073,8 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     void DoPlayAction(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Play robot action!!");
+        RobotManager.GetInst().GetCurrentRobot().StopRunTurn();
         ActionLogic.GetIns().OnPlayBtnClicked(go);
         if (!PlatformMgr.Instance.GetBluetoothState()) //未连接的情况
         {
@@ -1107,6 +1094,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     void DoStopAction(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Stop robot action!!");
         ActionLogic.GetIns().DoStopAction(go);
         Play_button.GetChild(0).GetComponent<UISprite>().spriteName = "icon_play";
     }
@@ -1116,6 +1104,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     void DoEditAction(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click edit button out of camera scene!!");
         GameObject oriGO = GameObject.Find("oriGO");
         SceneMgrTest.Instance.LastScene = SceneType.EditAction;
         
@@ -1128,16 +1117,25 @@ public class ModelDetailsWindow_new : MonoBehaviour
 
             DontDestroyOnLoad(oriGO);
         }
-        string name = ActionLogic.GetIns().GetCurActName();
-        if (!string.IsNullOrEmpty(name))
+        string id = ActionLogic.GetIns().GetCurActId();
+        if (!string.IsNullOrEmpty(id))
         {
-            ActionEditScene.OpenActions(name);
+            ActionEditScene.OpenActions(id);
         }
     }
 
     void PopDeletaWin(GameObject go)
     {
-        PublicPrompt.ShowDelateWin(LauguageTool.GetIns().GetText("删除动作提示") + "\"" + ActionLogic.GetIns().GetCurActName() + "\"", DelateActionConfrim);
+        Robot robot = RobotManager.GetInst().GetCurrentRobot();
+        if (null != robot)
+        {
+            ActionSequence act = robot.GetActionsForID(ActionLogic.GetIns().GetCurActId());
+            if (null != act)
+            {
+                PublicPrompt.ShowDelateWin(LauguageTool.GetIns().GetText("删除动作提示") + "\"" + act.Name + "\"", DelateActionConfrim);
+            }
+        }
+        
     }
 
     void DelateActionConfrim(GameObject go)
@@ -1162,6 +1160,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// <param name="go"></param>
     void DoDeletaAction(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Delete selected action!!");
         ActionLogic.GetIns().DeletaAction();
         OnActionClick(null);
         UpdateActionsData();
@@ -1181,17 +1180,18 @@ public class ModelDetailsWindow_new : MonoBehaviour
         if (RobotManager.GetInst().GetCurrentRobot() == null)
             yield break;
         yield return new WaitForEndOfFrame();
-        List<string> totalActions = RobotManager.GetInst().GetCurrentRobot().GetActionsNameList();
+        List<string> totalActions = RobotManager.GetInst().GetCurrentRobot().GetActionsIdList();
+        GameObject tobj = Resources.Load("Prefabs/newActionItem1") as GameObject;
         for (int i = 0; i < totalActions.Count; i++)   //创建结点
         {
-            GameObject tobj = Resources.Load("Prefabs/newActionItem1") as GameObject;
             GameObject obj = GameObject.Instantiate(tobj) as GameObject;
             obj.transform.SetParent(t);
             obj.transform.localScale = Vector3.one;
+            obj.name = totalActions[i];
             UISprite sp = obj.transform.GetChild(0).GetComponent<UISprite>();
             if (null != sp)
             {
-                ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForName(name);
+                ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(totalActions[i]);
                 if (null == act)
                 {
                     sp.spriteName = "add";
@@ -1205,22 +1205,24 @@ public class ModelDetailsWindow_new : MonoBehaviour
         }
         for (int i = 0; i < totalActions.Count; i++)
         {
-            string name = totalActions[i];
-            ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForName(name);
+            string id = totalActions[i];
+            ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(id);
             if (null == act)
             {
                 t.GetChild(i).GetChild(0).GetComponent<UISprite>().spriteName = "add";
+                t.GetChild(i).GetComponentInChildren<UILabel>().text = string.Empty;
             }
             else
             {
                 t.GetChild(i).GetChild(0).GetComponent<UISprite>().spriteName = act.IconName;
+                t.GetChild(i).GetComponentInChildren<UILabel>().text = act.Name;
             }
             t.GetChild(i).GetChild(0).GetComponent<UISprite>().MakePixelPerfect();
             /*if (name == PublicFunction.Default_Actions_Name)
             {
                 name = LauguageTool.GetIns().GetText("FuWei");
             }*/
-            t.GetChild(i).GetComponentInChildren<UILabel>().text = name;
+            
             UIEventListener.Get(t.GetChild(i).gameObject).onClick = OnActionClick;
         }
         t.GetComponent<UIGrid>().repositionNow = true;
@@ -1230,6 +1232,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// </summary>
     void UpdateActionsData()
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Update action list!!");
         Transform t = GameObject.Find("MainUIRoot_new/ModelDetails/Bottom/ActionList/scrollRect").transform;
         for (int i = 0; i < t.childCount; i++)
         {
@@ -1240,6 +1243,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
 
     void OnActionClick(GameObject go)
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Click any action icon!!");
         if (go == null)
         {
             hasSelectAction = false;
@@ -1251,7 +1255,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
         }
         //hasSelectAction = true;
         ActionLogic.GetIns().DoSelectItem(go);
-        if (RobotManager.GetInst().GetCurrentRobot().IsOfficialForName(go.GetComponentInChildren<UILabel>().text)) //官方动作不可删除 可编辑
+        if (RobotManager.GetInst().GetCurrentRobot().IsOfficialForId(go.name)) //官方动作不可删除 可编辑
         {
             Delete_button.gameObject.SetActive(false);
         }
@@ -1259,10 +1263,10 @@ public class ModelDetailsWindow_new : MonoBehaviour
         {
             Delete_button.gameObject.SetActive(true);
         }
-
+        RobotManager.GetInst().GetCurrentRobot().StopRunTurn();
         StartCoroutine(WaitAMoment());
 
-        if (go.GetComponentInChildren<UILabel>().text == ActionLogic.GetIns().GetNowPlayingActionName() && PlatformMgr.Instance.GetBluetoothState())
+        if (go.name == ActionLogic.GetIns().GetNowPlayingActionId() && PlatformMgr.Instance.GetBluetoothState())
         {
             Play_button.GetChild(0).GetComponent<UISprite>().spriteName = "icon_stop";
         }
@@ -1301,7 +1305,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
         if (IsCameraState)
         {
             Edit_button.gameObject.SetActive(false);
-            Debug.Log("hasSelectAction is " + hasSelectAction);
+            //Debug.Log("hasSelectAction is " + hasSelectAction);
 
             Delete_button.gameObject.SetActive(true);
             GameObject ccf = null;
@@ -1355,7 +1359,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
     void Awake()
     {
         Ins = this;
-        GuidePagesConfig = Application.persistentDataPath + "/instruction1";
+        GuidePagesConfig = ResourcesEx.persistentDataPath + "/instruction1";
     }
     void Start()
     {
@@ -1459,8 +1463,11 @@ public class ModelDetailsWindow_new : MonoBehaviour
         CameraAreas.gameObject.SetActive(false);
         CameraBgPanel.gameObject.SetActive(false);
 
+        IsCameraExitSS = false;
+
         if (IsOfficial)   //官方
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Select official model!!");
             officialTrans.gameObject.SetActive(true);
             defaultTrans.gameObject.SetActive(false);
             UIEventListener.Get(officialTrans.GetChild(0).gameObject).onClick = BuildClick;
@@ -1480,15 +1487,17 @@ public class ModelDetailsWindow_new : MonoBehaviour
             //Resets_button = offGrid.GetChild(2);
 
             //Connect_button.gameObject.SetActive(true);
-            
+
             if (robotName != null)
             {
                 robotName.text = RobotManager.GetInst().GetCurrentRobot().ShowName;
             }
             TakePhotoObj.SetActive(false);
+  
         }
         else   //自定义
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Select custom model!!");
             GameObject ttem = GameObject.Find("MainUIRoot_new/GameObject");  //模型加载完后才能继续操作
             if (ttem != null && ttem.GetComponent<BoxCollider>() != null)
             {
@@ -1576,6 +1585,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
         if (trans.GetChild(trans.childCount - 1).GetComponentInChildren<UILabel>() != null)
             trans.GetChild(trans.childCount - 1).GetComponentInChildren<UILabel>().text = LauguageTool.GetIns().GetText("新建动作");
 
+
         if (UICam != null) //切换场景时 画面闪烁的问题
         {
             StartCoroutine(ShowLeftFrame());
@@ -1594,25 +1604,27 @@ public class ModelDetailsWindow_new : MonoBehaviour
             StreamWriter sw = System.IO.File.CreateText(GuidePagesConfig);
             sw.Write("{\"instruction1\":\"0\"}");
             sw.Close();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "xian shi yin dao!!");
         }
         else
         {
             FirstGuidePage.GetIns().OnClosePage();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "关闭引导页!!");
         }
+
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "enter scene!!");
     }
     IEnumerator ShowLeftFrame()
     {
-        yield return null;
-        yield return null;
-        yield return new WaitForEndOfFrame();
+        yield return new WaitForSeconds(0.05f);
         if (UICam != null)
             UICam.enabled = true;
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "ShowLeftFrame!!");
     }
 
     IEnumerator DoAtFrameEnd()
     {
-        yield return new WaitForEndOfFrame();
-        yield return null;
+        yield return new WaitForSeconds(0.05f);
         ShowPlaylist = false;
     }
 
@@ -1679,12 +1691,17 @@ public class ModelDetailsWindow_new : MonoBehaviour
                     UISprite sprite = BT_button.GetChild(1).GetComponent<UISprite>();
                     if (null != sprite)
                     {
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "now any robot is disconnect!");
+
                         sprite.spriteName = "disconnect";
                         sprite.SetDimensions(50, 50);
                         // sprite.MakePixelPerfect();
                     }
-                    if (Power_button != null)
+                    if (Power_button != null && Power_button.gameObject.activeSelf)
+                    {
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "now power icon is hidded for current robot is null!");
                         Power_button.gameObject.SetActive(false);
+                    }
                 }
                 return;
             }
@@ -1694,6 +1711,9 @@ public class ModelDetailsWindow_new : MonoBehaviour
             //StartCoroutine(ShowPowerIcons(0.5f));
             if (flag)
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "now any bluetooth is connect!");
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "now isactionscene is " + IsActionScene);
+
                 iconName = "connect";
                 if (Power_button != null && !IsActionScene)
                 {
@@ -1709,10 +1729,17 @@ public class ModelDetailsWindow_new : MonoBehaviour
             }
             else
             {
+                PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "now any bluetooth is disconnect!");
+
                 iconName = "disconnect";
-                if (Power_button != null)
+                if (Power_button != null && Power_button.gameObject.activeSelf)
                 {
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "now power icon is hidded for current bluetooth is disconnect!");
                     Power_button.gameObject.SetActive(false);
+                }
+                if (Play_button != null && Play_button.GetChild(0).GetComponent<UISprite>().spriteName == "icon_stop")
+                {
+                    Play_button.GetChild(0).GetComponent<UISprite>().spriteName = "icon_play";
                 }
             }
             if (null != BT_button)
@@ -1725,8 +1752,6 @@ public class ModelDetailsWindow_new : MonoBehaviour
                     //sprite.MakePixelPerfect();
                 }
             }
-
-
         }
         catch (System.Exception ex)
         {
@@ -1741,8 +1766,11 @@ public class ModelDetailsWindow_new : MonoBehaviour
     {
         yield return new WaitForSeconds(t);
 
-        if (!IsActionScene)
-            Power_button.gameObject.SetActive(true);     
+        if (!IsActionScene && PlatformMgr.Instance.GetBluetoothState())
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "now bluetooth is smkkkk!!");
+            Power_button.gameObject.SetActive(true);
+        }
     }
 
     /// <summary>
@@ -1750,11 +1778,19 @@ public class ModelDetailsWindow_new : MonoBehaviour
     /// </summary>
     void InitModelPic()
     {
-        StartCoroutine(CaculatePicSize());
+        try
+        {
+            StartCoroutine(CaculatePicSize());
+        }
+        catch (System.Exception ex)
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "InitModelPic 模型主页图片异常 error=" + ex.ToString());
+        }
     }
 
     IEnumerator CaculatePicSize()
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "CaculatePicSize 模型主页图片开始加载");
         yield return null;
         if (PhotoTexture == null)
             yield break;
@@ -1765,6 +1801,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
         }
         else
         {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "CaculatePicSize 图片路径为空，加载默认图片");
             Texture tempTexture;
             Texture errorPic = Resources.Load<Texture>("pic_error");
             if (errorPic != null)
@@ -1779,7 +1816,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 }
                 catch (System.Exception ex)
                 {
-                    Debuger.Log(ex.ToString());
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, ex.ToString());
                 }
             }
         }
@@ -1790,7 +1827,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
             //TakePhotoObj.SetActive(true);
         }
         StartCoroutine(WaitSometime());
-
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "CaculatePicSize 模型主页图片加载完成");
     }
     IEnumerator WaitSometime()
     {
@@ -1807,7 +1844,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
 #endif
         if (!File.Exists(name))
         {
-            Debuger.Log("file doesn't exist");
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "File doesn't exist!!");
             //加载错误图片
             Texture errorPic = Resources.Load<Texture>("pic_error");
 
@@ -1821,7 +1858,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 }
                 catch (System.Exception ex)
                 {
-                    Debuger.Log(ex.ToString());
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
                 }
             }
             yield break;
@@ -1840,9 +1877,11 @@ public class ModelDetailsWindow_new : MonoBehaviour
             if (null != www.error || www.texture == null)   // error
             {
                 if (www.error != null)
-                    Debuger.Log("load texture error = " + www.error);
+                    //Debuger.Log("load texture error = " + www.error);
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "load texture error = " + www.error);
                 if (www.texture == null)
-                    Debuger.Log("texture is null");
+                    //Debuger.Log("texture is null");
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "texture is null");
                 Texture errorPic = Resources.Load<Texture>("pic_error");
 
                 if (errorPic != null)
@@ -1860,7 +1899,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
                     }
                     catch (System.Exception ex)
                     {
-                        Debuger.Log(ex.ToString());
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
                     }
                 }
                 yield break;
@@ -1878,12 +1917,12 @@ public class ModelDetailsWindow_new : MonoBehaviour
             }
             catch (System.Exception ex)
             {
-                Debuger.Log(ex.ToString());
+                PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
             }
         }
         else
         {
-            Debuger.Log("not done " + path);
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "not done " + path);
         }
     }
 
@@ -1905,31 +1944,6 @@ public class ModelDetailsWindow_new : MonoBehaviour
             t.x = screenWidth;
         }
         return t;
-        /*UIRoot root = GameObject.FindObjectOfType<UIRoot>();
-        Vector2 temp = Vector2.zero;
-        if (root != null)
-        {
-            float s = (float)root.activeHeight / Screen.height;
-            int height = Mathf.CeilToInt(Screen.height * s);
-            int width = Mathf.CeilToInt(Screen.width * s);
-            temp.x = width;
-            temp.y = height;
-        }
-        
-        Vector2 t = new Vector2();
-        t = Vector2.zero;
-
-        if (w * temp.y > h * temp.x)  //chang
-        {
-            t.y = (int)temp.y;
-            t.x = (int)(h * temp.y / h);
-        }
-        else   //kuan
-        {
-            t.x = (int)temp.x;
-            t.y = (int)(h * temp.x / w);
-        }
-        return t;*/
     }
 
     /// <summary>
@@ -1948,12 +1962,12 @@ public class ModelDetailsWindow_new : MonoBehaviour
     {
         try
         {
-            StartCoroutine(delayExcute(InitModelPic));
+            //StartCoroutine(delayExcute(InitModelPic));
             //InitModelPic();
         }
         catch (System.Exception ex)
         {
-
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, "PhotographBack error = " + ex.ToString());
         }
     }
 
@@ -1999,7 +2013,9 @@ public class ModelDetailsWindow_new : MonoBehaviour
             }
         }
         catch (System.Exception ex)
-        { }
+        { 
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
+        }
     }
 
     /// <summary>
@@ -2021,7 +2037,6 @@ public class ModelDetailsWindow_new : MonoBehaviour
                     GuideVideo_button.gameObject.SetActive(false);
                     Saved_Button.gameObject.SetActive(false);
                     StartPlay_Button.gameObject.SetActive(false);
-
 #endif
                     Back_button.gameObject.SetActive(true);
                     Camera_button.gameObject.SetActive(false);
@@ -2033,6 +2048,32 @@ public class ModelDetailsWindow_new : MonoBehaviour
                     PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.ExitPlayVideoMode, "");
                     PublicPrompt.ShowChargePrompt(GoBack);
                 }
+                if (IsCameraState)
+                {
+                    IsCameraExitSS = true;
+                    IsCameraState = false;
+
+                    if (AddButton != null)
+                    {
+                        AddButton.gameObject.SetActive(true);
+                    }
+
+                    Vector4 size3 = ScrollActionItems.GetComponent<UIPanel>().baseClipRegion;
+                    size3.z = size3.z - (200.0f * PublicFunction.GetWidth() / 1334.0f);
+                    size3.x = size3.x - (100.0f * PublicFunction.GetWidth() / 1334.0f);
+                    ScrollActionItems.GetComponent<UIPanel>().baseClipRegion = size3;
+
+                    //GameObject ddo = null;
+                    //ScrollActionItems.GetComponent<UIPanel>().SetAnchor(ddo);
+
+                    Vector3 pos3 = ScrollActionItems.localPosition;
+
+                    if (pos3.x < (-500.0f * PublicFunction.GetWidth() / 1334.0f))
+                        pos3.x = pos3.x + (179.0f * PublicFunction.GetWidth() / 1334.0f);
+                    ScrollActionItems.localPosition = pos3;
+
+                    ScrollActionItems.GetComponent<UIPanel>().SetAnchor(GameObject.Find("MainUIRoot_new/ModelDetails/Bottom/ActionList"));
+                }
             }
 
             if (PlatformMgr.Instance.PowerData.isAdapter) //插上适配器
@@ -2042,7 +2083,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
                     firstAdapter = true;
                     if (Power_button != null) //充电状态
                     {
-                        Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "Shape";
+                        Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "power1";
                         Power_button.GetChild(1).GetComponent<UISprite>().enabled = false;
                         Power_button.GetChild(2).GetComponent<UISprite>().enabled = true;
                     }
@@ -2051,7 +2092,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 {
                     if (Power_button != null)
                     {
-                        Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "charging";
+                        Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "fullCharge";
                         Power_button.GetChild(1).GetComponent<UISprite>().enabled = false;
                         Power_button.GetChild(2).GetComponent<UISprite>().enabled = false;
                         //Power_button.GetChild(1).GetComponent<UISprite>().fillAmount = PlatformMgr.Instance.PowerData.percentage * 0.01f;
@@ -2064,7 +2105,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 {
                     if (Power_button != null)
                     {
-                        Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "Shape";
+                        Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "power1";
                         Power_button.GetChild(1).GetComponent<UISprite>().enabled = true;
                         Power_button.GetChild(2).GetComponent<UISprite>().enabled = false;
                     }
@@ -2075,19 +2116,24 @@ public class ModelDetailsWindow_new : MonoBehaviour
                 {
                     if (PlatformMgr.Instance.PowerData.percentage > 20) //正常电量
                     {
+                        Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "power1";
+                        Power_button.GetChild(1).GetComponent<UISprite>().enabled = true;
+                        Power_button.GetChild(2).GetComponent<UISprite>().enabled = false;
                         Power_button.GetChild(1).GetComponent<UISprite>().fillAmount = PlatformMgr.Instance.PowerData.percentage * 0.01f;
                     }
                     else  //低电量
                     {
-                        Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "Battery_no";
+                        Power_button.GetChild(0).GetComponent<UISprite>().spriteName = "low battery";
                         Power_button.GetChild(1).GetComponent<UISprite>().enabled = false;
                         Power_button.GetChild(2).GetComponent<UISprite>().enabled = false;
                     }
                 }
             }
         }
-        catch
-        { }
+        catch (System.Exception ex)
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
+        }
     }
 
     bool IsProtected()
@@ -2100,6 +2146,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
         if (IsCameraState)
         {
             GiveupCurrentVideo(null);
+            IsCameraExitSS = true;
         }
         BackEffect(null);
         //Game.Scene.SceneMgr.EnterScene(Game.Scene.SceneType.MainWindow);
@@ -2125,7 +2172,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
         }
 
     }
@@ -2164,6 +2211,7 @@ public class ModelDetailsWindow_new : MonoBehaviour
             //        }
             //    }
             //}
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "显示引导页!!");
         }
     }
 

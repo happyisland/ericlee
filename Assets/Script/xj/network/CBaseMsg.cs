@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Game.Platform;
 
 public class CBaseMsg
 {
@@ -174,7 +175,7 @@ public class MyBitConverter
         }
         catch (System.Exception ex)
         {
-            Debuger.LogError("BinaryReader 长度出错");
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "BinaryReader 长度出错");
         }
         return bytes;
     }
@@ -221,11 +222,8 @@ public class CommonMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
 
     }
@@ -249,11 +247,8 @@ public class CommonMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -276,11 +271,8 @@ public class HandShakeMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -302,11 +294,8 @@ public class ChangeNameMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -322,10 +311,13 @@ public class ReadBackMsg : CBaseMsg
     public ReadBackMsg()
     {
         servoList = new List<byte>();
+        needReadBackCount = 0;
     }
     public List<byte> servoList;//舵机id列表
     //public byte id;//舵机id
     public byte powerDown;//是否掉电回读，00掉电，01不掉电
+
+    public int needReadBackCount;
 
     public override void Write(BinaryWriter bw)
     {
@@ -344,11 +336,8 @@ public class ReadBackMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -380,11 +369,8 @@ public class ReadBackMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -400,12 +386,13 @@ public class CtrlActionMsg : CBaseMsg
 {
     public CtrlActionMsg()
     {
-        rotas = new List<byte>();
-        ids = new List<byte>();
+        //rotas = new List<byte>();
+        //ids = new List<byte>();
+        dict = new Dictionary<byte, byte>();
     }
-
-    public List<byte> ids;//舵机的id
-    public List<byte> rotas;//转动的角度
+    Dictionary<byte, byte> dict;
+    //public List<byte> ids;//舵机的id
+    //public List<byte> rotas;//转动的角度
     public ushort sportTime;//舵机运动时间，须除以20
     public ushort endTime;//舵机完成的时间
 
@@ -415,17 +402,23 @@ public class CtrlActionMsg : CBaseMsg
         {
             
             UInt32 id = 0;
+            List<byte> ids = new List<byte>();
+            foreach (KeyValuePair<byte, byte> kvp in dict)
+            {
+                ids.Add(kvp.Key);
+            }
+            ids.Sort();
             for (int i = 0, imax = ids.Count; i < imax; ++i)
             {
                 id += (UInt32)Math.Pow(2, ids[i] - 1);
             }
             MyBitConverter.WriteUInt32(bw, id);
             //bw.Write(startId);
-            if (null != rotas)
+            for (int i = 0, imax = ids.Count; i < imax; ++i)
             {
-                for (int i = 0, icount = rotas.Count; i < icount; ++i)
+                if (dict.ContainsKey(ids[i]))
                 {
-                    bw.Write(rotas[i]);
+                    bw.Write(dict[ids[i]]);
                 }
             }
             bw.Write((byte)(sportTime / 20));
@@ -433,18 +426,20 @@ public class CtrlActionMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
 
-    public void AddRota(byte rota)
+    public void AddRota(byte id, byte rota)
     {
-        rotas.Add(rota);
+        dict[id] = rota;
+    }
+
+    public int GetServoCount()
+    {
+        return dict.Count;
     }
 }
 /// <summary>
@@ -487,11 +482,8 @@ public class CtrlServosMoveMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
 
     }
@@ -538,11 +530,8 @@ public class WeakLatchesMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
 
     }
@@ -565,11 +554,8 @@ public class PlayFlashMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -594,11 +580,8 @@ public class PauseActionMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -624,11 +607,8 @@ public class ContinueActionMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -653,11 +633,8 @@ public class StopActionMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -695,11 +672,8 @@ public class FlashStartMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -728,11 +702,8 @@ public class FlashWriteMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -756,11 +727,8 @@ public class FlashStopMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -782,11 +750,8 @@ public class ReadAllFlashMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -811,11 +776,8 @@ public class ReadAllFlashMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -852,11 +814,8 @@ public class DjTurnMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -888,11 +847,8 @@ public class SelfCheckMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -918,11 +874,8 @@ public class SelfCheckMsgErrorAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -952,11 +905,8 @@ public class SelfCheckMsgDjErrorAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1032,11 +982,8 @@ public class SelfCheckDjErrorAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1060,11 +1007,8 @@ public class ReadMotherboardDataMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1132,6 +1076,7 @@ public class ReadMotherboardDataMsgAck : CBaseMsg
                     errorVerIds.Add((byte)(i + 1));
                 }
             }
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, string.Format("servo id = {0}, errorIds = {1} , errorVerIds = {2} version = {3}", PublicFunction.ListToString(ids), PublicFunction.ListToString(errorIds), PublicFunction.ListToString(errorVerIds), djVersion));
             flashSize = br.ReadByte();
             TopologyPartType[] sensorTypes = PublicFunction.Open_Topology_Part_Type;
             for (int i = 0, imax = sensorTypes.Length; i < imax; ++i)
@@ -1143,11 +1088,8 @@ public class ReadMotherboardDataMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1173,7 +1115,12 @@ public class SensorData
         {
             byte tmpIds = br.ReadByte();
             byte erIds = br.ReadByte();
-            version = PublicFunction.BytesToHexString(br.ReadBytes(4));
+            StringBuilder sb = new StringBuilder();
+            sb.Append(br.ReadByte().ToString().PadLeft(2, '0'));
+            sb.Append(br.ReadByte().ToString().PadLeft(2, '0'));
+            sb.Append(br.ReadByte().ToString().PadLeft(2, '0'));
+            sb.Append(br.ReadByte().ToString().PadLeft(2, '0'));
+            version = sb.ToString();
             byte errver = br.ReadByte();
             for (int i = 0; i < 8; ++i)
             {
@@ -1190,14 +1137,12 @@ public class SensorData
                     errorVerIds.Add((byte)(i + 1));
                 }
             }
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, ToString());
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1234,11 +1179,8 @@ public class ChangeDeviceIdMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1268,11 +1210,8 @@ public class WhileAllActionMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1299,11 +1238,8 @@ public class ReadMcuIdMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1326,11 +1262,8 @@ public class ReadMcuIdMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1374,11 +1307,8 @@ public class WriteIcFlashMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1403,11 +1333,8 @@ public class ReadIcFlashMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1434,11 +1361,8 @@ public class ReadIcFlashSnAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1473,11 +1397,8 @@ public class RobotUpdateStartMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1486,11 +1407,11 @@ public class RobotUpdateStartMsg : CBaseMsg
 /// <summary>
 /// 主板在线升级消息
 /// </summary>
-public class RobotUpdateWriteMsg : CBaseMsg
+public class UpdateWriteMsg : CBaseMsg
 {
     public ushort frameNum;
     public byte[] bytes;
-    public RobotUpdateWriteMsg()
+    public UpdateWriteMsg()
     {
 
     }
@@ -1505,45 +1426,12 @@ public class RobotUpdateWriteMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
 
     }
 }
-/// <summary>
-/// 取消主板在线升级
-/// </summary>
-public class RobotUpdateStopMsg : CBaseMsg
-{
-    public byte arg;
-    public RobotUpdateStopMsg()
-    {
-        arg = 0;
-    }
-
-    public override void Write(BinaryWriter bw)
-    {
-        try
-        {
-            base.Write(bw);
-            bw.Write(arg);
-        }
-        catch (System.Exception ex)
-        {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
-        }
-
-    }
-}
-
 
 #endregion
 
@@ -1572,42 +1460,19 @@ public class ServoUpdateStartMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
 /// <summary>
 /// 舵机升级程序写入
 /// </summary>
-public class ServoUpdateWriteMsg : CBaseMsg
+public class ServoUpdateWriteMsg : UpdateWriteMsg
 {
-    public ushort frameNum;
-    public byte[] bytes;
     public ServoUpdateWriteMsg()
     {
 
-    }
-
-    public override void Write(BinaryWriter bw)
-    {
-        try
-        {
-            base.Write(bw);
-            bw.Write(frameNum);
-            bw.Write(bytes);
-        }
-        catch (System.Exception ex)
-        {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
-        }
     }
 }
 
@@ -1628,6 +1493,7 @@ public class ServoUpdateFailAck : CBaseMsg
         try
         {
             base.Read(br);
+            br.ReadByte();
             UInt32 ids = MyBitConverter.ReadUInt32(br);
             for (int i = 0; i < 32; ++i)
             {
@@ -1639,15 +1505,139 @@ public class ServoUpdateFailAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
 
+#endregion
+
+#region 传感器升级
+/// <summary>
+/// 开始升级传感器
+/// </summary>
+public class SensorUpdateStartMsg : CBaseMsg
+{
+   // public SensorBaseData sensorData;
+    public byte sensorType;
+
+    public byte ids;
+    public ushort frameCount;//文件总帧数
+    public string fileName;//文件名
+
+    public SensorUpdateStartMsg()
+    {
+        //sensorData = new SensorBaseData();
+    }
+
+    public override void Write(BinaryWriter bw)
+    {
+        try
+        {
+            base.Write(bw);
+            bw.Write(sensorType);
+            bw.Write(ids);
+            bw.Write(frameCount);
+            byte[] bytes = Encoding.UTF8.GetBytes(fileName);
+            if (null != bytes)
+            {
+                bw.Write((byte)bytes.Length);
+                bw.Write(bytes);
+            }
+            
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+        }
+    }
+}
+/// <summary>
+/// 写入传感器升级文件
+/// </summary>
+public class SensorUpdateWriteMsg : UpdateWriteMsg
+{
+    public TopologyPartType sensorType;
+    
+    public SensorUpdateWriteMsg()
+    {
+
+    }
+
+    public override void Write(BinaryWriter bw)
+    {
+        bw.Write((byte)sensorType);
+        base.Write(bw);
+    }
+}
+
+public class SensorStopUpdateMsg : CBaseMsg
+{
+    public TopologyPartType sensorType;
+    public byte arg = 0;
+    public SensorStopUpdateMsg()
+    {
+
+    }
+
+    public override void Write(BinaryWriter bw)
+    {
+        base.Write(bw);
+        bw.Write((byte)sensorType);
+        bw.Write(arg);
+    }
+}
+
+
+public class SensorUpdateAck : CBaseMsg
+{
+    public TopologyPartType sensorType;
+    public byte result;
+
+    public SensorUpdateAck()
+    {
+
+    }
+
+    public override void Read(BinaryReader br)
+    {
+        base.Read(br);
+        sensorType = (TopologyPartType)br.ReadByte();
+        result = br.ReadByte();
+    }
+}
+
+public class SensorUpdateFailAck : CBaseMsg
+{
+    public List<byte> sensorList;
+    public SensorUpdateFailAck()
+    {
+        sensorList = new List<byte>();
+    }
+
+    public override void Read(BinaryReader br)
+    {
+        try
+        {
+            base.Read(br);
+            UInt32 ids = MyBitConverter.ReadUInt32(br);
+            for (int i = 0; i < 32; ++i)
+            {
+                if ((ids & (UInt32)Math.Pow(2, i)) >= 1)
+                {
+                    sensorList.Add((byte)(i + 1));
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+        }
+    }
+}
 #endregion
 
 #region 读取系统版本号
@@ -1669,11 +1659,8 @@ public class ReadSystemVersionAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1712,14 +1699,15 @@ public class ReadPowerMsgAck : CBaseMsg
             {
                 percentage = 0;
             }
+            if (percentage > 100)
+            {
+                percentage = 100;
+            }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1747,11 +1735,8 @@ public class ReadDeviceTypeMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1798,11 +1783,8 @@ public class SetSensorIOStateMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1843,11 +1825,8 @@ public class SensorBaseData
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1857,21 +1836,21 @@ public class SensorBaseData
         {
             sensorType = br.ReadByte();
             byte id = br.ReadByte();
-            for (int i = 0; i < 8; ++i)
+            if (0 != id)
             {
-                if ((id & (1 << i)) > 0)
+                for (int i = 0; i < 8; ++i)
                 {
-                    ids.Add((byte)(i + 1));
+                    if ((id & (1 << i)) > 0)
+                    {
+                        ids.Add((byte)(i + 1));
+                    }
                 }
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1902,11 +1881,8 @@ public class ReadSensorDataMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1919,9 +1895,14 @@ public class ReadSensorDataOtherMsg : CBaseMsg
 {
     public List<SensorBaseData> sensorList;
 
+    public byte arg;//如果是陀螺仪则需要发送该参数
+    public byte arg1;//保留的
+
     public ReadSensorDataOtherMsg()
     {
         sensorList = new List<SensorBaseData>();
+        arg = 0;
+        arg1 = 0;
     }
 
     public override void Write(BinaryWriter bw)
@@ -1933,15 +1914,17 @@ public class ReadSensorDataOtherMsg : CBaseMsg
             for (int i = 0, imax = sensorList.Count; i < imax; ++i)
             {
                 sensorList[i].Write(bw);
+                if (sensorList[i].sensorType == (byte)TopologyPartType.Gyro)
+                {
+                    bw.Write(arg);
+                    bw.Write(arg1);
+                }
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -1952,6 +1935,7 @@ public class ReadSensorDataOtherMsgAck : CBaseMsg
 {
     public byte totalFrame;
     public byte nowFrame;
+    public byte sensorNum;
 
     public ReadSensorDataOtherMsgAck()
     {
@@ -1964,14 +1948,12 @@ public class ReadSensorDataOtherMsgAck : CBaseMsg
             base.Read(br);
             totalFrame = br.ReadByte();
             nowFrame = br.ReadByte();
+            sensorNum = br.ReadByte();
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -1995,11 +1977,8 @@ public class ReadSensorDataMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2025,11 +2004,8 @@ public class ReadInfraredDataMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2056,11 +2032,8 @@ public class ReadTouchDataMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2095,11 +2068,8 @@ public class ReadGyroDataMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2127,11 +2097,8 @@ public class ReadSpeakerDataMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2160,11 +2127,8 @@ public class SendSensorDataMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2191,11 +2155,8 @@ public class SendSensorDataMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2205,18 +2166,7 @@ public class SendSensorDataMsgAck : CBaseMsg
 /// </summary>
 public class SendDigitalTubeDataMsg : SendSensorDataMsg
 {
-    public enum DigitalTubeControlType : byte
-    {
-        StaticDisplay = 0,
-        FlashingDisplay,
-        IncrementDisplay,
-        DecreaseDisplay,
-        TimeDisplay,
-        IncrementTime,
-        DecreaseTime,
-    }
-
-    public DigitalTubeControlType controlType = DigitalTubeControlType.StaticDisplay;
+    public byte controlType = 0;
     /// <summary>
     /// 需显示的数字位数，1表示个位，2表示十分位，3表示百分位，4表示千分位
     /// </summary>
@@ -2261,7 +2211,7 @@ public class SendDigitalTubeDataMsg : SendSensorDataMsg
         try
         {
             base.Write(bw);
-            bw.Write((byte)controlType);
+            bw.Write(controlType);
             UInt16 controlWay = 0;
             for (int i = 0, imax = showNum.Count; i < imax; ++i)
             {
@@ -2287,11 +2237,8 @@ public class SendDigitalTubeDataMsg : SendSensorDataMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2301,16 +2248,9 @@ public class SendDigitalTubeDataMsg : SendSensorDataMsg
 /// </summary>
 public class SendEmojiDataMsg : SendSensorDataMsg
 {
-    public enum LightType : byte
-    {
-        Blink = 0,//眨眼
-        Sad,//伤心
-        Happy,//开心
-        Dizzy,//晕
-    }
-    public LightType lightType;
-    public UInt16 duration;//单次表情持续时间，ms
-    public byte times;//0不断重复
+    public byte lightType;
+    //public UInt16 duration;//单次表情持续时间，ms
+    public UInt16 times;//0xFFFF不断重复
     public string rgb;//#FFFFFF|0XFFFFFF
 
     public SendEmojiDataMsg()
@@ -2323,9 +2263,10 @@ public class SendEmojiDataMsg : SendSensorDataMsg
         try
         {
             base.Write(bw);
-            bw.Write((byte)lightType);
-            bw.Write((byte)(duration / 100));
-            bw.Write(times);
+            bw.Write(lightType);
+            //bw.Write((byte)(duration / 100));
+            MyBitConverter.WriteUInt16(bw, times);
+            //bw.Write(times);
             byte[] rgbAry = PublicFunction.HexStringToRGB(rgb);
             bw.Write(rgbAry[0]);
             bw.Write(rgbAry[1]);
@@ -2333,11 +2274,8 @@ public class SendEmojiDataMsg : SendSensorDataMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2347,7 +2285,7 @@ public class SendEmojiDataMsg : SendSensorDataMsg
 /// </summary>
 public class SendLightDataMsg : SendSensorDataMsg
 {
-    public UInt16 duration;//单次表情持续时间，ms
+    public UInt16 duration;//单次表情持续时间，s
     public List<LightShowData> showData;
 
     public SendLightDataMsg()
@@ -2360,7 +2298,7 @@ public class SendLightDataMsg : SendSensorDataMsg
         try
         {
             base.Write(bw);
-            bw.Write((byte)(duration / 100));
+            bw.Write((byte)PublicFunction.Rounding(duration / 1000.0f));
             bw.Write((byte)showData.Count);
             for (int i = 0, imax = showData.Count; i < imax; ++i)
             {
@@ -2369,11 +2307,8 @@ public class SendLightDataMsg : SendSensorDataMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -2413,11 +2348,8 @@ public class LightShowData
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2463,11 +2395,8 @@ public class CtrlSensorLEDMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }
@@ -2506,11 +2435,8 @@ public class ChangeSensorIDMsg : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -2545,11 +2471,140 @@ public class ChangeSensorIDMsgAck : CBaseMsg
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+        }
+    }
+}
+#endregion
+
+
+#region 读取传感器ID
+
+/// <summary>
+/// 读取传感器id发送消息
+/// </summary>
+public class ReadSensorIDMsg : CBaseMsg
+{
+    public SensorBaseData sensorData;
+    public byte arg;
+
+    public ReadSensorIDMsg()
+    {
+        sensorData = new SensorBaseData();
+        arg = 0;
+    }
+
+    public override void Write(BinaryWriter bw)
+    {
+        try
+        {
+            base.Write(bw);
+            sensorData.Write(bw);
+            bw.Write(arg);
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+        }
+    }
+}
+
+/// <summary>
+/// 读取传感器ID返回
+/// </summary>
+public class ReadSensorIDMsgAck : CBaseMsg
+{
+    public SensorBaseData sensorData;
+    public byte result;
+
+    public ReadSensorIDMsgAck()
+    {
+        sensorData = new SensorBaseData();
+    }
+
+    public override void Read(BinaryReader br)
+    {
+        try
+        {
+            base.Read(br);
+            sensorData.Read(br);
+            result = br.ReadByte();
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+        }
+    }
+}
+#endregion
+
+
+#region 设置蓝牙通讯超时机制
+
+/// <summary>
+/// 设置蓝牙通讯超时机制
+/// </summary>
+public class SetBLEOutTimeMsg : CBaseMsg
+{
+    public bool openFlag;
+
+    public SetBLEOutTimeMsg()
+    {
+        openFlag = true;
+    }
+
+    public override void Write(BinaryWriter bw)
+    {
+        try
+        {
+            base.Write(bw);
+            if (openFlag)
             {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+                bw.Write((byte)0);
             }
+            else
+            {
+                bw.Write((byte)1);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+        }
+    }
+}
+#endregion
+
+
+#region 自动修复舵机异常命令
+
+/// <summary>
+/// 修复舵机异常
+/// </summary>
+public class RepairServoExceptionMsg : CBaseMsg
+{
+    public byte arg;
+
+    public RepairServoExceptionMsg()
+    {
+        arg = 0;
+    }
+
+    public override void Write(BinaryWriter bw)
+    {
+        try
+        {
+            base.Write(bw);
+            bw.Write(arg);
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 }

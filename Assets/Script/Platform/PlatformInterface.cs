@@ -196,6 +196,18 @@ public class PlatformInterface
     {
         return false;
     }
+    /// <summary>
+    /// 同步文件
+    /// </summary>
+    /// <param name="modelId">模型id</param>
+    /// <param name="modelType">模型类型</param>
+    /// <param name="filePath">模型路径</param>
+    /// <param name="operateType">操作类型</param>
+    /// <returns></returns>
+    public virtual bool OperateSyncFile(string modelId, ResFileType modelType, string filePath, OperateFileType operateType)
+    {
+        return true;
+    }
 
     /// <summary>
     /// 连接蓝牙音响
@@ -213,6 +225,33 @@ public class PlatformInterface
     {
 
     }
+    /// <summary>
+    /// Event是重要日志
+    /// </summary>
+    /// <param name="text"></param>
+    public virtual void LogEvent(string text)
+    {
+        Debuger.Log(text);
+    }
+
+    /// <summary>
+    /// Info是一般日志
+    /// </summary>
+    /// <param name="text"></param>
+    public virtual void LogInfo(string text)
+    {
+        Debuger.Log(text);
+    }
+
+    /// <summary>
+    /// Debug是调试日志
+    /// </summary>
+    /// <param name="text"></param>
+    public virtual void LogDebug(string text)
+    {
+        Debuger.Log(text);
+    }
+
     #endregion
 
     #region 其他函数

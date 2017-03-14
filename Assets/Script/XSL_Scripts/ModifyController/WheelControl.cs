@@ -12,6 +12,7 @@ public class WidgetManager
 {
     public JoyStickContrlManager joyStickManager;
     public VSliderControlManager vSliderManager;
+    public HSliderControlManager hSliderManager;
     public static int[] speedArray = new int[] { 0x0080, 0x00EA, 0x0154, 0x01BE, 0x0228, 0x0292 };  //速度档位
 
     public WidgetManager(ControllerData data)
@@ -20,6 +21,7 @@ public class WidgetManager
         {
             joyStickManager = new JoyStickContrlManager(data.GetJockList());
             vSliderManager = new VSliderControlManager(data.GetSliderList());
+            hSliderManager = new HSliderControlManager(data.GetHSliderList());
         }
     }
 
@@ -27,6 +29,7 @@ public class WidgetManager
     {
         joyStickManager.ClearUp();
         vSliderManager.ClearUp();
+        hSliderManager.ClearUp();
     }
 
     /// <summary>
@@ -46,7 +49,7 @@ public class WidgetManager
         joyStickManager.RemoveStickcontrol(widgetID);
     }
     /// <summary>
-    /// 新增滑竿控件
+    /// 新增滑杆控件
     /// </summary>
     /// <param name="widgetID"></param>
     public void AddVsliderControl(SliderWidgetData data)
@@ -54,12 +57,28 @@ public class WidgetManager
         vSliderManager.AddNewStickcontrol(data);
     }
     /// <summary>
-    /// 删除滑竿控件
+    /// 删除滑杆控件
     /// </summary>
     /// <param name="widgetID"></param>
     public void RemoveVsliderControl(string widgetID)
     {
         vSliderManager.RemoveStickcontrol(widgetID);
+    }
+    /// <summary>
+    /// 新增横杆控件
+    /// </summary>
+    /// <param name="widgetID"></param>
+    public void AddHsliderControl(HSliderWidgetData data)
+    {
+        hSliderManager.AddNewHStickcontrol(data);
+    }
+    /// <summary>
+    /// 删除横杆控件
+    /// </summary>
+    /// <param name="widgetID"></param>
+    public void RemoveHsliderControl(string widgetID)
+    {
+        hSliderManager.RemoveHStickcontrol(widgetID);
     }
     /// <summary>
     /// 新增动作数据
@@ -361,14 +380,176 @@ public class JoyStickControl
     }
 }
 /// <summary>
-/// 横滑竿控制类
+/// 横滑杆管理类
 /// </summary>
-public class HSliderControl
-{ 
-    
+public class HSliderControlManager
+{
+    List<HSliderControl> hSliderList;
+
+    public HSliderControl GetHSliderByID(string id)
+    {
+        if (hSliderList != null)
+        {
+            return hSliderList.Find((x) => x.ID == id);
+        }
+        else
+        {
+            return null;
+        }
+    }
+
+    public HSliderControlManager(List<HSliderWidgetData> hList)
+    {
+        hSliderList = new List<HSliderControl>(hList.Count);
+        for (int i = 0; i < hList.Count; i++)
+        {
+            hSliderList.Add(new HSliderControl(hList[i]));
+        }
+    }
+
+    /// <summary>
+    /// 新增横滑杆控件
+    /// </summary>
+    /// <param name="data"></param>
+    public void AddNewHStickcontrol(HSliderWidgetData data)
+    {
+        hSliderList.Add(new HSliderControl(data));
+        // joystickList.Add(new JoyStickControl(data));
+    }
+    /// <summary>
+    /// 删除横滑杆控件
+    /// </summary>
+    /// <param name="widgetid"></param>
+    public void RemoveHStickcontrol(string widgetid)
+    {
+        hSliderList.Remove(GetHSliderByID(widgetid));
+        // joystickList.Remove(GetJoystickByID(widgetid));
+    }
+
+    public void ClearUp()
+    {
+        hSliderList = new List<HSliderControl>();
+    }
+
+    /// <summary>
+    /// 准备就绪
+    /// </summary>
+    public void ReadyHsliderControl()
+    {
+        if (hSliderList != null)
+        {
+            foreach (var tem in hSliderList)
+            {
+                if (tem.hsliderData != null)
+                {
+                    tem.isRightSetting = tem.hsliderData.isOK;
+                }
+                else
+                    tem.isRightSetting = false;
+            }
+        }
+    }
 }
 /// <summary>
-/// 竖滑竿管理类
+/// 横滑杆控制类
+/// </summary>
+public class HSliderControl
+{
+    public bool isReady;  //控件是否可以控制 蓝牙ok，配置ok
+    public string ID;
+    public HSliderWidgetData hsliderData;
+    private TurnData wheelData;
+    private TurnData preWheelData;
+    public static bool turnOver;
+    public bool isRightSetting;
+    public bool changeFlag;
+    public bool changeOver;
+    private int speedvalue; //速度档位值
+    public int Speedvalue                          //档位值发生改变时 记录当前轮模式的数据改变
+    {
+        get
+        {
+            return speedvalue;
+        }
+        set
+        {
+            if (value != speedvalue && value != 0) //发生改变
+            {
+                int k = 1;
+                /*if (hsliderData.directionDisclock)
+                    k = -1;
+                else
+                    k = 1;*/
+                if (value * k > 0)
+                    wheelData.turnDirection = TurnDirection.turnByClock;
+                else
+                    wheelData.turnDirection = TurnDirection.turnByDisclock;
+                wheelData.turnSpeed = (ushort)WidgetManager.speedArray[Mathf.Abs(value)];
+                changeFlag = true;  //标记着值发生改变
+            }
+            else if (value != 0)
+            {
+
+            }
+            else
+            {
+                wheelData.turnDirection = TurnDirection.turnStop;
+                wheelData.turnSpeed = 0;
+                changeFlag = true;
+            }
+            speedvalue = value;
+        }
+    }
+
+    public HSliderControl(HSliderWidgetData data)
+    {
+        hsliderData = data;
+        this.ID = data.widgetId;
+    }
+    /// <summary>
+    /// 坐标与速度的转换
+    /// </summary>
+    /// <param name="x"></param>
+    /// <param name="y"></param>
+    /// <param name="r"></param>
+    public void TurnWheelSpeed(float x, float y, int r)
+    {
+        float a = (2 * y - x - Mathf.Abs(x)) / (2 * r);
+        if (a < 0.1f && a > -0.1f)
+        {
+            Speedvalue = 0;
+            return;
+        }
+        int zf = a > 0 ? 1 : -1;
+        float aa = Mathf.Abs(a);
+        if (aa < 0.3f)
+            Speedvalue = 1 * zf;
+        else if (aa < 0.5f)
+            Speedvalue = 2 * zf;
+        else if (aa < 0.7f)
+            Speedvalue = 3 * zf;
+        else if (aa < 0.9f)
+            Speedvalue = 4 * zf;
+        else
+            Speedvalue = 5 * zf;
+    }
+
+    /// <summary>
+    /// 发送命令通知硬件
+    /// </summary>
+    public void WheelTurn()
+    {
+        changeOver = true;
+        if (preWheelData.turnSpeed != wheelData.turnSpeed || preWheelData.turnDirection != wheelData.turnDirection) //数据不一样时发送
+        {
+            RobotManager.GetInst().GetCurrentRobot().CtrlServoTurn(hsliderData.servoID, wheelData);
+            preWheelData = wheelData;
+        }
+    }
+}
+
+/// <summary>
+/// 竖滑杆管理类
 /// </summary>
 public class VSliderControlManager
 {
@@ -439,7 +620,7 @@ public class VSliderControlManager
     }
 }
 /// <summary>
-/// 竖滑竿控制类
+/// 竖滑杆控制类
 /// </summary>
 public class VSliderControl
 {

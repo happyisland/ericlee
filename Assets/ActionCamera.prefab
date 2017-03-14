@@ -54,11 +54,37 @@ MonoBehaviour:
     paddingRight: 0
     paddingTop: 0
     paddingBottom: 0
+  - name: charging
+    x: 95
+    y: 512
+    width: 45
+    height: 23
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
   - name: disablesave
-    x: 901
+    x: 800
     y: 924
     width: 100
     height: 100
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: fullCharge
+    x: 848
+    y: 592
+    width: 46
+    height: 34
     borderLeft: 0
     borderRight: 0
     borderTop: 0
@@ -120,8 +146,8 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_acionsimple
-    x: 800
-    y: 823
+    x: 901
+    y: 924
     width: 100
     height: 100
     borderLeft: 0
@@ -133,7 +159,7 @@ MonoBehaviour:
     paddingTop: 0
     paddingBottom: 0
   - name: icon_giveup
-    x: 901
+    x: 800
     y: 823
     width: 100
     height: 100
@@ -185,8 +211,8 @@ MonoBehaviour:
     paddingTop: 3
     paddingBottom: 3
   - name: icon_unbluetooth
-    x: 800
-    y: 722
+    x: 901
+    y: 823
     width: 100
     height: 100
     borderLeft: 0
@@ -199,11 +225,50 @@ MonoBehaviour:
     paddingBottom: 0
   - name: icon_unsaved
     x: 800
-    y: 924
+    y: 722
     width: 100
     height: 100
     borderLeft: 0
     borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: low battery
+    x: 895
+    y: 592
+    width: 45
+    height: 34
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: power1
+    x: 941
+    y: 592
+    width: 45
+    height: 34
+    borderLeft: 0
+    borderRight: 0
+    borderTop: 0
+    borderBottom: 0
+    paddingLeft: 0
+    paddingRight: 0
+    paddingTop: 0
+    paddingBottom: 0
+  - name: power2
+    x: 990
+    y: 698
+    width: 29
+    height: 23
+    borderLeft: 8
+    borderRight: 8
     borderTop: 0
     borderBottom: 0
     paddingLeft: 0

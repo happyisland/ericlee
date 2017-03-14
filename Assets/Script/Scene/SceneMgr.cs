@@ -9,7 +9,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-
+using Game.Platform;
 
 namespace Game.Scene
 {
@@ -58,37 +58,48 @@ namespace Game.Scene
         //跳转场景
         public static void EnterScene(SceneType type)
         {
-            //if (sm_currScene != null)
-            //{
-            //    sm_currScene.Dispose();
-            //}
-            //mCurrentSceneType = type;
-            //AsyncOperation asyn = Application.LoadLevelAsync((int)type);
-            //Timer.Cancel(m_timerId);   
-            //m_timerId = Timer.Add(0.5f, 0.5f, 1, EnterSceneCallBack, asyn, type);
-            if (type == SceneType.EmptyScene)
+            try
             {
-                RobotMgr.Instance.GoToCommunity();
-            }
-            if (mCurrentSceneType == SceneType.MainWindow)
-            {
-                //先通知主场景播放退出动画
-                mCurrentSceneType = type;
-                ModelDetailsWindow_new.Ins.PreEnterOtherScenes(EnterOtherScenes);
-            }
-            else
-            {
-                if (sm_currScene != null)
+                if (type == SceneType.EmptyScene)
                 {
-                    sm_currScene.Dispose();
+                    RobotMgr.Instance.GoToCommunity();
                 }
-                mCurrentSceneType = type;
-                AsyncOperation asyn = Application.LoadLevelAsync((int)type);
-                if (-1 == m_timerId)
+                if (mCurrentSceneType == SceneType.MainWindow)
                 {
-                    Timer.Cancel(m_timerId);
+                    //先通知主场景播放退出动画
+                    mCurrentSceneType = type;
+                    if (null != ModelDetailsWindow_new.Ins)
+                    {
+                        try
+                        {
+                            ModelDetailsWindow_new.Ins.PreEnterOtherScenes(EnterOtherScenes);
+                        }
+                        catch (System.Exception ex)
+                        {
+                            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+                        }
+                    }
                 }
-                m_timerId = Timer.Add(0.5f, 0.5f, 1, EnterSceneCallBack, asyn, type);
+                else
+                {
+                    if (sm_currScene != null)
+                    {
+                        sm_currScene.Dispose();
+                    }
+                    mCurrentSceneType = type;
+                    AsyncOperation asyn = Application.LoadLevelAsync((int)type);
+                    if (-1 == m_timerId)
+                    {
+                        Timer.Cancel(m_timerId);
+                    }
+                    m_timerId = Timer.Add(0.5f, 0.5f, 1, EnterSceneCallBack, asyn, type);
+                }
+            }
+            catch (System.Exception ex)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
         }
 

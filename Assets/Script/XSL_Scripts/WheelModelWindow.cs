@@ -47,9 +47,9 @@ public class WheelModelWindow : BasePopWin {
     protected override void AddEvent()
     {
         base.AddEvent();
-        byClock = GameHelper.FindChildCompoent(mTrans, "back/Direction/clockWise", "UIToggle") as UIToggle;
-        byDisclock = GameHelper.FindChildCompoent(mTrans, "back/Direction/nishizhen", "UIToggle") as UIToggle;
-        speedBar = GameHelper.FindChildCompoent(mTrans, "back/Velocity/speedSlider", "UISlider") as UISlider;
+        byClock = GameHelper.FindChildComponent<UIToggle>(mTrans, "back/Direction/clockWise");
+        byDisclock = GameHelper.FindChildComponent<UIToggle>(mTrans, "back/Direction/nishizhen");
+        speedBar = GameHelper.FindChildComponent<UISlider>(mTrans, "back/Velocity/speedSlider");
         if (speedBar != null)
         {
             EventDelegate.Add(speedBar.onChange, ShowSpeed);

@@ -109,38 +109,7 @@ public class MyProjectBuild
         }
     }
 
-
-
-    /*[MenuItem("ProjectBuild/Android/导出社区带个人模型版")]
-    public static void BuildForGoogleAndData()
-    {
-        //打包之前先设置一下 预定义标签， 我建议大家最好 做一些  91 同步推 快用 PP助手一类的标签。 这样在代码中可以灵活的开启 或者关闭 一些代码。
-        //因为 这里我是承接 上一篇文章， 我就以sharesdk做例子 ，这样方便大家学习 ，
-        //PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, "USE_SHARE");
-        if (SetCommunity(false, true, BuildTarget.Android))
-        {
-            SetAndroidSetting();
-            string path = Application.dataPath.Replace("\\", "/");
-            path = path.Substring(0, path.LastIndexOf("/Assets"));
-            path = path.Substring(0, path.LastIndexOf("/"));
-            path += "/RobotAndroid";
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            else
-            {
-                PublicFunction.DelDirector(Path.Combine(path, PlayerSettings.productName));
-            }
-            //path = EditorUtility.SaveFilePanel("选择导出路径", path, "", "");
-            BuildPipeline.BuildPlayer(GetBuildScenes(), path, BuildTarget.Android, BuildOptions.AcceptExternalModificationsToPlayer);
-            //EditorUtility.RevealInFinder(Path.Combine(path, PlayerSettings.productName));
-            AndroidMoveFloder(Path.Combine(path, PlayerSettings.productName + "/assets/bin"));
-            PublicFunction.DelDirector(path, true);
-        }
-    }*/
-
-    [MenuItem("ProjectBuild/Android/导出社区打日志版")]
+    [MenuItem("ProjectBuild/Android/导出社区fir_test打日志版")]
     public static void BuildForGoogleTest()
     {
         if (SetCommunity(true,false, BuildTarget.Android))
@@ -181,11 +150,6 @@ public class MyProjectBuild
                 EditorUtility.RevealInFinder(path);
             }
         }
-#if UNITY_ANDROID
-        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
-#elif UNITY_IPHONE
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
-#endif
     }
 
     [MenuItem("ProjectBuild/Android/导出unity打日志版")]
@@ -202,11 +166,6 @@ public class MyProjectBuild
                 EditorUtility.RevealInFinder(path);
             }
         }
-#if UNITY_ANDROID
-        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
-#elif UNITY_IPHONE
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
-#endif
     }
 
     [MenuItem("ProjectBuild/IOS/导出社区正式版")]
@@ -326,11 +285,6 @@ public class MyProjectBuild
             }
 
         }
-#if UNITY_ANDROID
-        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
-#elif UNITY_IPHONE
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
-#endif
     }
 
     [MenuItem("ProjectBuild/IOS/导出unity打日志版")]
@@ -359,11 +313,6 @@ public class MyProjectBuild
             }
 
         }
-#if UNITY_ANDROID
-        PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
-#elif UNITY_IPHONE
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
-#endif
     }
 
 
@@ -479,22 +428,7 @@ public class MyProjectBuild
         ClientMain.GetInst().simulationUseThirdAppFlag = false;
         ClientMain.GetInst().debugLogFlag = isTest;
         ClientMain.GetInst().copyDefaultFlag = true;
-        if (isTest)
-        {
-#if UNITY_ANDROID
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, "USE_TEST");
-#elif UNITY_IPHONE
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, "USE_TEST");
-#endif
-        }
-        else
-        {
-#if UNITY_ANDROID
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, null);
-#elif UNITY_IPHONE
-            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, null);
-#endif
-        }
+
         DelFolder(Application.streamingAssetsPath + "/defaultFiles", null, true);
         /*if (target == BuildTarget.Android)
         {
@@ -515,6 +449,13 @@ public class MyProjectBuild
         PlayerSettings.Android.preferredInstallLocation = AndroidPreferredInstallLocation.PreferExternal;
         PlayerSettings.Android.splashScreenScale = AndroidSplashScreenScale.ScaleToFill;
         PlayerSettings.Android.targetDevice = AndroidTargetDevice.FAT;
+        PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
+        PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel15;
+        /*PlayerSettings.useAnimatedAutorotation = false;
+        PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+        PlayerSettings.allowedAutorotateToLandscapeRight = true;
+        PlayerSettings.allowedAutorotateToPortrait = false;
+        PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;*/
     }
 
     static void SetIphoneSetting()
@@ -522,7 +463,14 @@ public class MyProjectBuild
 #if UNITY_IPHONE
         PlayerSettings.SetPropertyInt("ScriptingBackend", (int)ScriptingImplementation.IL2CPP, BuildTarget.iPhone);
         PlayerSettings.SetPropertyInt("Architecture", 2, BuildTarget.iPhone);
+        PlayerSettings.targetIOSGraphics = TargetIOSGraphics.OpenGLES_2_0;
 #endif
+        PlayerSettings.defaultInterfaceOrientation = UIOrientation.LandscapeLeft;
+        /*PlayerSettings.useAnimatedAutorotation = true;
+        PlayerSettings.allowedAutorotateToLandscapeLeft = true;
+        PlayerSettings.allowedAutorotateToLandscapeRight = true;
+        PlayerSettings.allowedAutorotateToPortrait = false;
+        PlayerSettings.allowedAutorotateToPortraitUpsideDown = false;*/
         PlayerSettings.iOS.targetDevice = iOSTargetDevice.iPhoneAndiPad;
     }
 

@@ -125,7 +125,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     }
     public void CallUnityCmd(string argStr)
     {
-        Debuger.Log(string.Format("CallUnityCmd = {0}", argStr));
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeDebug, string.Format("CallUnityCmd = {0}", argStr));
         do 
         {
             if (!mWaitExceptionRepairFlag && argStr.StartsWith(Logic_Cmd_Start))
@@ -177,7 +177,6 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             dict["result"] = CallUnityResult.failure.ToString();
             dict["cmd"] = argStr;
             string jsonbill = Json.Serialize(dict);
-            Debuger.Log(string.Format("LogicCMDResult = {0}", jsonbill));
             PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.LogicCMDResult, jsonbill);
         } while (false);
     }
@@ -222,16 +221,12 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             AddSensorData(ref dict);
             
             string jsonbill = Json.Serialize(dict);
-            Debuger.Log(string.Format("OpenLogic = {0}", jsonbill));
             PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.OpenLogicProgramming, jsonbill);
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -284,12 +279,12 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             mWaitCmdDict.Clear();
         }
         isLogicOpenSearchFlag = true;
-        SearchBluetoothMsg.ShowMsg();
+        ConnectBluetoothMsg.ShowMsg();
     }
 
     public void CloseBlueSearch()
     {
-        if (!PopWinManager.GetInst().IsExist(typeof(TopologyBaseMsg)) && !PopWinManager.GetInst().IsExist(typeof(SearchBluetoothMsg)))
+        if (!PopWinManager.GetInst().IsExist(typeof(TopologyBaseMsg)) && !PopWinManager.GetInst().IsExist(typeof(ConnectBluetoothMsg)))
         {
             EventMgr.Inst.Fire(EventID.Exit_Blue_Connect);
         }
@@ -307,6 +302,35 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                 LogicCtrl.GetInst().ChargeProtectedCallBack();
             }
         }
+    }
+
+
+    public void OpenSetServoModel()
+    {
+        SetServoTypeMsg.ShowMsg(CloseSetServoModel);
+    }
+
+    public void CloseSetServoModel()
+    {
+        string servoList = string.Empty;
+        if (null != mRobot)
+        {
+            servoList = PublicFunction.ListToString<byte>(mRobot.GetAllDjData().GetAngleList(), PublicFunction.Separator_Or);
+        }
+        string circleServos = string.Empty;
+        if (null != mRobot)
+        {
+            circleServos = PublicFunction.ListToString<byte>(mRobot.GetAllDjData().GetTurnList(), PublicFunction.Separator_Or);
+        }
+        Dictionary<string, string> dict = new Dictionary<string, string>();
+        dict["commonServo"] = servoList;
+        dict["circleServo"] = circleServos;
+        string jsonbill = Json.Serialize(dict);
+        PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.refreshAllServo, jsonbill);
+        /*if (PlatformMgr.Instance.IsChargeProtected)
+        {
+            LogicCtrl.GetInst().ChargeProtectedCallBack();
+        }*/
     }
 
     public void NotifyLogicDicBlue()
@@ -366,7 +390,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     /// 普通提示，不做其他处理
     /// </summary>
     /// <param name="tips"></param>
-    public void CommonTipsCallBack(string tips, float intervalTime)
+    public void CommonTipsCallBack(string tips, float intervalTime, CommonTipsColor color)
     {
         if (IsLogicProgramming)
         {
@@ -375,7 +399,11 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                 return;
             }
             mShowTipsLastTime = Time.time;
-            PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.CommonTips, tips);
+            Dictionary<string, object> dict = new Dictionary<string, object>();
+            dict["msg"] = tips;
+            dict["level"] = (byte)color;
+            string jsonbill = Json.Serialize(dict);
+            PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.CommonTips, jsonbill);
         }
     }
     /// <summary>
@@ -383,7 +411,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     /// </summary>
     public void ChargeProtectedCallBack()
     {
-        if (IsLogicProgramming)
+        if (IsLogicProgramming && !isLogicOpenSearchFlag)
         {
             if (!mChargeProtectedFlag)
             {
@@ -493,11 +521,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_OK);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -568,7 +593,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     {
         try
         {
-            if (2 != args.Length)
+            if (args.Length < 2)
             {//参数错误
                 ParameterError(args[0], CallUnityErrorCode.Result_None);
             }
@@ -598,11 +623,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -614,7 +636,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     {
         try
         {
-            if (args.Length != 2)
+            if (args.Length < 2)
             {//参数错误
                 ParameterError(args[0], CallUnityErrorCode.Result_None);
             }
@@ -643,11 +665,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -658,7 +677,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     {
         try
         {
-            if (args.Length != 2)
+            if (args.Length < 2)
             {//参数错误
                 ParameterError(args[0], CallUnityErrorCode.Result_None);
             }
@@ -688,11 +707,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -703,7 +719,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     {
         try
         {
-            if (args.Length != 2)
+            if (args.Length < 2)
             {
                 RunCmdFinished(args[0]);
             }
@@ -734,7 +750,11 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                                 angle = PublicFunction.DuoJi_Max_Show_Rota;
                             }
                             rotas[servo] = (byte)angle;
-                            mRobot.CtrlActionForDjId(servo, angle);
+                            ErrorCode ret = mRobot.CtrlActionForDjId(servo, angle);
+                            if (ret != ErrorCode.Result_OK)
+                            {
+                                RunCmdFinished(args[0]);
+                            }
                         }
                     }
                     
@@ -748,11 +768,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             RunCmdFinished(args[0]);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -798,11 +815,17 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                         
                         
                     }
-                    mRobot.CtrlServoMove(rotas, time);
-                    mServoSetCallBackFlag = false;
-                    mServoSetFinishedFlag = false;
-                    mWaitServoSetIndex = Timer.Add(time / 1000.0f, 1, 1, ServoSetFinished);
-                    //CmdCallBack(args[0], CallUnityResult)
+                    ErrorCode ret = mRobot.CtrlServoMove(rotas, time);
+                    if (ret == ErrorCode.Result_OK)
+                    {
+                        mServoSetCallBackFlag = false;
+                        mServoSetFinishedFlag = false;
+                        mWaitServoSetIndex = Timer.Add(time / 1000.0f, 1, 1, ServoSetFinished);
+                    }
+                    else
+                    {
+                        CmdCallBack(args[0], CallUnityResult.failure);
+                    }
                 }
                 else
                 {
@@ -815,11 +838,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -848,7 +868,11 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                         {
                             TurnData turnData = new TurnData();
                             byte servo = byte.Parse(dict["servo"].ToString());
-                            string speedStr = dict["speed"].ToString();
+                            string speedStr = string.Empty;
+                            if (dict.ContainsKey("speed"))
+                            {
+                                speedStr = dict["speed"].ToString();
+                            }
                             int speed = 0;
                             switch (speedStr)
                             {
@@ -903,11 +927,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -954,11 +975,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -1005,11 +1023,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -1028,11 +1043,10 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
             {
                 mWaitCmdDict.Clear();
             }
-            NetWork.GetInst().ClearAllMsg();
+            NetWork.GetInst().ClearCacheMsg();
             if (PlatformMgr.Instance.GetBluetoothState())
             {
                 mRobot.StopNowPlayActions();
-                mRobot.StopAllTurn();
                 //RunCmdFinished(args[0]);
                 
             }
@@ -1044,11 +1058,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             //RunCmdFinished(args[0]);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1064,11 +1075,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             RunCmdFinished(args[0]);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1099,11 +1107,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1142,11 +1147,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -1184,11 +1186,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -1226,11 +1225,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -1269,7 +1265,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                                 for (int lightIndex = 0, lightMax = lightsData.Count; lightIndex < lightMax; ++lightIndex)
                                 {
                                     string color = lightsData[lightIndex].ToString();
-                                    if (!string.IsNullOrEmpty(color))
+                                    //if (!string.IsNullOrEmpty(color))
                                     {
                                         if (!showColor.ContainsKey(color))
                                         {
@@ -1307,11 +1303,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -1322,7 +1315,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     {
         try
         {
-            if (args.Length < 4)
+            if (args.Length < 3)
             {//参数错误
                 ParameterError(args[0], CallUnityErrorCode.Result_None);
             }
@@ -1332,15 +1325,16 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                 {
                     mSetEmojiCount = 0;
                     JsonData data = new JsonData(Json.Deserialize(args[1]));
-                    byte times = byte.Parse(args[2]);
-                    UInt16 duration = UInt16.Parse(args[3]);
+                    UInt16 times = UInt16.Parse(args[2]);
+                    //UInt16 duration = UInt16.Parse(args[3]);
+                    Dictionary<byte, Dictionary<string, List<byte>>> emojiDict = new Dictionary<byte, Dictionary<string, List<byte>>>();
                     for (int i = 0, imax = data.Count; i < imax; ++i)
                     {
                         Dictionary<string, object> dict = (Dictionary<string, object>)data[i].Dictionary;
                         if (null != dict)
                         {
                             byte id = 0;
-                            SendEmojiDataMsg.LightType lightType = SendEmojiDataMsg.LightType.Blink;
+                            byte lightType = 0;
                             string color = string.Empty;
                             if (dict.ContainsKey("id"))
                             {
@@ -1348,16 +1342,31 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                             }
                             if (dict.ContainsKey("emotionIndex"))
                             {
-                                lightType = (SendEmojiDataMsg.LightType)byte.Parse(dict["emotionIndex"].ToString());
+                                lightType = (byte)byte.Parse(dict["emotionIndex"].ToString());
                             }
                             if (dict.ContainsKey("color"))
                             {
                                 color = dict["color"].ToString();
                             }
-                            List<byte> ids = new List<byte>();
-                            ids.Add(id);
+                            if (!emojiDict.ContainsKey(lightType))
+                            {
+                                Dictionary<string, List<byte>> colorDict = new Dictionary<string, List<byte>>();
+                                emojiDict[lightType] = colorDict;
+                            }
+                            if (!emojiDict[lightType].ContainsKey(color))
+                            {
+                                List<byte> ids = new List<byte>();
+                                emojiDict[lightType][color] = ids;
+                            }
+                            emojiDict[lightType][color].Add(id);
+                        }
+                    }
+                    foreach (var kvp in emojiDict)
+                    {
+                        foreach (var tmp in kvp.Value)
+                        {
                             ++mSetEmojiCount;
-                            mRobot.SendEmoji(ids, lightType, color, times, duration);
+                            mRobot.SendEmoji(tmp.Value, kvp.Key, tmp.Key, times);
                         }
                     }
                 }
@@ -1370,11 +1379,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1396,7 +1402,7 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
                 {
                     mSetDigitalTubeCount = 0;
                     List<byte> ids = PublicFunction.StringToByteList(args[1]);
-                    SendDigitalTubeDataMsg.DigitalTubeControlType controlType = (SendDigitalTubeDataMsg.DigitalTubeControlType)(byte.Parse(args[2]));
+                    byte controlType = byte.Parse(args[2]);
                     List<byte> showNum = PublicFunction.StringToByteList(args[3]);
                     List<byte> showSubPoint = PublicFunction.StringToByteList(args[4]);
                     bool showColon = args[5].Equals("1");
@@ -1417,11 +1423,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1477,11 +1480,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         catch (System.Exception ex)
         {
             CatchException(args[0], CallUnityErrorCode.Result_None);
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     #endregion
@@ -1708,8 +1708,11 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
 
     public void ExceptionRepairResult()
     {
-        PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.JsExceptionWaitResult, string.Empty);
-        mWaitExceptionRepairFlag = false;
+        if (mWaitExceptionRepairFlag)
+        {
+            PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.JsExceptionWaitResult, string.Empty);
+            mWaitExceptionRepairFlag = false;
+        }
     }
 #endregion
     /// <summary>
@@ -1718,6 +1721,10 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     /// <param name="cmd"></param>
     void RunCmdFinished(string cmd)
     {
+        if (null == mRuningCmdDict)
+        {
+            return;
+        }
         mRuningCmdDict.Remove(cmd);
         if (!mWaitExceptionRepairFlag && null != mWaitCmdDict && mWaitCmdDict.ContainsKey(cmd))
         {
@@ -1732,7 +1739,6 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     /// <param name="cmd"></param>
     void ParameterError(string cmd, CallUnityErrorCode errorCode)
     {
-        Debuger.Log(string.Format("ParameterError LogicCMDResult = {0}", cmd));
         CmdCallBack(cmd, CallUnityResult.failure, errorCode);
     }
     /// <summary>
@@ -1741,7 +1747,6 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
     /// <param name="cmd"></param>
     void CatchException(string cmd, CallUnityErrorCode errorCode)
     {
-        Debuger.Log(string.Format("CatchException LogicCMDResult = {0}", cmd));
         CmdCallBack(cmd, CallUnityResult.failure, errorCode);
     }
 
@@ -1767,7 +1772,6 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         }
         dict["cmd"] = CmdArgsToString(mRuningCmdDict[cmd]).ToString();
         string jsonbill = Json.Serialize(dict);
-        Debuger.Log(string.Format("LogicCMDResult = {0}", jsonbill));
         PlatformMgr.Instance.CallPlatformFunc(CallPlatformFuncID.LogicCMDResult, jsonbill);
         if (null != logicCmdCallBack)
         {
@@ -1813,11 +1817,8 @@ public class LogicCtrl : SingletonObject<LogicCtrl>
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         return dict;
     }
@@ -1883,4 +1884,13 @@ public enum CallUnityErrorCode : byte
     Result_OK = 1,
     Blue_DisConnect = 2,
     Actions_Not_Exist = 3,
+}
+/// <summary>
+/// 提示颜色
+/// </summary>
+public enum CommonTipsColor : byte
+{
+    yellow = 0,
+    green = 1,
+    red = 2,
 }

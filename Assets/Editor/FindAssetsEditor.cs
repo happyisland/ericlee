@@ -25,8 +25,8 @@ public class FindAssetsEditor : EditorWindow
     }
     #endregion
 
-    Type[] types = new Type[] { typeof(UISprite), typeof(UITexture) };
-    string[] inputText = new string[] { string.Empty, string.Empty };
+    Type[] types = new Type[] { typeof(UISprite), typeof(UITexture), typeof(UIAtlas)};
+    string[] inputText = new string[] { string.Empty, string.Empty, string.Empty};
     #region 其他函数
     void OnGUI()
     {
@@ -56,7 +56,12 @@ public class FindAssetsEditor : EditorWindow
                         if (objs[objIndex] is GameObject)
                         {
                             GameObject tmpObj = objs[objIndex] as GameObject;
-                            Component[] coms = tmpObj.GetComponentsInChildren(types[i], true);
+                            Type findType = types[i];
+                            if (findType == typeof(UIAtlas))
+                            {
+                                findType = typeof(UISprite);
+                            }
+                            Component[] coms = tmpObj.GetComponentsInChildren(findType, true);
                             for (int comIndex = 0, comMax = coms.Length; comIndex < comMax; ++comIndex)
                             {
                                 if (types[i] == typeof(UISprite))
@@ -70,6 +75,14 @@ public class FindAssetsEditor : EditorWindow
                                 {
                                     Texture tex = (coms[comIndex] as UITexture).mainTexture;
                                     if (null != tex && tex.name == inputText[i])
+                                    {
+                                        Debug.Log(AssetDatabase.GetAssetPath(tmpObj));
+                                    }
+                                }
+                                else if (types[i] == typeof(UIAtlas))
+                                {
+                                    UIAtlas atlas = (coms[comIndex] as UISprite).atlas;
+                                    if (null != atlas && atlas.name == inputText[i])
                                     {
                                         Debug.Log(AssetDatabase.GetAssetPath(tmpObj));
                                     }

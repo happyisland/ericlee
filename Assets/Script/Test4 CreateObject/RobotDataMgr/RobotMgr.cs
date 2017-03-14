@@ -6,7 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using Game.Scene;
-
+using Game.Platform;
 
 public class RobotMgr
 {
@@ -1438,7 +1438,10 @@ public class RobotMgr
     public static string NameNoType(string namewithtype)
     {
         int posnum=namewithtype.LastIndexOf("_");
-
+        if (-1 == posnum)
+        {
+            return namewithtype;
+        }
         string namenotype = namewithtype.Substring(0,posnum);  //如：12_playerdata   取:12
         return namenotype;
     }
@@ -1600,34 +1603,28 @@ public class RobotMgr
     #endregion
 
     #region 显示
-    //显示舵机ID
-    public void ShowDJID(GameObject djgo,string robotname,Dictionary<string, Texture> djIDTexture)
+    //显示舵机，传感器ID
+    public void ShowID(GameObject goTemp,int idTemp,Dictionary<string, Texture> djIDTexture)
     {
-        if(djgo!=null)
+        foreach (Transform child in goTemp.transform.GetComponentsInChildren<Transform>())
         {
-            string goname = djgo.name;
-            int id = RobotMgr.Instance.rbt[robotname].gos[goname].djID;
-
-            foreach(Transform child in djgo.transform.GetComponentsInChildren<Transform>())
+            if(child.name=="Num1")
             {
-                if(child.name=="Num1")
+                if (idTemp < 10)
                 {
-                    if(id<10)
-                    {
-                        child.renderer.material.mainTexture=djIDTexture["0"];
-                    }
-                    else
-                    {
-                        int idFirst = id / 10;
-                        child.renderer.material.mainTexture = djIDTexture[idFirst.ToString()];
-                    }
+                    child.renderer.material.mainTexture=djIDTexture["0"];
                 }
+                else
+                {
+                    int idFirst = idTemp / 10;
+                    child.renderer.material.mainTexture = djIDTexture[idFirst.ToString()];
+                }
+            }
 
-                if (child.name == "Num2")
-                {
-                    int idSec = id %10;
-                    child.renderer.material.mainTexture = djIDTexture[idSec.ToString()];
-                }
+            if (child.name == "Num2")
+            {
+                int idSec = idTemp % 10;
+                child.renderer.material.mainTexture = djIDTexture[idSec.ToString()];
             }
         }
     }
@@ -1780,6 +1777,7 @@ public class RobotMgr
     //基本数据清空
     public void ClearBaseData()
     {
+        PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "ClearBaseData:");
          if (AddedAllGOs != null){  AddedAllGOs.Clear();}
 
         if (alldpbox != null) {  alldpbox.Clear();}

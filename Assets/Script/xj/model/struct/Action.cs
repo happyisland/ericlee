@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Game.Platform;
+using System;
 using System.Collections.Generic;
 using System.Xml;
 using UnityEngine;
@@ -43,7 +44,7 @@ public class Action
     /// <summary>
     /// 需要显示的舵机列表
     /// </summary>
-    public List<byte> showList;
+    private List<byte> showList;
 
     public int AllTime
     {
@@ -64,7 +65,7 @@ public class Action
         Init(index, PublicFunction.Default_Actions_Time, 0);
     }
 
-    public Action(XmlElement xe)
+    public Action(XmlElement xe, Robot robot)
     {
         rotas = new Dictionary<byte, short>();
         turnDict = new Dictionary<byte, TurnData>();
@@ -121,7 +122,12 @@ public class Action
                     showList = new List<byte>();
                     for (int i = 0, imax = ary2.Length; i < imax; ++i)
                     {
-                        showList.Add(byte.Parse(ary2[i]));
+                        byte id = byte.Parse(ary2[i]);
+                        DuoJiData data = robot.GetAnDjData(id);
+                        if (null != data && data.modelType == ServoModel.Servo_Model_Angle)
+                        {
+                            showList.Add(id);
+                        }
                     }
                 }
             }
@@ -136,11 +142,8 @@ public class Action
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -288,7 +291,7 @@ public class Action
         }
     }
 
-    public void Copy(Action action)
+    public void Copy(Action action, Robot robot)
     {
         sportTime = action.sportTime;
         waitTime = action.waitTime;
@@ -306,10 +309,20 @@ public class Action
         }
         if (null != action.showList)
         {
-            showList = new List<byte>();
             for (int i = 0, imax = action.showList.Count; i < imax; ++i)
             {
-                showList.Add(action.showList[i]);
+                if (null != robot && null != robot.GetAnDjData(action.showList[i]) && robot.GetAnDjData(action.showList[i]).modelType == ServoModel.Servo_Model_Angle)
+                {
+                    if (null == showList)
+                    {
+                        showList = new List<byte>();
+                    }
+                    showList.Add(action.showList[i]);
+                }
+            }
+            if (showList != null && showList.Count == 0)
+            {
+                showList = null;
             }
         }
         else
@@ -326,7 +339,15 @@ public class Action
     {
         if (turnDict.Count > 0)
         {
-            return true;
+            bool isStop = false;
+            foreach (KeyValuePair<byte, TurnData> kvp in turnDict)
+            {
+                if (kvp.Value.turnDirection != TurnDirection.turnStop)
+                {
+                    isStop = true;
+                }
+            }
+            return isStop;
         }
         return false;
     }
@@ -346,6 +367,11 @@ public class Action
         {
             showList.Remove((byte)id);
         }
+    }
+
+    public List<byte> GetShowID()
+    {
+        return showList;
     }
 
     public void CleanUp()

@@ -82,6 +82,14 @@ public class ClientMainEditor : UIWidgetContainerEditor
                     clientMain.UseTestModelFlag = true;
                 }
             }
+			if (GUILayout.Button("打开测试标志", GUILayout.Width(100), GUILayout.Height(24)))
+			{
+#if UNITY_ANDROID
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.Android, "USE_TEST");
+#elif UNITY_IPHONE
+            PlayerSettings.SetScriptingDefineSymbolsForGroup(BuildTargetGroup.iPhone, "USE_TEST");
+#endif
+			}
         }
         LauguageType lgType = LauguageTool.GetIns().CurLauguage;
         LauguageType tagType = lgType + 1;

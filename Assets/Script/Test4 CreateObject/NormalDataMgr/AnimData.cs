@@ -36,4 +36,6 @@ public class AnimBase
     public string firstPic;//每张局部图第一次出现时
 
     public string lvdaiNum;//履带拼接的数量
+
+    public string sensorID;//传感器ID提示
 }

@@ -17,6 +17,7 @@ public class TextureRenameEdit : EditorWindow
     #endregion
 
     #region 其他属性
+    string mFileFont = string.Empty;
     #endregion
 
     #region 公有函数
@@ -35,35 +36,111 @@ public class TextureRenameEdit : EditorWindow
     string mFolderPath = string.Empty;
     void OnGUI()
     {
-        string folderPath = string.Empty;
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("修改前缀为:", GUILayout.Width(120));
+        mFileFont = GUILayout.TextField(mFileFont, GUILayout.Width(100));
+        GUILayout.EndHorizontal();
         if (GUILayout.Button("选择文件夹", GUILayout.Width(100), GUILayout.Height(20)))
         {
-            folderPath = EditorUtility.OpenFolderPanel("选择文件夹", mFolderPath, string.Empty);
+            mFolderPath = EditorUtility.OpenFolderPanel("选择文件夹", mFolderPath, string.Empty);
         }
-        if (!string.IsNullOrEmpty(folderPath))
+        if (GUILayout.Button("普通改名"))
         {
-            mFolderPath = folderPath;
-            string[] files = Directory.GetFiles(folderPath);
-            if (null != files)
+            if (!string.IsNullOrEmpty(mFolderPath))
             {
-                for (int i = 0, imax = files.Length; i < imax; ++i)
+                string[] files = Directory.GetFiles(mFolderPath);
+                if (null != files)
                 {
-                    string path = Path.GetDirectoryName(files[i]);
-                    string ex = Path.GetExtension(files[i]);
-                    string fileName = Path.GetFileNameWithoutExtension(files[i]);
-                    string[] tmp = fileName.Split('_');
-                    if (null != tmp && tmp.Length == 2 && PublicFunction.IsInteger(tmp[1]))
+                    for (int i = 0, imax = files.Length; i < imax; ++i)
                     {
-                        int num = int.Parse(tmp[1]);
-                        string newName = tmp[0] + "_" + num;
-                        File.Move(files[i], path + "/" + newName + ex);
+                        string path = Path.GetDirectoryName(files[i]);
+                        string ex = Path.GetExtension(files[i]);
+                        string fileName = Path.GetFileNameWithoutExtension(files[i]);
+                        string[] tmp = fileName.Split('_');
+                        if (null != tmp && tmp.Length == 2 && PublicFunction.IsInteger(tmp[1]))
+                        {
+                            string font = mFileFont;
+                            if (string.IsNullOrEmpty(font))
+                            {
+                                font = tmp[0];
+                            }
+                            int num = int.Parse(tmp[1]);
+                            string newName = font + "_" + num;
+                            File.Move(files[i], path + "/" + newName + ex);
+                        }
                     }
                 }
             }
-            
         }
+        if (GUILayout.Button("升序改名"))
+        {
+            SortFile(mFolderPath, true);
+        }
+        if (GUILayout.Button("降序改名"))
+        {
+            SortFile(mFolderPath, false);
+        }
+    }
 
+    void SortFile(string folder, bool ascFlag)
+    {
+        if (!string.IsNullOrEmpty(folder))
+        {
+            string[] files = Directory.GetFiles(folder);
+            if (null != files)
+            {
+                List<string> list = new List<string>();
+                for (int i = 0, imax = files.Length; i < imax; ++i)
+                {
+                    list.Add(files[i]);
+                }
+                list.Sort(delegate (string a, string b)
+                {
+                    if (ascFlag)
+                    {
+                        return (GetNum(a) - GetNum(b));
+                    }
+                    else
+                    {
+                        return (GetNum(b) - GetNum(a));
+                    }
+                });
+                for (int i = 0, imax = list.Count; i < imax; ++i)
+                {
+                    string path = Path.GetDirectoryName(list[i]);
+                    string newPath = path + "/newFile";
+                    if (!Directory.Exists(newPath))
+                    {
+                        Directory.CreateDirectory(newPath);
+                    }
+                    string ex = Path.GetExtension(list[i]);
+                    string fileName = Path.GetFileNameWithoutExtension(list[i]);
+                    string[] tmp = fileName.Split('_');
+                    if (null != tmp && tmp.Length == 2 && PublicFunction.IsInteger(tmp[1]))
+                    {
+                        string font = mFileFont;
+                        if (string.IsNullOrEmpty(font))
+                        {
+                            font = tmp[0];
+                        }
+                        //int num = int.Parse(tmp[1]);
+                        string newName = font + "_" + i;
+                        File.Move(list[i], newPath + "/" + newName + ex);
+                    }
+                }
+            }
+        }
+    }
 
+    int GetNum(string str)
+    {
+        string fileName = Path.GetFileNameWithoutExtension(str);
+        string[] tmp = fileName.Split('_');
+        if (null != tmp && tmp.Length == 2 && PublicFunction.IsInteger(tmp[1]))
+        {
+            return int.Parse(tmp[1]);
+        }
+        return 0;
     }
     #endregion
 }

@@ -294,6 +294,63 @@ public class LauguageConvert : EditorWindow
                         {
                             TextCell tmp = new TextCell();
                             tmp.key = lgstr[keyIndex].Trim().TrimStart('"').TrimEnd('"');
+                            if (string.IsNullOrEmpty(tmp.key))
+                            {
+                                continue;
+                            }
+                            for (int i = 0, imax = lgstr.Length; i < imax; ++i)
+                            {
+                                if (i != keyIndex && i < arys.Length)
+                                {
+                                    Lauguage lg = new Lauguage();
+                                    lg.lauType = StringToLauguageType(arys[i]);
+                                    lg.value = lgstr[i].Trim().TrimStart('"').TrimEnd('"');
+                                    tmp.lauguages.Add(lg);
+                                }
+                            }
+                            bool addFlag = LauguageTool.GetIns().AddLauguage(tmp);
+                        }
+                    }
+                    LauguageTool.GetIns().Save();
+                    EditorUtility.DisplayDialog("成功", "写入成功", "确定");
+                }
+                else
+                {
+                    EditorUtility.DisplayDialog("失败", "key不存在，请检查文本", "确定");
+                }
+            }
+        }
+        else if (GUILayout.Button("导入有key值的新增语言翻译", GUILayout.Width(100), GUILayout.Height(40)))
+        {
+            string folderPath = EditorUtility.OpenFilePanel("选择翻译文件", string.Empty, string.Empty);
+            if (!string.IsNullOrEmpty(folderPath) && Path.GetExtension(folderPath).Equals(".txt"))
+            {
+                FileStream fs = new FileStream(folderPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                StreamReader sr = new StreamReader(fs);
+                string text = sr.ReadLine();
+                string[] arys = text.Split('\t');
+                int keyIndex = -1;
+                for (int i = 0, imax = arys.Length; i < imax; ++i)
+                {
+                    if (arys[i].Equals("key"))
+                    {
+                        keyIndex = i;
+                        break;
+                    }
+                }
+                if (-1 != keyIndex)
+                {
+                    while (!string.IsNullOrEmpty(text = sr.ReadLine()))
+                    {
+                        string[] lgstr = text.Split('\t');
+                        if (null != lgstr && keyIndex < lgstr.Length)
+                        {
+                            TextCell tmp = new TextCell();
+                            tmp.key = lgstr[keyIndex].Trim().TrimStart('"').TrimEnd('"');
+                            if (string.IsNullOrEmpty(tmp.key))
+                            {
+                                continue;
+                            }
                             for (int i = 0, imax = lgstr.Length; i < imax; ++i)
                             {
                                 if (i != keyIndex && i < arys.Length)
@@ -362,7 +419,7 @@ public class LauguageConvert : EditorWindow
                                 }
                                 LauguageTool.GetIns().AddLauguage(tmp);
                             }
-                            
+
                         }
                     }
                     LauguageTool.GetIns().Save();

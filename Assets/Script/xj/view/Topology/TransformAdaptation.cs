@@ -17,6 +17,7 @@ public class TransformAdaptation : MonoBehaviour
     #region 其他属性
     Transform mTrans;
     Vector4 mRect;
+    bool isChangePosFlag = false;
     #endregion
 
     #region 公有函数
@@ -24,11 +25,19 @@ public class TransformAdaptation : MonoBehaviour
     {
         isRecalculate = true;
         mRect = rect;
+        isChangePosFlag = false;
+    }
+
+    public void RemovePosition(Vector4 rect)
+    {
+        isRecalculate = true;
+        mRect = rect;
+        isChangePosFlag = true;
     }
     #endregion
 
     #region 其他函数
-    void Start()
+    void Awake()
     {
         mTrans = transform;
         mRect = new Vector4(0, 0, PublicFunction.GetWidth() * ScalingFactor, PublicFunction.GetHeight() * ScalingFactor);
@@ -42,7 +51,15 @@ public class TransformAdaptation : MonoBehaviour
             Camera camera = NGUITools.FindInParents<Camera>(mTrans);
             if (null != camera)
             {
-                PublicFunction.RemoveToCenter(mTrans, camera.transform, ScalingFactor, mRect, false);
+                if (isChangePosFlag)
+                {
+                    isChangePosFlag = false;
+                    PublicFunction.RemoveToCenter(mTrans, camera.transform, mRect, false);
+                }
+                else
+                {
+                    PublicFunction.RemoveToCenter(mTrans, camera.transform, ScalingFactor, mRect, false);
+                }
             }
             
         }

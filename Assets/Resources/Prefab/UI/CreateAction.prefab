@@ -1076,7 +1076,7 @@ MonoBehaviour:
   bottomType: 1
   topType: 1
   mAtlas: {fileID: 11484648, guid: bbd920e4afccd444c89b7a170c97f0ad, type: 2}
-  mSpriteName: button
+  mSpriteName: button_100
   mFillCenter: 1
 --- !u!114 &11406022
 MonoBehaviour:
@@ -1327,6 +1327,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -1387,6 +1389,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -1477,6 +1481,8 @@ MonoBehaviour:
   pressed: {r: .717647076, g: .639215708, b: .482352942, a: 1}
   disabledColor: {r: .5, g: .5, b: .5, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 
@@ -2496,6 +2502,8 @@ MonoBehaviour:
   pressed: {r: .933333337, g: .933333337, b: .933333337, a: 1}
   disabledColor: {r: 1, g: 1, b: 1, a: 1}
   duration: .200000003
+  playSound: 0
+  soundEffect: 0
   dragHighlight: 0
   hoverSprite: 
   pressedSprite: 

@@ -39,8 +39,8 @@ namespace Game.UI
 
         private void Init()
         {
-            m_back = GameHelper.FindChildCompoent(m_gameObj.transform, "back", "UISprite") as UISprite;
-            m_label = GameHelper.FindChildCompoent(m_gameObj.transform, "Label", "UILabel") as UILabel;
+            m_back = GameHelper.FindChildComponent<UISprite>(m_gameObj.transform, "back");
+            m_label = GameHelper.FindChildComponent<UILabel>(m_gameObj.transform, "Label");
             SetCollider(m_pivot);
         }
 

@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Xml;
 using System;
 using System.IO;
+using Game.Resource;
 
 public class NowStepData
 {
@@ -108,41 +109,15 @@ public class NowStepData
 
     public string GetResourcesPath(string xmlName)
     {
-        string pathfile = "";
-        string pathfileDownLoad = "";
         string pathfileDefault = "";
-       // Debug.Log(Application.persistentDataPath);
-        pathfile = Application.persistentDataPath + "/playerdata/" + xmlName;
-        pathfileDownLoad = Application.persistentDataPath + "/download";
-        pathfileDefault = Application.persistentDataPath + "/default";
-        if (!Directory.Exists(pathfile))
-        {
-            Directory.CreateDirectory(pathfile);
-        }
 
-        if (!Directory.Exists(pathfileDownLoad))
-        {
-            Directory.CreateDirectory(pathfileDownLoad);
-        }
-
+        pathfileDefault = ResourcesEx.GetCommonPathForNoTypeName(xmlName);
+        
         if (!Directory.Exists(pathfileDefault))
         {
             Directory.CreateDirectory(pathfileDefault);
         }
-
-
-        if (Application.platform == RuntimePlatform.IPhonePlayer)
-        {
-            return pathfile + "/" + xmlName + ".xml";
-        }
-        else if (Application.platform == RuntimePlatform.Android)
-        {
-            return pathfile + "/" + xmlName + ".xml";
-        }
-        else
-        {
-            return pathfile + "/" + xmlName + ".xml";
-        }
+        return pathfileDefault + "/" + xmlName + ".xml";
     }
 
     public void CreateXElement()
@@ -189,39 +164,24 @@ public class NowStepData
     //自制--查询准备新建的XML是否与已有文档重名
     public List<string> XMLExistNormal(string fileName)
     {
-        string pathfile = "";
-        if (Application.platform == RuntimePlatform.IPhonePlayer)
+        string pathfile = string.Empty;
+        if (fileName.Equals("default"))
         {
-            pathfile = Application.persistentDataPath + "/" + fileName;
-            //pathfile = Application.persistentDataPath+"/Raw/"+ "/RobotModel";
-            if (!Directory.Exists(pathfile))
-            {
-                Directory.CreateDirectory(pathfile);
-            }
-            dir = pathfile;
+            pathfile = ResourcesEx.GetCommonRootPath();
         }
-        else if (Application.platform == RuntimePlatform.Android)
+        else if (fileName.Equals("download"))
         {
-            pathfile = Application.persistentDataPath + "/" + fileName;
-            //pathfile = Application.persistentDataPath + "/RobotModel";
-            if (!Directory.Exists(pathfile))
-            {
-                Directory.CreateDirectory(pathfile);
-            }
-            dir = pathfile;
+            pathfile = PublicFunction.CombinePath(ResourcesEx.persistentDataPath, "download");
         }
         else
         {
-            pathfile = Application.persistentDataPath + "/" + fileName;
-            //pathfile = Application.persistentDataPath + "/RobotModel";
-            if (!Directory.Exists(pathfile))
-            {
-                Directory.CreateDirectory(pathfile);
-            }
-            dir = pathfile;
+            pathfile = ResourcesEx.GetUserRootPath();
         }
-
-
+        if (!Directory.Exists(pathfile))
+        {
+            Directory.CreateDirectory(pathfile);
+        }
+        dir = pathfile;
         string[] filename = System.IO.Directory.GetDirectories(dir);
         if (filename != null)
         {

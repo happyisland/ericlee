@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
+using Game.Platform;
 
 namespace Game
 {
@@ -55,9 +56,17 @@ namespace Game
 			{
 				if (this.m_nextTime > Time.time) 
 					return false;
-                if (!this.Disposed)
-				    this.Call();
-
+                try
+                {
+                    if (!this.Disposed)
+                        this.Call();
+                }
+                catch (System.Exception ex)
+                {
+                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+                }
+                
 				if (this.m_interval == 0)						// 如果没指定时间间隔，则只执行一次
 					return true;
 

@@ -340,7 +340,7 @@ public class NewControl : MonoBehaviour {
 
     void OnConnectClick(GameObject go)
     {
-        ModelDetailsWindow.ConnectBluetooth();
+        //ModelDetailsWindow.ConnectBluetooth();
     }
 
     /// <summary>
@@ -362,7 +362,7 @@ public class NewControl : MonoBehaviour {
         {
             string str = ControlData.GetIns().curActionData.ActionList[j];
             
-            if (RobotManager.GetInst().GetCurrentRobot().GetActionsNameList().Contains(str))  //模型动作包含
+            if (RobotManager.GetInst().GetCurrentRobot().GetActionsIdList().Contains(str))  //模型动作包含
             {
                 GameObject item = Resources.Load("Prefabs/newActionItem") as GameObject;   //创建对应图标
                 item = Instantiate(item) as GameObject;
@@ -371,7 +371,7 @@ public class NewControl : MonoBehaviour {
                 item.transform.localPosition = Vector3.zero;
                 UIEventListener.Get(item).onClick = OnActionPlay;
                 item.transform.GetComponentInChildren<UILabel>().text = str;
-                ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForName(str);
+                ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(str);
                 if (null == act)
                 {
                     item.transform.GetChild(0).GetComponent<UISprite>().spriteName = "add";
@@ -413,27 +413,29 @@ public class NewControl : MonoBehaviour {
         {
             Destroy(OtherActionTrans.GetChild(i).gameObject);
         }
-        List<string> totalActions = RobotManager.GetInst().GetCurrentRobot().GetActionsNameList();
+        List<string> totalActions = RobotManager.GetInst().GetCurrentRobot().GetActionsIdList();
         string tem = "";
         for (int i = 0; i < totalActions.Count; i++)
         {
             tem = totalActions[i];
-            if (!ActionLogic.GetIns().IsNameExist(tem))
+            if (!ActionLogic.GetIns().IsIdExist(tem))
             {
                 GameObject item = Resources.Load("Prefabs/newActionItem") as GameObject;   //创建对应图标
                 item = Instantiate(item) as GameObject;
                 item.transform.SetParent(OtherActionTrans);
                 item.transform.localScale = Vector3.one;
                 UIEventListener.Get(item).onClick = OnActionPlay;
-                item.transform.GetComponentInChildren<UILabel>().text = tem;
-                ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForName(tem);
+                item.name = tem;
+                ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(tem);
                 if (null == act)
                 {
                     item.transform.GetChild(0).GetComponent<UISprite>().spriteName = "add";
+                    item.transform.GetComponentInChildren<UILabel>().text = string.Empty;
                 }
                 else
                 {
                     item.transform.GetChild(0).GetComponent<UISprite>().spriteName = act.IconName;
+                    item.transform.GetComponentInChildren<UILabel>().text = act.Name;
                 }
                 item.transform.GetChild(0).GetComponent<UISprite>().MakePixelPerfect();
 

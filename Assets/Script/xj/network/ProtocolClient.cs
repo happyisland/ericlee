@@ -17,6 +17,7 @@ public class ProtocolClient
     #region 私有属性
     static ProtocolClient mInst = null;
     Dictionary<string, Dictionary<CMDCode, OnRobotDelegate>> mNetCallBack = null;
+    Dictionary<string, Dictionary<CMDCode, Dictionary<ExtendCMDCode, OnRobotDelegate>>> mClientCallBack = null;
     #endregion
 
     #region 公有函数
@@ -43,6 +44,32 @@ public class ProtocolClient
         }
         mNetCallBack[mac][cmd] = delg;
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="mac"></param>
+    /// <param name="cmd"></param>
+    /// <param name="exCmd"></param>
+    /// <param name="dlgt"></param>
+    public void Register(string mac, CMDCode cmd, ExtendCMDCode exCmd, OnRobotDelegate dlgt)
+    {
+        if (null == mClientCallBack)
+        {
+            mClientCallBack = new Dictionary<string, Dictionary<CMDCode, Dictionary<ExtendCMDCode, OnRobotDelegate>>>();
+        }
+        if (!mClientCallBack.ContainsKey(mac))
+        {
+            Dictionary<CMDCode, Dictionary<ExtendCMDCode, OnRobotDelegate>> dict = new Dictionary<CMDCode, Dictionary<ExtendCMDCode, OnRobotDelegate>>();
+            mClientCallBack[mac] = dict;
+        }
+        if (!mClientCallBack[mac].ContainsKey(cmd))
+        {
+            Dictionary<ExtendCMDCode, OnRobotDelegate> dict = new Dictionary<ExtendCMDCode, OnRobotDelegate>();
+            mClientCallBack[mac][cmd] = dict;
+        }
+        mClientCallBack[mac][cmd][exCmd] = dlgt;
+    }
     /// <summary>
     /// 移除某个机器人的所有回调
     /// </summary>
@@ -50,6 +77,10 @@ public class ProtocolClient
     public void RemoveRobotDlgt(string mac)
     {
         mNetCallBack.Remove(mac);
+        if (null != mClientCallBack)
+        {
+            mClientCallBack.Remove(mac);
+        }
     }
     /// <summary>
     /// 处理回调，之所以要传入长度是因为有些消息需要通过长度来判断是否成功
@@ -57,15 +88,20 @@ public class ProtocolClient
     /// <param name="cmd"></param>
     /// <param name="len"></param>
     /// <param name="br"></param>
-    public void OnMsgDelegate(CMDCode cmd, int len, string mac, BinaryReader br, ExtendCMDCode exCmd)
+    public bool OnMsgDelegate(CMDCode cmd, int len, string mac, BinaryReader br, ExtendCMDCode exCmd)
     {
         if (mNetCallBack.ContainsKey(mac))
         {
             if (mNetCallBack[mac].ContainsKey(cmd) && null != mNetCallBack[mac][cmd])
             {
-                mNetCallBack[mac][cmd](len, br, exCmd);
+                return mNetCallBack[mac][cmd](len, br, exCmd);
             }
         }
+        if (null != mClientCallBack && mClientCallBack.ContainsKey(mac) && mClientCallBack[mac].ContainsKey(cmd) && mClientCallBack[mac][cmd].ContainsKey(exCmd))
+        {
+            return mClientCallBack[mac][cmd][exCmd](len, br, exCmd);
+        }
+        return true;
     }
     #endregion
 
@@ -77,8 +113,7 @@ public class ProtocolClient
     #endregion
 }
 
-public delegate void OnNetMessageDelegate(string mac, int len, BinaryReader br);
-public delegate void OnRobotDelegate(int len, BinaryReader br, ExtendCMDCode exCmd);
+public delegate bool OnRobotDelegate(int len, BinaryReader br, ExtendCMDCode exCmd);
 /// <summary>
 /// 命令
 /// </summary>
@@ -233,6 +268,14 @@ public enum CMDCode : byte
     /// </summary>
     Weak_Latches = (byte)0x38,
     /// <summary>
+    /// 打开或者关闭蓝牙通讯超时机制
+    /// </summary>
+    Set_BLE_OutTime = (byte)0x3A,
+    /// <summary>
+    /// 自动修复舵机异常提示
+    /// </summary>
+    Repair_Servo_Exception = (byte)0x3B,
+    /// <summary>
     /// 开启或者关闭传感器传输功能
     /// </summary>
     Set_Sensor_IO_State = (byte)0x71,
@@ -244,6 +287,10 @@ public enum CMDCode : byte
     /// 修改传感器id
     /// </summary>
     Change_Sensor_ID = (byte)0x74,
+    /// <summary>
+    /// 读取传感器id，用于判断该传感器是否存在
+    /// </summary>
+    Read_sensor_ID = (byte)0x75,
     /// <summary>
     /// 发送数据到传感器
     /// </summary>
@@ -260,6 +307,22 @@ public enum CMDCode : byte
     /// 控制传感器的LED显示
     /// </summary>
     Ctrl_Sensor_LED = (byte)0x7F,
+    /// <summary>
+    /// 开始传感器升级
+    /// </summary>
+    Sensor_Update_Start = (byte)0x80,
+    /// <summary>
+    /// 传感器升级文件写入
+    /// </summary>
+    Sensor_Update_Write = (byte)0x81,
+    /// <summary>
+    /// 取消传感器升级
+    /// </summary>
+    Sensor_Update_Stop = (byte)0x82,
+    /// <summary>
+    /// 传感器升级完成
+    /// </summary>
+    Sensor_Update_Finish = (byte)0x83,
 }
 
 public enum ExtendCMDCode : byte
@@ -287,6 +350,8 @@ public enum ExtendCMDCode : byte
     ReadSpeakerData,
     SendEmojiData,
     SendDigitalTubeData,
+    Set_Sensor_IO_State,
+    Check_Sensor_ID,
 }
 
 /// <summary>
@@ -300,16 +365,19 @@ public enum ErrorCode
     Result_DJ_ID_Repeat = -3,//舵机ID重复
     Result_Servo_Num_Inconsistent = -4,//舵机数量不一致
     Result_Servo_ID_Inconsistent = -5,//舵机id不一致
+    Result_Sensor_Exception = -6,//传感器异常
+    Servo_Model_Type_Error = -7,  //舵机模式错误
 
     Result_Name_Empty       = -100,//名字为空
     Result_Name_Exist       = -101,//名字已存在
 
     Result_Port_Exist       = -200,//已存在的连接口
 
-    Do_Not_Upgrade          = -300,//不需要升级
+    Can_Upgraded            = -300,//能够升级
     Robot_Power_Low         = -301,//电量过低
     Robot_Adapter_Close_Protect = -302,//在充电且关闭了充电保护
     Robot_Adapter_Open_Protect  = -303,//在充电且打开了充电保护
+    Robot_Sensor_ID_Repeat  = -304,//传感器id重复
 
     Result_Blue_Dis         = -1000,//蓝牙已断开
     Parameter_Error         = -1001,//参数错误

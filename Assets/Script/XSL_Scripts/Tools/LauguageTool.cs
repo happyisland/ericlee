@@ -12,6 +12,7 @@ using System.Text;
 using UnityEngine;
 using System.IO;
 using System;
+using Game.Resource;
 
 public class LauguageTool
 {
@@ -39,7 +40,7 @@ public class LauguageTool
     private LauguageTool()
     {
         path += "/TextConfig.txt";
-        LauguageConfigPath = Application.persistentDataPath + "/LanguageCode";
+        LauguageConfigPath = ResourcesEx.persistentDataPath + "/LanguageCode";
 
         TextAsset text = Resources.Load("TextConfig", typeof(TextAsset)) as TextAsset;
         if (null != text)
@@ -262,11 +263,15 @@ public class LauguageTool
 
     public string GetText(string key)
     {
+        string str = key;
         if (configText.ContainsKey(key))
         {
-            return configText[key];
+            if (!string.IsNullOrEmpty(configText[key]))
+            {
+                str = configText[key];
+            }
         }
-        return key;
+        return str;
     }
 
     public static void XmlToTxt(string filePath,char split)

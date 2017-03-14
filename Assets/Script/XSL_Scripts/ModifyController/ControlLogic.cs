@@ -21,14 +21,14 @@ public class ControlLogic
     /// 播放动作
     /// </summary>
     /// <param name="name"></param>
-    public void PlayAction(string name)
+    public void PlayAction(string actionId)
     {
         if (RobotManager.GetInst().GetCurrentRobot().Connected)
         {
-            RobotManager.GetInst().GetCurrentRobot().PlayActionsForName(name);
-            float durt = RobotManager.GetInst().GetCurrentRobot().GetActionsForName(name).GetAllTime();
+            RobotManager.GetInst().GetCurrentRobot().PlayActionsForID(actionId);
+            float durt = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(actionId).GetAllTime();
             durt /= 1000;
-            ClientMain.GetInst().StartCoroutine(ActionCirclePlay(durt,name));//new Game.Event.EventArg(durt,name));//ActionCirclePlay(durt, name));
+            ClientMain.GetInst().StartCoroutine(ActionCirclePlay(durt,actionId));//new Game.Event.EventArg(durt,name));//ActionCirclePlay(durt, name));
         }
         else
         { 
@@ -53,11 +53,11 @@ public class ControlLogic
     
     }
 
-    private IEnumerator ActionCirclePlay(float durTime,string name)//Game.Event.EventArg arg)
+    private IEnumerator ActionCirclePlay(float durTime,string actionId)//Game.Event.EventArg arg)
     {
         if (!actionTouch)
             yield break;
         yield return new WaitForSeconds(durTime);
-        PlayAction(name);
+        PlayAction(actionId);
     }
 }

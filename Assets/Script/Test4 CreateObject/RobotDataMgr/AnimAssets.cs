@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using Game.Resource;
 
 public class AnimAssets : MonoBehaviour {
 
@@ -65,7 +66,7 @@ public class AnimAssets : MonoBehaviour {
     {
         //找到内置的图片
         innerSprites = GetInnerTexList.Instance.FindPicType();
-        string pathTT = Application.persistentDataPath + "/default/" + robotNameNoType + "/JuBuPic";
+        string pathTT = PublicFunction.CombinePath(ResourcesEx.GetCommonPathForNoTypeName(robotNameNoType), "JuBuPic");
         if (System.IO.Directory.Exists(pathTT) == false)
         {
             noJuBu = true;
@@ -109,6 +110,7 @@ public class AnimAssets : MonoBehaviour {
                 animb.pic = animdata[id][12];
                 animb.firstPic = animdata[id][13];
                 animb.lvdaiNum = animdata[id][14];
+                animb.sensorID = animdata[id][15];
                 if (animDataT.anims.ContainsKey(id) == false)
                 {
                     animDataT.anims.Add(id, animb);
@@ -188,33 +190,44 @@ public class AnimAssets : MonoBehaviour {
         if (pics.Count > pcount)
         {
             //零件图片
-            string pathTemp = "file:///" + Application.persistentDataPath + "//default//" + robotNameNoType + "//JuBuPic//" + pics[pcount] + ".png";
+            string pathTemp = "file:///" + PublicFunction.CombinePath(ResourcesEx.GetCommonPathForNoTypeName(robotNameNoType), "JuBuPic") + pics[pcount] + ".png";
             //Debug.Log("dfsfdsf:" + pathTemp);
             WWW www = new WWW(pathTemp);
 
             Texture textureT = null;
             yield return www;
-            if (www != null && string.IsNullOrEmpty(www.error))
+            try
             {
-                //获取Texture
-                textureT = www.texture;
-                //更多操作...    
-                if (textureT != null && RobotMgr.Instance.jubuPics.ContainsKey(pics[pcount]) == false)
+                if (www != null && string.IsNullOrEmpty(www.error))
                 {
+                    //获取Texture
+                    textureT = www.texture;
+                    //更多操作...    
+                    if (textureT != null && RobotMgr.Instance.jubuPics.ContainsKey(pics[pcount]) == false)
+                    {
 
-                    //Debug.Log("dfsfdsf:"+pics[jubuPCount]);
-                    RobotMgr.Instance.jubuPics.Add(pics[pcount], textureT);
+                        //Debug.Log("dfsfdsf:"+pics[jubuPCount]);
+                        RobotMgr.Instance.jubuPics.Add(pics[pcount], textureT);
+                    }
+
+                }
+                else
+                {
+                    if (textureTT != null && RobotMgr.Instance.jubuPics.ContainsKey(pics[pcount]) == false)
+                    {
+                        RobotMgr.Instance.jubuPics.Add(pics[pcount], textureTT);
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                if (ClientMain.Exception_Log_Flag)
+                {
+                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
                 }
 
             }
-            else
-            {
-                if (textureTT != null && RobotMgr.Instance.jubuPics.ContainsKey(pics[pcount]) == false)
-                {
-                    RobotMgr.Instance.jubuPics.Add(pics[pcount], textureTT);
-                }
-            }
-
             pcount++;
             if (pics.Count == RobotMgr.Instance.jubuPics.Count)
             {
@@ -251,30 +264,42 @@ public class AnimAssets : MonoBehaviour {
         {
 
             //零件图片
-            string pathTemp = "file:///" + Application.persistentDataPath + "//partsPic//" + outNamT[i] + ".png";
+            string pathTemp = "file:///" + ResourcesEx.persistentDataPath + "//partsPic//" + outNamT[i] + ".png";
 
             WWW www = new WWW(pathTemp);
 
             Texture textureT = null;
             yield return www;
-            if (www != null && string.IsNullOrEmpty(www.error))
+            try
             {
-                //获取Texture
-                textureT = www.texture;
-                //更多操作...    
-                if (textureT != null && RobotMgr.Instance.outPics.ContainsKey(outNamT[i]) == false)
+                if (www != null && string.IsNullOrEmpty(www.error))
                 {
-                    RobotMgr.Instance.outPics.Add(outNamT[i], textureT);
+                    //获取Texture
+                    textureT = www.texture;
+                    //更多操作...    
+                    if (textureT != null && RobotMgr.Instance.outPics.ContainsKey(outNamT[i]) == false)
+                    {
+                        RobotMgr.Instance.outPics.Add(outNamT[i], textureT);
+                    }
+
+                }
+                else
+                {
+                    if (textureTT != null)
+                    {
+                        //Debug.Log("sfff:" + outNamT[i]);
+                        RobotMgr.Instance.outPics.Add(outNamT[i], textureTT);
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                if (ClientMain.Exception_Log_Flag)
+                {
+                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
                 }
 
-            }
-            else
-            {
-                if (textureTT != null)
-                {
-                    //Debug.Log("sfff:" + outNamT[i]);
-                    RobotMgr.Instance.outPics.Add(outNamT[i], textureTT);
-                }
             }
             i++;
             if (RobotMgr.Instance.outPics.Count == outNamT.Count)
@@ -322,19 +347,19 @@ public class AnimAssets : MonoBehaviour {
             
             if (Application.platform == RuntimePlatform.WindowsEditor)
             {
-                path1 = "file:///" + Application.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/editor/" + robotIDTemp + ".assetbundle";
+                path1 = "file:///" + ResourcesEx.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/editor/" + robotIDTemp + ".assetbundle";
             }
             else if (Application.platform == RuntimePlatform.IPhonePlayer)
             {
-                path1 = "file:///" + Application.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/ios/" + robotIDTemp + ".assetbundle";
+                path1 = "file:///" + ResourcesEx.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/ios/" + robotIDTemp + ".assetbundle";
             }
             else if (Application.platform == RuntimePlatform.OSXEditor)
             {
-                path1 = "file:///" + Application.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/ios/" + robotIDTemp + ".assetbundle";
+                path1 = "file:///" + ResourcesEx.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/ios/" + robotIDTemp + ".assetbundle";
             }
             else if (Application.platform == RuntimePlatform.Android)
             {
-                path1 = "file:///" + Application.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/android/" + robotIDTemp + ".assetbundle";
+                path1 = "file:///" + ResourcesEx.persistentDataPath + "/" + opentype + "/" + robotNameNoType + "/clip/android/" + robotIDTemp + ".assetbundle";
             }
 
             StartCoroutine(GetClip(robotIDTemp));
@@ -360,21 +385,33 @@ public class AnimAssets : MonoBehaviour {
         bundle1 = new WWW(path1);
 
         yield return bundle1;
-        //Debug.Log("anims:" + RobotMgr.Instance.anims.Count);
-        foreach (string temp in animtype)
+        try
         {
-            if (RobotMgr.Instance.anims.ContainsKey(temp) == false)
+            //Debug.Log("anims:" + RobotMgr.Instance.anims.Count);
+            foreach (string temp in animtype)
             {
-                UnityEngine.Object t = bundle1.assetBundle.Load(temp);
-                //Debug.Log("animclipname:" + temp);
-                clipTemp = GameObject.Instantiate(t) as AnimationClip;
-                clipTemp.name = temp;
-                if (clipTemp != null)
+                if (RobotMgr.Instance.anims.ContainsKey(temp) == false)
                 {
-                    RobotMgr.Instance.anims.Add(temp, clipTemp);
+                    UnityEngine.Object t = bundle1.assetBundle.Load(temp);
+                    //Debug.Log("animclipname:" + temp);
+                    clipTemp = GameObject.Instantiate(t) as AnimationClip;
+                    clipTemp.name = temp;
+                    if (clipTemp != null)
+                    {
+                        RobotMgr.Instance.anims.Add(temp, clipTemp);
+                    }
+                    bundle1.assetBundle.Unload(true);
                 }
-                bundle1.assetBundle.Unload(true);
             }
+        }
+        catch (System.Exception ex)
+        {
+            if (ClientMain.Exception_Log_Flag)
+            {
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            }
+
         }
 
     }

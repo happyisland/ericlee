@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Game.Platform;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -85,6 +86,7 @@ public abstract class BaseUI
             DirectOpen();
         }
         SingletonObject<UIManager>.GetInst().OpenUI(this);
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent,  " Open UI name =" + this.GetType().ToString());
     }
     /// <summary>
     /// 用于把按钮事件传入所属Scene
@@ -112,6 +114,7 @@ public abstract class BaseUI
             SingletonObject<UIManager>.GetInst().AddDestroyObj(mTrans.gameObject);
             mTrans = null;
         }
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "OnClose UI name =" + this.GetType().ToString());
     }
     
     public virtual void Release()
@@ -222,7 +225,10 @@ public abstract class BaseUI
     /// <param name="obj"></param>
     protected virtual void OnButtonClick(GameObject obj)
     {
-
+        if (null != obj)
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, this.GetType().ToString() + " OnClick name =" + obj.name);
+        }
     }
 
     protected virtual void OnButtonDrag(GameObject obj, Vector2 delta)

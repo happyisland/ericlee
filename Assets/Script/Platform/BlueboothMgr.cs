@@ -55,11 +55,6 @@ namespace Game.Platform
         private List<DeviceInfo> m_newDevice = new List<DeviceInfo>();                                //新搜寻到的蓝牙设备
         public List<DeviceInfo> NewDevice { get { return m_newDevice; } }
 
-        private bool m_connenctState = false;
-        public bool ConnenctState 
-        {
-            get { return m_connenctState; }
-        }
 
         public BluetoothMgr()
         {
@@ -105,11 +100,8 @@ namespace Game.Platform
 
         public void MatchResult(bool boo)
         {
-            m_connenctState = boo;
-            if (!m_connenctState)
+            if (!boo)
             {
-                PlatformMgr.Instance.PowerData.isAdapter = false;
-                PlatformMgr.Instance.PowerData.isChargingFinished = false;
                 EventMgr.Inst.Fire(EventID.BLUETOOTH_MATCH_RESULT, new EventArg(boo));
             }
         }
@@ -180,14 +172,6 @@ namespace Game.Platform
         {
             m_matchedDevice.Clear();
             m_newDevice.Clear();
-        }
-        /// <summary>
-        /// 断开蓝牙
-        /// </summary>
-        public void DisConnenctBuletooth()
-        {
-            ClearDevice();
-            m_connenctState = false;
         }
     }
 }

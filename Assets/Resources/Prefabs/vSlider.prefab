@@ -67,6 +67,38 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!1 &125308
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 425308}
+  - 114: {fileID: 11425308}
+  m_Layer: 4
+  m_Name: cwSwitch
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!1 &125310
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 4
+  m_Component:
+  - 4: {fileID: 425310}
+  - 114: {fileID: 11425310}
+  m_Layer: 4
+  m_Name: acSwitch
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
 --- !u!1 &126382
 GameObject:
   m_ObjectHideFlags: 0
@@ -142,6 +174,8 @@ Transform:
   - {fileID: 466884}
   - {fileID: 416080}
   - {fileID: 426382}
+  - {fileID: 425310}
+  - {fileID: 425308}
   m_Father: {fileID: 0}
   m_RootOrder: 0
 --- !u!4 &400004
@@ -169,6 +203,30 @@ Transform:
   m_Children: []
   m_Father: {fileID: 400002}
   m_RootOrder: 3
+--- !u!4 &425308
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 125308}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: -144.500015, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 400002}
+  m_RootOrder: 6
+--- !u!4 &425310
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 125310}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 95.0000153, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 400002}
+  m_RootOrder: 5
 --- !u!4 &426382
 Transform:
   m_ObjectHideFlags: 1
@@ -200,7 +258,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 166884}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -25, z: 0}
+  m_LocalPosition: {x: -1, y: -26, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 400002}
@@ -249,7 +307,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 88
   mHeight: 88
-  mDepth: 6
+  mDepth: 11
   autoResizeBoxCollider: 1
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -349,7 +407,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 90
   mHeight: 340
-  mDepth: 4
+  mDepth: 10
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -426,13 +484,13 @@ MonoBehaviour:
   updateAnchors: 1
   mColor: {r: 1, g: 1, b: 1, a: 1}
   mPivot: 4
-  mWidth: 136
-  mHeight: 380
-  mDepth: 4
+  mWidth: 124
+  mHeight: 374
+  mDepth: 3
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
-  aspectRatio: .357894748
+  aspectRatio: .331550807
   mType: 1
   mFillDirection: 4
   mFillAmount: 1
@@ -445,6 +503,106 @@ MonoBehaviour:
   topType: 1
   mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
   mSpriteName: vsliderShadow@2x
+  mFillCenter: 1
+--- !u!114 &11425308
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 125308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b3dc54f924693f41b5cbecb267e647a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftAnchor:
+    target: {fileID: 400002}
+    relative: .5
+    absolute: -22
+  rightAnchor:
+    target: {fileID: 400002}
+    relative: .5
+    absolute: 22
+  bottomAnchor:
+    target: {fileID: 400002}
+    relative: 0
+    absolute: 39
+  topAnchor:
+    target: {fileID: 400002}
+    relative: 0
+    absolute: 72
+  updateAnchors: 1
+  mColor: {r: 1, g: 1, b: 1, a: 1}
+  mPivot: 4
+  mWidth: 44
+  mHeight: 33
+  mDepth: 7
+  autoResizeBoxCollider: 0
+  hideIfOffScreen: 0
+  keepAspectRatio: 0
+  aspectRatio: 1.33333337
+  mType: 0
+  mFillDirection: 4
+  mFillAmount: 1
+  mInvert: 0
+  mFlip: 0
+  centerType: 1
+  leftType: 1
+  rightType: 1
+  bottomType: 1
+  topType: 1
+  mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
+  mSpriteName: shunshi
+  mFillCenter: 1
+--- !u!114 &11425310
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 125310}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b3dc54f924693f41b5cbecb267e647a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  leftAnchor:
+    target: {fileID: 400002}
+    relative: 0
+    absolute: 28
+  rightAnchor:
+    target: {fileID: 400002}
+    relative: 1
+    absolute: -28
+  bottomAnchor:
+    target: {fileID: 400002}
+    relative: 1
+    absolute: -121
+  topAnchor:
+    target: {fileID: 400002}
+    relative: 1
+    absolute: -89
+  updateAnchors: 1
+  mColor: {r: 1, g: 1, b: 1, a: 1}
+  mPivot: 4
+  mWidth: 44
+  mHeight: 32
+  mDepth: 7
+  autoResizeBoxCollider: 0
+  hideIfOffScreen: 0
+  keepAspectRatio: 0
+  aspectRatio: 1.375
+  mType: 0
+  mFillDirection: 4
+  mFillAmount: 1
+  mInvert: 0
+  mFlip: 0
+  centerType: 1
+  leftType: 1
+  rightType: 1
+  bottomType: 1
+  topType: 1
+  mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
+  mSpriteName: nishi
   mFillCenter: 1
 --- !u!114 &11426382
 MonoBehaviour:
@@ -556,7 +714,7 @@ MonoBehaviour:
   bottomType: 1
   topType: 1
   mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
-  mSpriteName: vsliderSprite@2x
+  mSpriteName: Rectangle VsliderBB
   mFillCenter: 1
 --- !u!114 &11466884
 MonoBehaviour:
@@ -590,7 +748,7 @@ MonoBehaviour:
   mPivot: 4
   mWidth: 90
   mHeight: 340
-  mDepth: 7
+  mDepth: 4
   autoResizeBoxCollider: 0
   hideIfOffScreen: 0
   keepAspectRatio: 0
@@ -605,8 +763,8 @@ MonoBehaviour:
   rightType: 1
   bottomType: 1
   topType: 1
-  mAtlas: {fileID: 11400000, guid: 80cffdb59d2e419459cc679c12a75efa, type: 2}
-  mSpriteName: Clean
+  mAtlas: {fileID: 11400000, guid: 3851d806dd4517a4a84323ef44f7efe2, type: 2}
+  mSpriteName: Rectangle VsliderBoard@3x
   mFillCenter: 1
 --- !u!1001 &100100000
 Prefab:

@@ -1,0 +1,52 @@
+{"frames": {
+
+"236.png":
+{
+	"frame": {"x":2,"y":256,"w":252,"h":252},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":252,"h":252},
+	"sourceSize": {"w":252,"h":252}
+},
+"236icon.png":
+{
+	"frame": {"x":256,"y":2,"w":172,"h":166},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":172,"h":166},
+	"sourceSize": {"w":172,"h":166}
+},
+"360.png":
+{
+	"frame": {"x":2,"y":2,"w":252,"h":252},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":252,"h":252},
+	"sourceSize": {"w":252,"h":252}
+},
+"360icon.png":
+{
+	"frame": {"x":256,"y":170,"w":168,"h":176},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":168,"h":176},
+	"sourceSize": {"w":168,"h":176}
+},
+"shape.png":
+{
+	"frame": {"x":256,"y":348,"w":152,"h":138},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":152,"h":138},
+	"sourceSize": {"w":152,"h":138}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker ",
+	"version": "1.0",
+	"image": "setServoModel.png",
+	"format": "RGBA8888",
+	"size": {"w":512,"h":512},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:0f3a6ecb9038a669e0f9643ebd49b862:1/1$"
+}
+}

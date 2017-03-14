@@ -53,6 +53,16 @@ public class RobotManager
         return sInst;
     }
 
+    public void CleanUp()
+    {
+        isCreateRobotFlag = false;
+        isSetDeviceIDFlag = false;
+        if (null != mRobotDict)
+        {
+            mRobotDict.Clear();
+        }
+    }
+
     /// <summary>
     /// 增加一个机器人
     /// </summary>
@@ -127,8 +137,8 @@ public class RobotManager
                     robot.GetAllDjData().UpdateData(data);
                 }
                 AddRobot(id, robot);
-                ActionsManager.GetInst().ReadActions(robot.Name);
-                SingletonObject<ServosConManager>.GetInst().ReadServosConnection(robot.Name);
+                SingletonObject<ServosConManager>.GetInst().ReadServosConnection(robot);
+                ActionsManager.GetInst().ReadActions(robot);
             }
         }
         //告诉应用添加了模型

@@ -1,4 +1,5 @@
-﻿using LitJson;
+﻿using Game.Platform;
+using LitJson;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -128,11 +129,8 @@ public class InfraredData : ReadSensorDataBase
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 

@@ -27,15 +27,17 @@ public class NetWork
     Dictionary<CMDCode, ExtendCMDCode> mLastSendExCmdDict;
     //Thread mSendThread;
 #if UNITY_EDITOR
-    const int Wait_Msg_Out_Time = 0;
+    const int Wait_Msg_Out_Time_Long = 0;
+    const int Wait_Msg_Out_Time_Normal = 0;
 #else
-    const int Wait_Msg_Out_Time = 10;
+    const int Wait_Msg_Out_Time_Long = 10;
+    const int Wait_Msg_Out_Time_Normal = 1;
 #endif
     float mLastSendTime;
     /// <summary>
     /// 禁止边充边玩时可以发送的指令
     /// </summary>
-    CMDCode[] mChargeCanSendCmd = new CMDCode[] { CMDCode.Hand_Shake, CMDCode.Read_System_Power, CMDCode.Read_Device_Type, CMDCode.Self_Check, CMDCode.Read_Motherboard_Data, CMDCode.Read_System_Version, CMDCode.Read_IC_Flash, CMDCode.Write_IC_Flash, CMDCode.Read_MCU_ID, CMDCode.Change_Name, CMDCode.Robot_Update_Start, CMDCode.Robot_Update_Finish, CMDCode.Robot_Update_Write, CMDCode.Robot_Restart_Update_Start_Ack, CMDCode.Robot_Restart_Update_Finish_Ack, CMDCode.Servo_Update_Start, CMDCode.Servo_Update_Write, CMDCode.Servo_Update_Finish, CMDCode.Change_ID, CMDCode.Change_Sensor_ID, CMDCode.Read_Sensor_Data, CMDCode.Read_Sensor_Data_Other };
+    CMDCode[] mChargeCanSendCmd = new CMDCode[] { CMDCode.Hand_Shake, CMDCode.Read_System_Power, CMDCode.Read_Device_Type, CMDCode.Self_Check, CMDCode.Read_Motherboard_Data, CMDCode.Read_System_Version, CMDCode.Read_IC_Flash, CMDCode.Write_IC_Flash, CMDCode.Read_MCU_ID, CMDCode.Change_Name, CMDCode.Robot_Update_Start, CMDCode.Robot_Update_Finish, CMDCode.Robot_Update_Write, CMDCode.Robot_Update_Stop, CMDCode.Robot_Restart_Update_Start_Ack, CMDCode.Robot_Restart_Update_Finish_Ack, CMDCode.Servo_Update_Start, CMDCode.Servo_Update_Write, CMDCode.Servo_Update_Finish, CMDCode.Servo_Update_Stop, CMDCode.Change_ID, CMDCode.Change_Sensor_ID, CMDCode.Read_Sensor_Data, CMDCode.Read_Sensor_Data_Other, CMDCode.Sensor_Update_Start, CMDCode.Sensor_Update_Write, CMDCode.Sensor_Update_Stop, CMDCode.Sensor_Update_Finish };
     bool mChargePromptFlag = false;
 
     SendMsgData mSendedMsgData;
@@ -116,13 +118,12 @@ public class NetWork
                     }
                     sb.Append(string.Format("cmd= {0} exCmd = {1}", mSendMsgList[i].cmd, mSendMsgList[i].extendCmd));
                 }
-                Debug.LogError(string.Format("等待的命令数量={0},  {1}", mSendMsgList.Count, sb.ToString()));
+                PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeDebug, string.Format("等待的命令数量={0},  {1}", mSendMsgList.Count, sb.ToString()));
             }
             if (mLastSendTime < 0.1f)
             {
                 SendMsg();
             }
-            //MyLog.Log("SendMsg start end");
         }
         
 #endif
@@ -130,26 +131,52 @@ public class NetWork
 
     public void ReceiveMsg(CMDCode cmd, int len, string mac, BinaryReader br)
     {
+        bool finished = true;
         if (null != mSendedMsgData)
         {
-            ProtocolClient.GetInst().OnMsgDelegate(cmd, len, mac, br, mSendedMsgData.extendCmd);
+            finished = ProtocolClient.GetInst().OnMsgDelegate(cmd, len, mac, br, mSendedMsgData.extendCmd);
         }
         else
         {
             if (mLastSendExCmdDict.ContainsKey(cmd))
             {
-                ProtocolClient.GetInst().OnMsgDelegate(cmd, len, mac, br, mLastSendExCmdDict[cmd]);
+                finished = ProtocolClient.GetInst().OnMsgDelegate(cmd, len, mac, br, mLastSendExCmdDict[cmd]);
             }
             else
             {
-                ProtocolClient.GetInst().OnMsgDelegate(cmd, len, mac, br, ExtendCMDCode.Extend_Code_None);
+                finished = ProtocolClient.GetInst().OnMsgDelegate(cmd, len, mac, br, ExtendCMDCode.Extend_Code_None);
             }
         }
-        mLastSendTime = 0;
-        if (mSendMsgList.Count > 0)
+        if (cmd != CMDCode.Read_Sensor_Data_Other)
         {
-            SendMsg();
+            finished = true;
         }
+        if (finished)
+        {
+            if (null != mSendedMsgData && mSendedMsgData.cmd == CMDCode.Read_Back)
+            {//回读命令需特殊处理，等所有的舵机都回了以后在发送下一条指令
+                ReadBackMsg msg = (ReadBackMsg)mSendedMsgData.msg;
+                msg.needReadBackCount--;
+                if (msg.needReadBackCount <= 0)
+                {
+                    mSendedMsgData = null;
+                    mLastSendTime = 0;
+                    if (mSendMsgList.Count > 0)
+                    {
+                        SendMsg();
+                    }
+                }
+            }
+            else
+            {
+                mLastSendTime = 0;
+                mSendedMsgData = null;
+                if (mSendMsgList.Count > 0)
+                {
+                    SendMsg();
+                }
+            }
+        }        
     }
 
 
@@ -162,9 +189,10 @@ public class NetWork
             if (null != mSendedMsgData)
             {
                 //读取传感器的超时时间设为1秒，防止逻辑编程发送速度太快出现数据丢失等待时间过长
-                bool outTime = (mSendedMsgData.cmd == CMDCode.Hand_Shake || mSendedMsgData.cmd == CMDCode.Read_Motherboard_Data) ? time - mLastSendTime >= Wait_Msg_Out_Time : time - mLastSendTime >= 1;
+                bool outTime = (mSendedMsgData.cmd == CMDCode.Hand_Shake || mSendedMsgData.cmd == CMDCode.Read_Motherboard_Data) ? time - mLastSendTime >= Wait_Msg_Out_Time_Long : time - mLastSendTime >= Wait_Msg_Out_Time_Normal;
                 if (outTime)
                 {
+                    NetWaitMsg.CloseWait();
                     ReceiveMsg(mSendedMsgData.cmd, 0, mSendedMsgData.mac, null);
                 }
             }
@@ -184,6 +212,11 @@ public class NetWork
         mLastSendTime = 0;
         mChargePromptFlag = false;
         mSendedMsgData = null;
+    }
+
+    public void ClearCacheMsg()
+    {
+        mSendMsgList.Clear();
     }
     #endregion
 
@@ -266,21 +299,16 @@ public class NetWork
 
                 writer.Close();
                 DataStream.Close();
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    Debuger.Log("send time =" + Time.time + ",msg cmd=" + cmd + " length=" + pMsg.Length + "msg=" + PublicFunction.BytesToHexString(pMsg));
-                }
+                PlatformMgr.Instance.Log(Game.Platform.MyLogType.LogTypeEvent, "send time =" + Time.time + ",msg cmd=" + cmd.ToString() + " length=" + pMsg.Length + "msg=" + PublicFunction.BytesToHexString(pMsg));
+
                 mLastSendExCmdDict[cmd] = sendData.extendCmd;
                 PlatformMgr.Instance.SendMsg((byte)cmd, pMsg, pMsg.Length);
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
         mLastSendTime = Time.time;

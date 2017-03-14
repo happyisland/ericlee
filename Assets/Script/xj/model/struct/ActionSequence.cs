@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using UnityEngine;
+using Game;
+using Game.Platform;
 
 /// <summary>
 /// Author:xj
@@ -50,6 +52,11 @@ public class ActionSequence
             }
             name = value;
         }
+    }
+
+    public string ActionName
+    {
+        get { return name; }
     }
     /// <summary>
     /// 对应的机器人id
@@ -122,6 +129,7 @@ public class ActionSequence
     bool needSave;//是否需要保存
     string icon;
     string oldName = null;
+    bool isOfficial = false;
     #endregion
 
     #region 公有函数
@@ -147,7 +155,7 @@ public class ActionSequence
         createTime = 0;
     }
 
-    public ActionSequence(string name, string robotId, string actionsId, string icon, string showName)
+    public ActionSequence(string name, string robotId, string actionsId, string icon, string showName, bool isofficial)
     {
         this.name = name;
         id = actionsId;
@@ -155,6 +163,7 @@ public class ActionSequence
         mActions = new List<Action>();
         needSave = false;
         this.icon = icon;
+        this.isOfficial = isofficial;
         createTime = 0;
         try
         {
@@ -189,16 +198,13 @@ public class ActionSequence
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
 
-    public ActionSequence(ActionSequence act)
+    public ActionSequence(ActionSequence act, Robot robot)
     {
         this.name = act.name;
         this.id = act.Id;
@@ -207,10 +213,11 @@ public class ActionSequence
         needSave = act.needSave;
         this.icon = act.icon;
         createTime = act.createTime;
+        isOfficial = act.isOfficial;
         for (int i = 0, icount = act.Count; i < icount; ++i)
         {
             Action tmp = new Action();
-            tmp.Copy(act[i]);
+            tmp.Copy(act[i], robot);
             tmp.index = act[i].index;
             mActions.Add(tmp);
         }
@@ -223,6 +230,7 @@ public class ActionSequence
             }
         }
     }
+
     /// <summary>
     /// 重新生成动作ID
     /// </summary>
@@ -303,11 +311,8 @@ public class ActionSequence
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         //Save();
     }
@@ -332,9 +337,12 @@ public class ActionSequence
             Robot robot = RobotManager.GetInst().GetRobotForID(robotID);
             if (null != robot)
             {
-                ResFileType type = ResourcesEx.GetResFileType(RobotMgr.DataType(robot.Name));
-                string robotName = RobotMgr.NameNoType(robot.Name);
-                string path = ResourcesEx.GetActionsPath(robotName, id, type);
+                string path = ResourcesEx.GetActionFilePath(robot.Name, id);
+                bool addFileFlag = true;
+                if (File.Exists(path))
+                {
+                    addFileFlag = false;
+                }
                 //新建xml实例
                 XmlDocument xmlDoc = new XmlDocument();
                 //创建根节点，最上层节点
@@ -361,7 +369,7 @@ public class ActionSequence
                 root.SetAttribute("robotID", robotID);
                 root.SetAttribute("id", id);
                 root.SetAttribute("icon", icon);
-                if (0 == createTime && !File.Exists(path))
+                if (0 == createTime && addFileFlag)
                 {//不存在
                     createTime = DateTime.Now.Ticks;
                 }
@@ -376,12 +384,26 @@ public class ActionSequence
                     roots.AppendChild(node);
                 }
                 //将xml文件保存到本地
-                xmlDoc.Save(path);
-                string oldPath = ResourcesEx.GetActionsPath(robotName, name, type);
-                if (File.Exists(oldPath))
+                try
                 {
-                    File.Delete(oldPath);
+                    xmlDoc.Save(path);
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "保存动作:" + path);
+                    if (addFileFlag)
+                    {
+                        PlatformMgr.Instance.OperateSyncFile(robot.Name, path, OperateFileType.Operate_File_Add);
+                        PlatformMgr.Instance.MobClickEvent(MobClickEventID.ModelPage_CreateActionCount);
+                    }
+                    else
+                    {
+                        PlatformMgr.Instance.OperateSyncFile(robot.Name, path, OperateFileType.Operate_File_Change);
+                    }
                 }
+                catch (System.Exception ex)
+                {
+                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                    PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+                }
+                
                 if (!string.IsNullOrEmpty(oldName))
                 {
                     /*string oldNamePath = ResourcesEx.GetActionsPath(robotName, oldName, type);
@@ -396,11 +418,8 @@ public class ActionSequence
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
         needSave = false;
@@ -413,30 +432,31 @@ public class ActionSequence
             Robot robot = RobotManager.GetInst().GetRobotForID(robotID);
             if (null != robot)
             {
-                ResFileType type = ResourcesEx.GetResFileType(RobotMgr.DataType(robot.Name));
-                string robotName = RobotMgr.NameNoType(robot.Name);
-                string namePath = ResourcesEx.GetActionsPath(robotName, name, type);
-                if (File.Exists(namePath))
+                string path = ResourcesEx.GetActionFilePath(robot.Name, name);
+                if (!File.Exists(path))
                 {
-                    File.Delete(namePath);
+                    path = ResourcesEx.GetActionFilePath(robot.Name, id);
                 }
-                else
+                if (File.Exists(path))
                 {
-                    string path = ResourcesEx.GetActionsPath(robotName, id, type);
-                    if (File.Exists(path))
+                    try
                     {
                         File.Delete(path);
+                        PlatformMgr.Instance.OperateSyncFile(robot.Name, path, OperateFileType.Operate_File_Del);
                     }
+                    catch (System.Exception ex)
+                    {
+                        System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                        PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+                    }
+                    
                 }
             }
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -468,7 +488,8 @@ public class ActionSequence
     /// <returns></returns>
     public bool IsOfficial()
     {
-        Robot robot = RobotManager.GetInst().GetRobotForID(robotID);
+        return isOfficial;
+        /*Robot robot = RobotManager.GetInst().GetRobotForID(robotID);
         if (null != robot && robot.Name.EndsWith("_playerdata"))
         {
             return false;
@@ -477,7 +498,12 @@ public class ActionSequence
         {
             return false;
         }
-        return true;
+        return true;*/
+    }
+
+    public void SetOfficial(bool isOfficial)
+    {
+        this.isOfficial = isOfficial;
     }
     #endregion
 

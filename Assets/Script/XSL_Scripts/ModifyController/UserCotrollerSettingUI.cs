@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Game.Scene;
+using Game.Platform;
 
 public class UserCotrollerSettingUI : BaseUI
 {
@@ -44,21 +45,28 @@ public class UserCotrollerSettingUI : BaseUI
             }
             else if (obj.name.Contains("settingC"))
             {
+                //SetScene.GotoSetScene(SetSceneType.SetSceneTypeDevice);
                 DoSetting();
             }
         }
         catch (System.Exception ex)
-        { }
+        {
+            PlatformMgr.Instance.Log(MyLogType.LogTypeDebug, ex.ToString());
+        }
     }
 
     void GoBack()
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Back model function scene!!");
+
         mTrans.gameObject.SetActive(false);
         SceneMgr.EnterScene(SceneType.MainWindow);
     }
 
     void DoSetting()
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Enter controller setting UI!!");
+
         OnClose();
         UserdefControllerScene.Ins.CreateNewController("");
     }

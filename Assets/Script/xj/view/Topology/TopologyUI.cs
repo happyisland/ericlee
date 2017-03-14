@@ -1,5 +1,6 @@
 ﻿using Game;
 using Game.Event;
+using Game.Platform;
 using Game.Resource;
 using System;
 using System.Collections.Generic;
@@ -42,6 +43,8 @@ public class TopologyUI : BaseUI
     Dictionary<GameObject, List<PartPortData>> mPartPortDict;
 
     Dictionary<Transform, UpdateShowData> mUpdateDict;
+
+    Dictionary<TopologyPartType, List<byte>> mAddNewSensorDict;
 
     Transform mPanelSelfTrans;
     Transform mPanelDefaultTrans;
@@ -132,6 +135,7 @@ public class TopologyUI : BaseUI
         mPartPortDict = new Dictionary<GameObject, List<PartPortData>>();
         mUpdateDict = new Dictionary<Transform, UpdateShowData>();
         mBlankList = new List<GameObject>();
+        mAddNewSensorDict = new Dictionary<TopologyPartType, List<byte>>();
     }
 
     public TopologyUI(eUICameraType cameraType)
@@ -147,6 +151,7 @@ public class TopologyUI : BaseUI
         mPartPortDict = new Dictionary<GameObject, List<PartPortData>>();
         mUpdateDict = new Dictionary<Transform, UpdateShowData>();
         mBlankList = new List<GameObject>();
+        mAddNewSensorDict = new Dictionary<TopologyPartType, List<byte>>();
     }
 
     public override void Init()
@@ -236,12 +241,13 @@ public class TopologyUI : BaseUI
         {
             if (mIndependentQueueDict.Count > 0)
             {
-                float h = PublicFunction.GetHeight() - 200;
-                mTransformAdaptation.Recalculate(new Vector4(0, PublicFunction.GetHeight() / 2 - h / 2, PublicFunction.GetWidth() * 0.9f, h));
+                float h = PublicFunction.GetHeight() - 300;
+                mTransformAdaptation.Recalculate(new Vector4(0, 70, PublicFunction.GetWidth() * 0.9f, h));
             }
             else
             {
-                mTransformAdaptation.Recalculate(new Vector4(0, 0, PublicFunction.GetWidth() * 0.9f, PublicFunction.GetHeight() * 0.9f));
+                float h = PublicFunction.GetHeight() - 150;
+                mTransformAdaptation.Recalculate(new Vector4(0, 0, PublicFunction.GetWidth() * 0.9f, h));
             }
         }
     }
@@ -250,10 +256,23 @@ public class TopologyUI : BaseUI
     /// </summary>
     public void ResetNormalScale()
     {
-        if (null != mPanelSelfTrans)
+        /*if (null != mPanelSelfTrans)
         {
             mPanelSelfTrans.localScale = Vector3.one;
             mPanelSelfTrans.localPosition = Vector3.zero;
+        }*/
+        if (null != mTransformAdaptation)
+        {
+            if (mIndependentQueueDict.Count > 0)
+            {
+                float h = PublicFunction.GetHeight() - 300;
+                mTransformAdaptation.RemovePosition(new Vector4(0, 70, PublicFunction.GetWidth() * 0.9f, h));
+            }
+            else
+            {
+                float h = PublicFunction.GetHeight() - 150;
+                mTransformAdaptation.RemovePosition(new Vector4(0, 0, PublicFunction.GetWidth() * 0.9f, h));
+            }
         }
     }
 
@@ -266,15 +285,15 @@ public class TopologyUI : BaseUI
     /// </summary>
     /// <param name="mainResult"></param>
     /// <param name="servoUpdateList"></param>
-    public void SetPartState(ErrorCode mainResult, List<byte> servoUpdateList)
+    public void SetPartState(ErrorCode mainResult, List<byte> servoUpdateList, Dictionary<TopologyPartType, List<byte>> sensorUpdateList)
     {
         foreach (KeyValuePair<GameObject, TopologyPartData> kvp in mTopologyDict)
         {
-            CheckPartState(kvp.Key, kvp.Value, mainResult, servoUpdateList);
+            CheckPartState(kvp.Key, kvp.Value, mainResult, servoUpdateList, sensorUpdateList);
         }
         foreach (KeyValuePair<GameObject, TopologyPartData> kvp in mIndependentQueueDict)
         {
-            CheckPartState(kvp.Key, kvp.Value, mainResult, servoUpdateList);
+            CheckPartState(kvp.Key, kvp.Value, mainResult, servoUpdateList, sensorUpdateList);
         }
     }
 
@@ -308,11 +327,31 @@ public class TopologyUI : BaseUI
         OpenUpdateAnim();
     }
 
-    public void UpdateFinishedAnim(bool state)
+    public void OpenSensorUpdateAnim(TopologyPartType sensorType, List<byte> sensorUpdateList)
+    {
+        mUpdateDict.Clear();
+        foreach (KeyValuePair<GameObject, TopologyPartData> kvp in mTopologyDict)
+        {
+            if (kvp.Value.partType == sensorType && sensorUpdateList.Contains(kvp.Value.id))
+            {
+                AddUpdateItem(kvp.Key.transform);
+            }
+        }
+        foreach (KeyValuePair<GameObject, TopologyPartData> kvp in mIndependentQueueDict)
+        {
+            if (kvp.Value.partType == sensorType && sensorUpdateList.Contains(kvp.Value.id))
+            {
+                AddUpdateItem(kvp.Key.transform);
+            }
+        }
+        OpenUpdateAnim();
+    }
+
+    public void UpdateFinishedAnim(bool state, bool instant)
     {
         foreach (KeyValuePair<Transform, UpdateShowData> kvp in mUpdateDict)
         {
-            StateUpdateFinished(kvp.Key, state);
+            StateUpdateFinished(kvp.Key, state, instant);
             kvp.Value.UptateFinished();
         }
     }
@@ -327,6 +366,7 @@ public class TopologyUI : BaseUI
 
     public void RefreshIndependent()
     {
+        mAddNewSensorDict.Clear();
         if (null != mIndependentQueueTrans)
         {
             List<GameObject> delList = new List<GameObject>();
@@ -459,8 +499,7 @@ public class TopologyUI : BaseUI
                     mServosConnection.UpdateServoModel(data.id, data.modelType);
                 }
             }
-            string robotPath = ResourcesEx.GetRobotPath(mRobot.Name);
-            mServosConnection.Save(robotPath);
+            mServosConnection.Save(mRobot);
 
             SingletonObject<ServosConManager>.GetInst().UpdateServosConnection(mRobot.ID, mServosConnection);
         }
@@ -482,6 +521,7 @@ public class TopologyUI : BaseUI
             }
             CreateAllBlankSpace();
             InitChoicePartQueue();
+            AutoSelectPartGameObject();
         }
         else
         {
@@ -489,6 +529,7 @@ public class TopologyUI : BaseUI
             OpenTopologyDictDragDrop();
         }
         ResetNormalScale();
+        OpenTopologyMove();
     }
 
     public void CloseEditTopology()
@@ -516,6 +557,7 @@ public class TopologyUI : BaseUI
             CloseTopologyDictDragDrop();
         }
         RecalculateTopology();
+        CloseTopologyMove();
     }
     /// <summary>
     /// 检测拓扑图是否设置完成
@@ -523,7 +565,8 @@ public class TopologyUI : BaseUI
     /// <returns></returns>
     public bool IsSettingFinished()
     {
-        return IsPartSettingFinished(PartPortType.Port_Type_Pin_3) && IsPartSettingFinished(PartPortType.Port_Type_Pin_4);
+        return true;
+        //return IsPartSettingFinished(PartPortType.Port_Type_Pin_3) && IsPartSettingFinished(PartPortType.Port_Type_Pin_4);
     }
     /// <summary>
     /// 删除不连续的零件
@@ -575,8 +618,12 @@ public class TopologyUI : BaseUI
                 return string.Format(LauguageTool.GetIns().GetText("触碰传感器ID"), ids);
             case TopologyPartType.Gyro:
                 return string.Format(LauguageTool.GetIns().GetText("陀螺仪传感器ID"), ids);
-            case TopologyPartType.DigitalTube:
+            case TopologyPartType.Light:
                 return string.Format(LauguageTool.GetIns().GetText("灯光传感器ID"), ids);
+            case TopologyPartType.DigitalTube:
+                return string.Format(LauguageTool.GetIns().GetText("数码管传感器ID"), ids);
+            case TopologyPartType.Speaker:
+                return string.Format(LauguageTool.GetIns().GetText("蓝牙speakerID"), ids);
         }
         return string.Empty;
     }
@@ -687,6 +734,103 @@ public class TopologyUI : BaseUI
             }
         }
     }
+
+    public void OpenTopologyMove()
+    {
+        if (null != mTopologyPanelScrollView)
+        {
+            mTopologyPanelScrollView.enabled = true;
+        }
+        if (null != mTrans)
+        {
+            TouchManager touchManager = GameHelper.FindChildComponent<TouchManager>(mTrans, "center");
+            if (null != touchManager)
+            {
+                touchManager.enabled = true;
+            }
+        }
+    }
+
+    public void CloseTopologyMove()
+    {
+        if (null != mTopologyPanelScrollView)
+        {
+            mTopologyPanelScrollView.enabled = false;
+        }
+        if (null != mTrans)
+        {
+            TouchManager touchManager = GameHelper.FindChildComponent<TouchManager>(mTrans, "center");
+            if (null != touchManager)
+            {
+                touchManager.enabled = false;
+            }
+        }
+    }
+    /// <summary>
+    /// 保存传感器数据
+    /// </summary>
+    public void SaveTopologySensorData()
+    {
+        if (null != mRobot && null != mRobot.MotherboardData && null != mServosConnection)
+        {
+            bool changeFlag = false;
+            foreach (var kvp in mIndependentQueueDict)
+            {
+                if (kvp.Value.partType < TopologyPartType.Infrared || kvp.Value.partType >= TopologyPartType.MainBoard)
+                {
+                    continue;
+                }
+                SensorData sensorData = mRobot.MotherboardData.GetSensorData(kvp.Value.partType);
+                if (null == sensorData || !sensorData.ids.Contains(kvp.Value.id))
+                {//删除不存在的传感器
+                    mServosConnection.DelIndependentTopologyData(kvp.Value);
+                    changeFlag = true;
+                }
+                else if (mAddNewSensorDict.ContainsKey(kvp.Value.partType) && mAddNewSensorDict[kvp.Value.partType].Contains(kvp.Value.id))
+                {
+                    mServosConnection.AddTopologyPartData(kvp.Value);
+                    changeFlag = true;
+                }
+            }
+            if (changeFlag)
+            {
+                mServosConnection.Save(mRobot);
+            }
+        }
+    }
+
+#if UNITY_EDITOR
+    public void AddIndependentSensor(byte id, TopologyPartType sensorType)
+    {
+        GameObject obj = CreateSensorGameObject(id, sensorType, mIndependentQueueTrans, false);
+        if (null != obj)
+        {
+            //obj.transform.localPosition = new Vector3(mServoSize.x / 2 + i * (mServoSize.x + 46), 0);
+            TopologyPartData sensorData = new TopologyPartData();
+            sensorData.id = id;
+            sensorData.isIndependent = true;
+            sensorData.partType = sensorType;
+            sensorData.width = (int)mServoSize.x;
+            sensorData.height = (int)mServoSize.y;
+            mIndependentQueueDict[obj] = sensorData;
+            ResetIndependentQueuePosition(false);
+            UIManager.SetButtonEventDelegate(mIndependentQueueTrans, mBtnDelegate);
+            if (null != mQueuePanelTrans)
+            {
+                mQueuePanelTrans.gameObject.SetActive(true);
+            }
+            if (null != mQueueDragTrans)
+            {
+                mQueueDragTrans.gameObject.SetActive(true);
+            }
+        }
+    }
+
+    public bool IsEdit()
+    {
+        return isEdit;
+    }
+#endif
     #endregion
 
     #region 其他函数
@@ -820,7 +964,7 @@ public class TopologyUI : BaseUI
                 {
                     mIndependentScrollView = mQueuePanelTrans.GetComponent<UIScrollView>();
                     Vector3 pos = mQueuePanelTrans.localPosition;
-                    pos.y = UIManager.GetWinPos(mQueuePanelTrans, UIWidget.Pivot.Bottom, 0, 230 + PublicFunction.Back_Btn_Pos.y).y;
+                    pos.y = UIManager.GetWinPos(mQueuePanelTrans, UIWidget.Pivot.Bottom, 0, 140 + PublicFunction.Back_Btn_Pos.y).y;
                     pos.x = -PublicFunction.GetWidth() / 2 + 120;
                     mQueuePanelTrans.localPosition = pos;
                     UIPanel panel = mQueuePanelTrans.GetComponent<UIPanel>();
@@ -929,7 +1073,7 @@ public class TopologyUI : BaseUI
                         {
                             uiPanel.depth = mDepth + 2;
                             Vector4 rect = uiPanel.finalClipRegion;
-                            rect.z = PublicFunction.GetWidth() - PublicFunction.Back_Btn_Pos.x * 2 - 240 - uiPanel.clipSoftness.x * 2;
+                            rect.z = PublicFunction.GetWidth() - PublicFunction.Back_Btn_Pos.x * 2 - 120 - uiPanel.clipSoftness.x * 2;
                             rect.x = rect.z / 2 + uiPanel.clipSoftness.x;
                             uiPanel.baseClipRegion = rect;
                         }
@@ -939,6 +1083,7 @@ public class TopologyUI : BaseUI
                 mPin4Trans = center.Find("pin4trans");
                 if (null != mPin4Trans)
                 {
+                    mPin4Trans.localPosition = mPin3Trans.localPosition;
                     Transform bg = mPin4Trans.Find("bg");
                     if (null != bg)
                     {
@@ -1038,11 +1183,8 @@ public class TopologyUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1060,11 +1202,8 @@ public class TopologyUI : BaseUI
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
 
@@ -1098,18 +1237,15 @@ public class TopologyUI : BaseUI
                     }
                 }
             }
-            else if (!name.Equals("delBtn") && !name.Equals("bg") && !name.StartsWith("c_"))
+            /*else if (!name.Equals("delBtn") && !name.Equals("bg") && !name.StartsWith("c_"))
             {
                 HideChoicePartPanel(false);
-            }
+            }*/
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
     }
     /// <summary>
@@ -1146,15 +1282,22 @@ public class TopologyUI : BaseUI
                 List<PartPortData> list = mPartPortDict[obj];
                 if (list.Count > 0)
                 {
-                    if (mShowChoicePanelFlag)
+                    /*if (mShowChoicePanelFlag)
                     {
-                        HidePartQueue(true);
+                        //HidePartQueue(true);
                     }
                     else
                     {
                         if (null != mChoicePartActiveCallBack)
                         {
                             mChoicePartActiveCallBack(true);
+                        }
+                    }*/
+                    if (mShowChoicePortType != list[0].portType)
+                    {
+                        if (mShowChoicePanelFlag)
+                        {
+                            HidePartQueue(true);
                         }
                     }
                     SetSelectedPart(obj);
@@ -1190,7 +1333,7 @@ public class TopologyUI : BaseUI
             {
                 SetPlayerServoModel(mSelectedPartGameObject, mChoiceServoModel);
             }*/
-            HideChoicePartPanel(false);
+            //HideChoicePartPanel(false);
             return;
         }
         else if (name.Equals("delBtn"))
@@ -1246,7 +1389,7 @@ public class TopologyUI : BaseUI
                 }
                 else
                 {
-                    HideChoicePartPanel(false);
+                    //HideChoicePartPanel(false);
                 }
             }
             return;
@@ -1280,9 +1423,9 @@ public class TopologyUI : BaseUI
                     PartPortType portType = GetPartPortType(mTopologyDict[obj].partType);
                     if (portType == PartPortType.Port_Type_Pin_4)
                     {
-                        if (mShowChoicePanelFlag)
+                        /*if (mShowChoicePanelFlag)
                         {
-                            HidePartQueue(true);
+                            //HidePartQueue(true);
                         }
                         else
                         {
@@ -1290,21 +1433,35 @@ public class TopologyUI : BaseUI
                             {
                                 mChoicePartActiveCallBack(true);
                             }
+                        }*/
+                        if (mShowChoicePortType != PartPortType.Port_Type_Pin_4)
+                        {
+                            if (mShowChoicePanelFlag)
+                            {
+                                HidePartQueue(true);
+                            }
                         }
                         SetSelectedPart(obj);
                         ShowPartQueue(PartPortType.Port_Type_Pin_4);
                     }
                     else
                     {
-                        if (mShowChoicePanelFlag)
+                        /*if (mShowChoicePanelFlag)
                         {
-                            HidePartQueue(true);
+                            //HidePartQueue(true);
                         }
                         else
                         {
                             if (null != mChoicePartActiveCallBack)
                             {
                                 mChoicePartActiveCallBack(true);
+                            }
+                        }*/
+                        if (mShowChoicePortType != PartPortType.Port_Type_Pin_3)
+                        {
+                            if (mShowChoicePanelFlag)
+                            {
+                                HidePartQueue(true);
                             }
                         }
                         ServoModel modelType = ServoModel.Servo_Model_Angle;
@@ -1326,12 +1483,12 @@ public class TopologyUI : BaseUI
                 }
                 else
                 {
-                    HideChoicePartPanel(false);
+                    //HideChoicePartPanel(false);
                 }
             }
             return;
         }
-        HideChoicePartPanel(false);
+        //HideChoicePartPanel(false);
     }
     void SetServoModelResult(ServoModel modelType)
     {
@@ -1673,16 +1830,16 @@ public class TopologyUI : BaseUI
 
     void SetServoModelIcon(GameObject servo, ServoModel modelType)
     {
-        UISprite icon = GameHelper.FindChildComponent<UISprite>(servo.transform, "icon");
+        UISprite icon = GameHelper.FindChildComponent<UISprite>(servo.transform, "bg");
         if (null != icon)
         {
             if (modelType == ServoModel.Servo_Model_Angle)
             {
-                icon.spriteName = "angle_icon";
+                icon.spriteName = "servo_angle";
             }
             else
             {
-                icon.spriteName = "wheel_icon";
+                icon.spriteName = "servo_turn";
             }
         }
     }
@@ -1706,6 +1863,7 @@ public class TopologyUI : BaseUI
             }
             SetSensorIcon(obj, partType);
             SetSensorBg(obj, partType);
+            SetSensorUpdateImg(obj, partType);
             List<PartPortData> list = new List<PartPortData>();
             Transform left = obj.transform.Find("left");
             if (null != left)
@@ -1790,7 +1948,7 @@ public class TopologyUI : BaseUI
 
     public static void SetSensorIcon(GameObject obj, TopologyPartType partType)
     {
-        UISprite icon = GameHelper.FindChildComponent<UISprite>(obj.transform, "icon");
+        /*UISprite icon = GameHelper.FindChildComponent<UISprite>(obj.transform, "icon");
         if (null != icon)
         {
             switch (partType)
@@ -1814,7 +1972,7 @@ public class TopologyUI : BaseUI
                     icon.spriteName = "volume_icon";
                     break;
             }
-        }
+        }*/
     }
 
     public static void SetSensorBg(GameObject obj, TopologyPartType partType)
@@ -1824,11 +1982,23 @@ public class TopologyUI : BaseUI
         {
             switch (partType)
             {
+                case TopologyPartType.Infrared:
+                    icon.spriteName = "sensor_infrared";
+                    break;
+                case TopologyPartType.Gyro:
+                    icon.spriteName = "sensor_gyro";
+                    break;
+                case TopologyPartType.Touch:
+                    icon.spriteName = "sensor_touch";
+                    break;
                 case TopologyPartType.Light:
                     icon.spriteName = "sensor_light";
                     break;
                 case TopologyPartType.Speaker:
-                    icon.spriteName = "sensor_volume";
+                    icon.spriteName = "sensor_speaker";
+                    break;
+                case TopologyPartType.DigitalTube:
+                    icon.spriteName = "sensor_digitaltube";
                     break;
                 default:
                     icon.spriteName = "sensor_modular";
@@ -1837,9 +2007,41 @@ public class TopologyUI : BaseUI
         }
     }
 
+
     public static void SetSensorUpdateImg(GameObject obj, TopologyPartType partType)
     {
-
+        UISprite icon = GameHelper.FindChildComponent<UISprite>(obj.transform, "update/bg");
+        UISprite icon1 = GameHelper.FindChildComponent<UISprite>(obj.transform, "update/bg1");
+        if (null != icon && null != icon1)
+        {
+            switch (partType)
+            {
+                case TopologyPartType.Infrared:
+                    icon.spriteName = "sensor_infrared_upgrade";
+                    icon1.spriteName = "sensor_infrared_upgrading";
+                    break;
+                case TopologyPartType.Gyro:
+                    icon.spriteName = "sensor_gyro_upgrade";
+                    icon1.spriteName = "sensor_gyro_upgrading";
+                    break;
+                case TopologyPartType.Touch:
+                    icon.spriteName = "sensor_touch_upgrade";
+                    icon1.spriteName = "sensor_touch_upgrading";
+                    break;
+                case TopologyPartType.Light:
+                    icon.spriteName = "sensor_light_upgrade";
+                    icon1.spriteName = "sensor_light_upgrading";
+                    break;
+                case TopologyPartType.Speaker:
+                    icon.spriteName = "sensor_speaker_upgrade";
+                    icon1.spriteName = "sensor_speaker_upgrading";
+                    break;
+                case TopologyPartType.DigitalTube:
+                    icon.spriteName = "sensor_digitaltube_upgrade";
+                    icon1.spriteName = "sensor_digitaltube_upgrading";
+                    break;
+            }
+        }
     }
 
     GameObject CreateBlankGameObject(PartPortType portType)
@@ -1927,7 +2129,7 @@ public class TopologyUI : BaseUI
                 }
                 else
                 {
-                    bgSp.spriteName = "Unsuccessful";
+                    bgSp.spriteName = "unsuccessful";
                 }
                 bgSp.MyMakePixelPerfect();
             }
@@ -1936,12 +2138,14 @@ public class TopologyUI : BaseUI
                 if (state)
                 {
                     iconSp.spriteName = "yes";
+                    iconSp.MyMakePixelPerfect();
                 }
                 else
                 {
-                    iconSp.spriteName = "no";
+                    iconSp.spriteName = "exception";
+                    iconSp.MakePixelPerfect();
                 }
-                iconSp.MyMakePixelPerfect();
+                
             }
         }
     }
@@ -1955,12 +2159,12 @@ public class TopologyUI : BaseUI
         }
     }
 
-    void CheckPartState(GameObject obj, TopologyPartData data, ErrorCode mainResult, List<byte> servoUpdateList)
+    void CheckPartState(GameObject obj, TopologyPartData data, ErrorCode mainResult, List<byte> servoUpdateList, Dictionary<TopologyPartType, List<byte>> sensorUpdateList)
     {
         switch (data.partType)
         {
             case TopologyPartType.MainBoard:
-                if (mainResult == ErrorCode.Do_Not_Upgrade)
+                if (mainResult == ErrorCode.Result_OK)
                 {
                     SetState(obj.transform, true);
                 }
@@ -2014,6 +2218,14 @@ public class TopologyUI : BaseUI
                             {
                                 state = false;
                             }
+                            else if (!sensorData.ids.Contains(data.id))
+                            {
+                                state = false;
+                            }
+                            else if (sensorUpdateList.ContainsKey(data.partType) && sensorUpdateList[data.partType].Contains(data.id))
+                            {
+                                state = false;
+                            }
                         }
                         else
                         {
@@ -2044,6 +2256,10 @@ public class TopologyUI : BaseUI
                                 state = false;
                             }
                             else if (!sensorData.ids.Contains(data.id))
+                            {
+                                state = false;
+                            }
+                            else if (sensorUpdateList.ContainsKey(data.partType) && sensorUpdateList[data.partType].Contains(data.id))
                             {
                                 state = false;
                             }
@@ -2141,6 +2357,14 @@ public class TopologyUI : BaseUI
                         {
                             sensorDict[partType[i]] = dataDict[partType[i]];
                         }
+                        AddNewSensor(partType[i], sensorDict);
+                    }
+                }
+                else
+                {
+                    for (int i = 0, imax = partType.Length; i < imax; ++i)
+                    {
+                        AddNewSensor(partType[i], sensorDict);
                     }
                 }
 #if UNITY_EDITOR
@@ -2213,6 +2437,58 @@ public class TopologyUI : BaseUI
             if (null != mQueueDragTrans)
             {
                 mQueueDragTrans.gameObject.SetActive(false);
+            }
+        }
+    }
+
+    void AddNewSensor(TopologyPartType sensorType, Dictionary<TopologyPartType, List<byte>> sensorDict)
+    {
+        //加入新增传感器
+        if (null != mRobot && null != mRobot.MotherboardData)
+        {
+            SensorData sensorData = mRobot.MotherboardData.GetSensorData(sensorType);
+            if (null != sensorData && sensorData.ids.Count > 0)
+            {
+                for (int sensorIndex = 0, sensorMax = sensorData.ids.Count; sensorIndex < sensorMax; ++sensorIndex)
+                {
+                    bool isNewFlag = false;
+                    if (sensorDict.ContainsKey(sensorType))
+                    {
+                        if (!sensorDict[sensorType].Contains(sensorData.ids[sensorIndex]))
+                        {
+                            if (null == mServosConnection || mServosConnection.IsNewSensor(sensorType, sensorData.ids[sensorIndex]))
+                            {
+                                isNewFlag = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        if (null == mServosConnection || mServosConnection.IsNewSensor(sensorType, sensorData.ids[sensorIndex]))
+                        {
+                            isNewFlag = true;
+                        }
+                    }
+                    if (isNewFlag)
+                    {
+                        if (!sensorDict.ContainsKey(sensorType))
+                        {
+                            List<byte> list = new List<byte>();
+                            sensorDict[sensorType] = list;
+                        }
+                        sensorDict[sensorType].Add(sensorData.ids[sensorIndex]);
+                        if (mAddNewSensorDict.ContainsKey(sensorType))
+                        {
+                            mAddNewSensorDict[sensorType].Add(sensorData.ids[sensorIndex]);
+                        }
+                        else
+                        {
+                            List<byte> list = new List<byte>();
+                            list.Add(sensorData.ids[sensorIndex]);
+                            mAddNewSensorDict[sensorType] = list;
+                        }
+                    }
+                }
             }
         }
     }
@@ -4240,31 +4516,6 @@ public class TopologyUI : BaseUI
                     spriteName = "dian_hui";
                 }
                 break;
-            case TopologyPartType.Infrared:
-            case TopologyPartType.Touch:
-            case TopologyPartType.Light:
-            case TopologyPartType.Gravity:
-            case TopologyPartType.Ultrasonic:
-            case TopologyPartType.DigitalTube:
-                if (connected)
-                {
-                    spriteName = "dian_blue";
-                }
-                else
-                {
-                    spriteName = "dian_hui";
-                }
-                break;
-            case TopologyPartType.Gyro:
-                if (connected)
-                {
-                    spriteName = "san_liang";
-                }
-                else
-                {
-                    spriteName = "san_hui";
-                }
-                break;
             case TopologyPartType.MainBoard:
                 if (port.name.Equals("port6"))
                 {
@@ -4316,6 +4567,26 @@ public class TopologyUI : BaseUI
                             spriteName = "dian_hui";
                         }
                     }
+                }
+                break;
+            case TopologyPartType.Gyro:
+                if (connected)
+                {
+                    spriteName = "san_liang";
+                }
+                else
+                {
+                    spriteName = "san_hui";
+                }
+                break;
+            default:
+                if (connected)
+                {
+                    spriteName = "dian_blue";
+                }
+                else
+                {
+                    spriteName = "dian_hui";
                 }
                 break;
         }
@@ -4422,33 +4693,6 @@ public class TopologyUI : BaseUI
         }
     }
 
-    /*void StateUpdateStart(Transform stateTrans)
-    {
-        UISprite bg = GameHelper.FindChildComponent<UISprite>(stateTrans, "bg");
-        if (null != bg)
-        {
-            bg.spriteName = "update";
-            bg.MyMakePixelPerfect();
-            TweenRotation tweenRota = bg.gameObject.GetComponent<TweenRotation>();
-            bg.transform.localEulerAngles = new Vector3(0, 0, 360);
-            tweenRota.enabled = true;
-            tweenRota.ResetToBeginning();
-            tweenRota.duration = 1.5f;
-            tweenRota.from = new Vector3(0, 0, 360);
-            tweenRota.to = Vector3.zero;
-            tweenRota.Play(true);
-        }
-        Transform icon = stateTrans.Find("icon");
-        if (null != icon)
-        {
-            icon.gameObject.SetActive(false);
-        }
-        Transform label = stateTrans.Find("Label");
-        if (null != label)
-        {
-            label.gameObject.SetActive(true);
-        }
-    }*/
     void StateUpdateStart(Transform trans)
     {
         Transform bg = trans.Find("bg");
@@ -4463,7 +4707,7 @@ public class TopologyUI : BaseUI
         }
     }
 
-    void StateUpdateFinished(Transform trans, bool state)
+    void StateUpdateFinished(Transform trans, bool state, bool instant)
     {
         Transform partBg = trans.Find("bg");
         if (null != partBg)
@@ -4484,7 +4728,7 @@ public class TopologyUI : BaseUI
             }
             else
             {
-                bg.spriteName = "Unsuccessful";
+                bg.spriteName = "unsuccessful";
             }
             bg.MyMakePixelPerfect();
             /*TweenRotation tweenRota = bg.gameObject.GetComponent<TweenRotation>();
@@ -4508,16 +4752,25 @@ public class TopologyUI : BaseUI
                 if (state)
                 {
                     sp.spriteName = "yes";
+                    sp.MyMakePixelPerfect();
                 }
                 else
                 {
-                    sp.spriteName = "no";
+                    sp.spriteName = "exception";
+                    sp.MakePixelPerfect();
                 }
-                sp.MyMakePixelPerfect();
             }
             icon.localScale = Vector3.zero;
-            TweenScale tweenScale = icon.GetComponent<TweenScale>();
-            GameHelper.PlayTweenScale(tweenScale, Vector3.one, 1);
+            if (instant)
+            {
+                icon.localScale = Vector3.one;
+            }
+            else
+            {
+                TweenScale tweenScale = icon.GetComponent<TweenScale>();
+                GameHelper.PlayTweenScale(tweenScale, Vector3.one, 1);
+            }
+            
         }
     }
 
@@ -5083,6 +5336,13 @@ public class TopologyUI : BaseUI
     /// <param name="portType"></param>
     void ShowPartQueue(PartPortType portType, ServoModel modelType = ServoModel.Servo_Model_Angle)
     {
+        if (!mShowChoicePanelFlag)
+        {
+            if (null != mChoicePartActiveCallBack)
+            {
+                mChoicePartActiveCallBack(true);
+            }
+        }
         Transform trans = null;
         if (portType == PartPortType.Port_Type_Pin_3)
         {
@@ -5624,6 +5884,37 @@ public class TopologyUI : BaseUI
             }
         }
         return false;
+    }
+
+    /// <summary>
+    /// 自动选择零件
+    /// </summary>
+    void AutoSelectPartGameObject()
+    {
+        if (null == mSelectedPartGameObject)
+        {
+            List<PartPortData> list = mPartPortDict[mMotherBoxTrans.gameObject];
+            if (null != list)
+            {
+                for (int i = 0, imax = list.Count; i < imax; ++i)
+                {
+                    if (list[i].portObj.name.Equals("port1"))
+                    {
+                        if (null != mPortConnectionDict && mPortConnectionDict.ContainsKey(list[i].portObj))
+                        {
+                            GameObject otherPort = mPortConnectionDict[list[i].portObj];
+                            SetSelectedPart(otherPort.transform.parent.gameObject);
+                            ShowPartQueue(PartPortType.Port_Type_Pin_3, ServoModel.Servo_Model_Angle);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        else
+        {
+
+        }
     }
     #endregion
 }

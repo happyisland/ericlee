@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Xml.Serialization;
 using System;
 using System.IO;
+using Game.Resource;
+using Game.Platform;
 
 /// <summary>
 /// author:   孙宇
@@ -28,9 +30,10 @@ public class ControllerManager : SingletonObject<ControllerManager>
     public ControllerManager()
     {
         if (RecordContactInfo.Instance.openType == "default")
-            ControllerPath = Application.persistentDataPath + "/default/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData"; 
+            ControllerPath = ResourcesEx.GetRobotCommonPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
         else
-            ControllerPath = Application.persistentDataPath + "/playerdata/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData"; 
+            ControllerPath = ResourcesEx.GetRobotPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
+        
         if (!Directory.Exists(ControllerPath))
         {
             Directory.CreateDirectory(ControllerPath);
@@ -73,31 +76,11 @@ public class ControllerManager : SingletonObject<ControllerManager>
         if (oo != null)
             return oo;
         oo = curController.GetSliderdataByID(widgetID);
+        if (oo != null)
+            return oo;
+        oo = curController.GetHSliderdataByID(widgetID);
         return oo;
     }
-    /// <summary>
-    /// 判断两份数据是否相同
-    /// </summary>
-    /// <param name="data"></param>
-    /// <returns></returns>
-    //private bool IsChange()
-    //{
-    //    if (preControllerData.GetWidgetMount() != curController.GetWidgetMount())
-    //        return true;
-    //    else
-    //    {
-    //        if (preControllerData.actionData.Count != curController.actionData.Count || preControllerData.sliderData.Count != curController.sliderData.Count)
-    //            return true;
-    //        string str1 = MyMVC.XmlHelper.XmlSerialize(curController, System.Text.Encoding.UTF8);
-    //        string str2 = MyMVC.XmlHelper.XmlSerialize(preControllerData, System.Text.Encoding.UTF8);
-    //        if (str1 != str2)
-    //        {
-    //            return true;
-    //        }
-    //        else
-    //            return false;
-    //    }
-    //}
     /// <summary>
     /// 是否有遥控器
     /// </summary>
@@ -106,9 +89,9 @@ public class ControllerManager : SingletonObject<ControllerManager>
     public static bool IsControllersNull(string controllerID)
     {
         if (RecordContactInfo.Instance.openType == "default")
-            ControllerPath = Application.persistentDataPath + "/default/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotCommonPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
         else
-            ControllerPath = Application.persistentDataPath + "/playerdata/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
         controllerID = ControllerPath + "/" + controllerID;
         return !File.Exists(controllerID);
     }
@@ -137,14 +120,16 @@ public class ControllerManager : SingletonObject<ControllerManager>
     public static void DeletaController(string controllerID)
     {
         if (RecordContactInfo.Instance.openType == "default")
-            ControllerPath = Application.persistentDataPath + "/default/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotCommonPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
         else
-            ControllerPath = Application.persistentDataPath + "/playerdata/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
         string name = ControllerPath + "/" + controllerID;
         if (File.Exists(name))
         {
-            Debug.Log("File is exist "+name);
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Delete controller data file!!");
+
             File.Delete(name);
+            PlatformMgr.Instance.OperateSyncFile(RobotManager.GetInst().GetCurrentRobot().Name, name, OperateFileType.Operate_File_Del);
         }
     }
     /// <summary>
@@ -163,7 +148,7 @@ public class ControllerManager : SingletonObject<ControllerManager>
         curWidgets.RemoveJoystickControl(widgetID);
     }
     /// <summary>
-    /// 新建滑竿
+    /// 新建滑杆
     /// </summary>
     /// <param name="widgetID"></param>
     /// <param name="pos"></param>
@@ -177,6 +162,22 @@ public class ControllerManager : SingletonObject<ControllerManager>
     {
         curController.RemoveSliderData(widgetID);
         curWidgets.RemoveVsliderControl(widgetID);
+    }
+    /// <summary>
+    /// 新建横杆
+    /// </summary>
+    /// <param name="widgetID"></param>
+    /// <param name="pos"></param>
+    public void NewHSliderBar(string widgetID, Vector2 pos)
+    {
+        HSliderWidgetData data = new HSliderWidgetData(widgetID, pos);
+        curController.AddNewHSliderData(data);
+        curWidgets.AddHsliderControl(data);
+    }
+    public void RemoveHSliderBar(string widgetID)
+    {
+        curController.RemoveHSliderData(widgetID);
+        curWidgets.RemoveHsliderControl(widgetID);
     }
     /// <summary>
     /// 新建动作
@@ -201,9 +202,9 @@ public class ControllerManager : SingletonObject<ControllerManager>
     public static ControllerData GetControllerByName(string name)
     {
         if (RecordContactInfo.Instance.openType == "default")
-            ControllerPath = Application.persistentDataPath + "/default/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotCommonPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
         else
-            ControllerPath = Application.persistentDataPath + "/playerdata/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
         name = ControllerPath + "/" + name;
         ControllerData data = new ControllerData();
         data = MyMVC.XmlHelper.XmlDeserializeFromFile<ControllerData>(name, System.Text.Encoding.UTF8);
@@ -216,9 +217,9 @@ public class ControllerManager : SingletonObject<ControllerManager>
     public static void WriteControllerByID(ControllerData data)
     {
         if (RecordContactInfo.Instance.openType == "default")
-            ControllerPath = Application.persistentDataPath + "/default/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotCommonPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
         else
-            ControllerPath = Application.persistentDataPath + "/playerdata/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
 
         string str = MyMVC.XmlHelper.XmlSerialize(data, System.Text.Encoding.UTF8);
         FileStream fs = new FileStream(ControllerPath + "/"+data.controllerID, FileMode.OpenOrCreate, FileAccess.Write);
@@ -233,29 +234,56 @@ public class ControllerManager : SingletonObject<ControllerManager>
     /// </summary>
     public void SaveCurController()
     {
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Save current controller data!!");
+
+        curController.ScreenWidth = PublicFunction.GetWidth();
+        curController.ScreenHeight = PublicFunction.GetHeight();
+
         if (RecordContactInfo.Instance.openType == "default")
-            ControllerPath = Application.persistentDataPath + "/default/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotCommonPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
         else
-            ControllerPath = Application.persistentDataPath + "/playerdata/" + RobotManager.GetInst().GetCurrentRobot().Name.Substring(0, RobotManager.GetInst().GetCurrentRobot().Name.IndexOf("_")) + "/ControllerData";
+            ControllerPath = ResourcesEx.GetRobotPath(RobotManager.GetInst().GetCurrentRobot().Name) + "/ControllerData";
 
         string str = MyMVC.XmlHelper.XmlSerialize(curController, System.Text.Encoding.UTF8);
-        FileStream fs = new FileStream(ControllerPath + "/" + curController.controllerID, FileMode.OpenOrCreate, FileAccess.Write);
+        string path = ControllerPath + "/" + curController.controllerID;
+        bool addFileFlag = true;
+        if (File.Exists(path))
+        {
+            addFileFlag = false;
+        }
+        FileStream fs = new FileStream(path, FileMode.OpenOrCreate, FileAccess.Write);
         StreamWriter sw = new StreamWriter(fs);
         fs.SetLength(0);//首先把文件清空了。
         sw.Write(str);//写你的字符串。
         sw.Close();
         fs.Close();
-
+        if (ResourcesEx.GetRobotType(RobotManager.GetInst().GetCurrentRobot()) == ResFileType.Type_playerdata)
+        {
+            if (addFileFlag)
+            {
+                PlatformMgr.Instance.OperateSyncFile(RobotManager.GetInst().GetCurrentRobot().Name, path, OperateFileType.Operate_File_Add);
+            }
+            else
+            {
+                PlatformMgr.Instance.OperateSyncFile(RobotManager.GetInst().GetCurrentRobot().Name, path, OperateFileType.Operate_File_Change);
+            }
+        }
         //深拷贝
         string strr = MyMVC.XmlHelper.XmlSerialize(curController, System.Text.Encoding.UTF8);
         preControllerData = MyMVC.XmlHelper.XmlDeserialize<ControllerData>(strr, System.Text.Encoding.UTF8);
+
+        //Debug.Log("now servoID is " + curController.GetHSliderList()[0].servoID);
+        //Debug.Log("now min_angle is " + curController.GetHSliderList()[0].min_angle);
+        //Debug.Log("now max_angle is " + curController.GetHSliderList()[0].max_angle);
     }
     /// <summary>
     /// 取消遥控器修改
     /// </summary>
     public void CancelCurController()
     {
-            //深拷贝
+        PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "Cancel change current controller data!!");
+
+        //深拷贝
         string str = MyMVC.XmlHelper.XmlSerialize(preControllerData, System.Text.Encoding.UTF8);
         curController = MyMVC.XmlHelper.XmlDeserialize<ControllerData>(str, System.Text.Encoding.UTF8);
         curWidgets = new WidgetManager(curController); // 控件和数据更新
@@ -282,7 +310,7 @@ public class ControllerManager : SingletonObject<ControllerManager>
             
             for (int i = 0; i < curController.actionData.Count; i++)
             {
-                Debug.Log("Now action is " + curController.actionData[i].widgetID);
+                //Debug.Log("Now action is " + curController.actionData[i].widgetID);
                 list.Add(new WidgetShowType(curController.actionData[i].widgetID, WidgetShowType.widgetType.action, curController.actionData[i].localPos));
             }
         }
@@ -291,6 +319,13 @@ public class ControllerManager : SingletonObject<ControllerManager>
             for (int i = 0; i < curController.sliderData.Count; i++)
             {
                 list.Add(new WidgetShowType(curController.sliderData[i].widgetId, WidgetShowType.widgetType.vSlider, curController.sliderData[i].localPos));
+            }
+        }
+        if (curController.hsliderData != null)
+        {
+            for (int i = 0; i < curController.hsliderData.Count; i++)
+            {
+                list.Add(new WidgetShowType(curController.hsliderData[i].widgetId, WidgetShowType.widgetType.hSlider, curController.hsliderData[i].localPos));
             }
         }
         if (curController.jockstickData != null)
@@ -312,6 +347,7 @@ public class ControllerManager : SingletonObject<ControllerManager>
     {
         curWidgets.joyStickManager.ReadyJockControl();
         curWidgets.vSliderManager.ReadyVsliderControl();
+        curWidgets.hSliderManager.ReadyHsliderControl();
     }
     /// <summary>
     /// 控件的物理结构
@@ -335,6 +371,19 @@ public class ControllerManager : SingletonObject<ControllerManager>
             action,
         }
     }
+
+    /// <summary>
+    ///获取配置分辨率
+    /// </summary>
+    /// <returns></returns>
+    public int GetCurControllerSceneWidth()
+    {
+        return curController.ScreenWidth;
+    }
+    public int GetCurControllerSceneHeight()
+    {
+        return curController.ScreenHeight;
+    }
 }
 /// <summary>
 /// 遥控器数据
@@ -343,10 +392,16 @@ public class ControllerData
 {
     [XmlAttribute]
     public string controllerID;
+    [XmlAttribute]
+    public int ScreenWidth;
+    [XmlAttribute]
+    public int ScreenHeight;
     [XmlElement]
     public List<ActionWidgetData> actionData; //动作控件数据
     [XmlElement]
-    public List<SliderWidgetData> sliderData; //滑竿控件数据
+    public List<SliderWidgetData> sliderData; //滑杆控件数据
+    [XmlElement]
+    public List<HSliderWidgetData> hsliderData; //横杆控件数据
     [XmlElement]
     public List<JockstickData> jockstickData; //摇杆控件数据
 
@@ -356,23 +411,28 @@ public class ControllerData
     public ControllerData(string ID)
     {
         this.controllerID = ID;
+        this.ScreenWidth = PublicFunction.GetWidth();
+        this.ScreenHeight = PublicFunction.GetHeight();
         actionData = new List<ActionWidgetData>();
         sliderData = new List<SliderWidgetData>();
+        hsliderData = new List<HSliderWidgetData>();
         jockstickData = new List<JockstickData>();
     }
     public void ClearUp()
     {
         actionData = new List<ActionWidgetData>();
         sliderData = new List<SliderWidgetData>();
+        hsliderData = new List<HSliderWidgetData>();
         jockstickData = new List<JockstickData>();
     }
+    
     /// <summary>
     ///获取控件个数
     /// </summary>
     /// <returns></returns>
     public int GetWidgetMount()
     {
-        return actionData.Count + sliderData.Count + jockstickData.Count;
+        return actionData.Count + sliderData.Count + hsliderData.Count + jockstickData.Count;
     }
     /// <summary>
     /// 获取控件通过id
@@ -386,6 +446,10 @@ public class ControllerData
     {
         return sliderData.Find((x) => x.widgetId == ID);
     }
+    public HSliderWidgetData GetHSliderdataByID(string ID)
+    {
+        return hsliderData.Find((x) => x.widgetId == ID);
+    }
     public JockstickData GetJockdataByID(string ID)
     {
         return jockstickData.Find((x) => x.widgetId == ID);
@@ -397,6 +461,10 @@ public class ControllerData
     public List<SliderWidgetData> GetSliderList()
     {
         return sliderData;
+    }
+    public List<HSliderWidgetData> GetHSliderList()
+    {
+        return hsliderData;
     }
 
     /// <summary>
@@ -415,6 +483,10 @@ public class ControllerData
     {
         sliderData.Add(data);
     }
+    public void AddNewHSliderData(HSliderWidgetData data)
+    {
+        hsliderData.Add(data);
+    }
     public void RemoveJoystickData(string widgetID)
     {
         jockstickData.Remove(jockstickData.Find((x) => x.widgetId == widgetID));
@@ -422,6 +494,10 @@ public class ControllerData
     public void RemoveSliderData(string widgetID)
     {
         sliderData.Remove(sliderData.Find((x) => x.widgetId == widgetID));
+    }
+    public void RemoveHSliderData(string widgetID)
+    {
+        hsliderData.Remove(hsliderData.Find((x) => x.widgetId == widgetID));
     }
     public void RemoveActionData(string widgetID)
     {
@@ -477,7 +553,7 @@ public class ActionWidgetData
         if (id == "")
             return "";
         string actionNms = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(actionId).Name;
-        Debug.Log("Now action is " + actionNms);
+        //Debug.Log("Now action is " + actionNms);
         return actionNms;
         
     }
@@ -486,14 +562,14 @@ public class ActionWidgetData
         if (id == "")
             return "";
         string actionIds = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(actionId).Id;
-        Debug.Log("Now action is " + actionIds);
+        //Debug.Log("Now action is " + actionIds);
         return actionIds;
 
     }
 }
 
 /// <summary>
-/// 滑竿 控制一个舵机
+/// 滑杆 控制一个舵机
 /// </summary>
 public class SliderWidgetData
 {
@@ -551,6 +627,77 @@ public class SliderWidgetData
 
     public enum sliderType
     { 
+        h,
+        v
+    }
+}
+/// <summary>
+/// 横杆 控制一个舵机
+/// </summary>
+public class HSliderWidgetData
+{
+    [XmlAttribute]
+    public string widgetId;
+    [XmlElement]
+    public byte servoID;
+    [XmlEnum]
+    public hsliderType sType;
+    [XmlIgnore]
+    public Vector2 localPos
+    {
+        get
+        {
+            return new Vector2(pos_x, pos_y);
+        }
+        set
+        {
+            pos_x = value.x;
+            pos_y = value.y;
+        }
+    }
+    [XmlElement]
+    public float pos_x;
+    [XmlElement]
+    public float pos_y;
+    [XmlElement]
+    public int min_angle;
+    [XmlElement]
+    public int max_angle;
+    [XmlIgnore]
+    public bool isOK
+    {
+        get
+        {
+            return servoID != 0;
+        }
+    }
+    //protected string 
+    public HSliderWidgetData()
+    {
+        servoID = 0;
+        max_angle = 118;
+        min_angle = -118;
+    }
+    public HSliderWidgetData(string widgetID, Vector2 pos)
+    {
+        this.widgetId = widgetID;
+        localPos = pos;
+        servoID = 0;
+        sType = hsliderType.h;
+        max_angle = 118;
+        min_angle = -118;
+    }
+    public HSliderWidgetData(string widetID, byte servoID, Vector3 pos, int maxAngle, int minAngle)
+    {
+        this.widgetId = widetID;
+        this.servoID = servoID;
+        this.localPos = pos;
+        this.max_angle = maxAngle;
+        this.min_angle = minAngle;
+    }
+
+    public enum hsliderType
+    {
         h,
         v
     }

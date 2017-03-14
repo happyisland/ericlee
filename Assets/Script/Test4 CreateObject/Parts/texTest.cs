@@ -9,6 +9,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Game.Platform;
 using System.IO;
+using Game.Resource;
 
 public class texTest : MonoBehaviour {
     public delegate void DelegateMethod();
@@ -105,7 +106,7 @@ public class texTest : MonoBehaviour {
 
                     if (innerSprites.Contains(types[key].PicTemp) == false)
                     {
-                        string pathTemp = Application.persistentDataPath + "/partsPic/" + types[key].PicTemp + ".png";
+                        string pathTemp = ResourcesEx.persistentDataPath + "/partsPic/" + types[key].PicTemp + ".png";
                         Texture2D t = tMgr.LoadTextureByIO(pathTemp);//加载图片资源
                         childgo.GetComponent<UITexture>().mainTexture = t;
                         childgo.transform.Find("Sprite").GetComponent<UISprite>().spriteName = "Clean";
@@ -152,7 +153,7 @@ public class texTest : MonoBehaviour {
         string userID=JMSimulatorOnly.Instance.userID;
        //// Debug.Log("userID:"+userID);
        // userID = "local";
-        string path = Application.persistentDataPath + "/data/partsImport/" +userID + ".json";
+        string path = ResourcesEx.persistentDataPath + "/data/partsImport/" +userID + ".json";
         //Debug.Log("userID:" + userID);
         if(File.Exists(path))
         {

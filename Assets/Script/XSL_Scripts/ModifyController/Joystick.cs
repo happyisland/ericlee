@@ -119,65 +119,123 @@ public class Joystick : MonoBehaviour
             return;
         }
 
-        if (isPressed)
-        {
-            Lighting(1f);
-            CalculateJoystickAxis();
-            if (On_JoystickMoveStart != null)
-            {
-                //Debug.Log("On_JoystickMoveStart is not null");
-                On_JoystickMoveStart(this);
-            }
-            isHolding = true;
+        int wheelServoID01 = 0;
+        int wheelServoID02 = 0;
+        int wheelServoID03 = 0;
+        int wheelServoID04 = 0;
 
-            // check is useful 
-            if (joyControl == null)
+        if (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name) != null && (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name)).joyData.type == JockstickData.JockType.twoServo)
+        {
+            wheelServoID01 = (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name)).joyData.leftUpID;
+            wheelServoID02 = (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name)).joyData.rightUpID;
+            wheelServoID03 = 0;
+            wheelServoID04 = 0;
+        }
+        else if (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name) != null && (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name)).joyData.type == JockstickData.JockType.fourServo)
+        {
+            wheelServoID01 = (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name)).joyData.leftUpID;
+            wheelServoID02 = (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name)).joyData.rightUpID;
+            wheelServoID03 = (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name)).joyData.leftBottomID;
+            wheelServoID04 = (ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name)).joyData.rightBottomID;
+        }
+        else
+        {
+            wheelServoID01 = 0;
+            wheelServoID02 = 0;
+            wheelServoID03 = 0;
+            wheelServoID04 = 0;
+        }
+
+        if ((wheelServoID01 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID01).modelType == ServoModel.Servo_Model_Angle) ||
+            (wheelServoID02 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID02).modelType == ServoModel.Servo_Model_Angle) ||
+            (wheelServoID03 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID03).modelType == ServoModel.Servo_Model_Angle) ||
+            (wheelServoID04 != 0 && RobotManager.GetInst().GetCurrentRobot().GetAllDjData().GetDjData((byte)wheelServoID04).modelType == ServoModel.Servo_Model_Angle))
+        {
+            if (isPressed)
             {
-                joyControl = ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name);
-                if (joyControl == null)
-                    return;
-                else
-                    Debug.Log("joyControl is not null 0");
+                Lighting(1f);
+                CalculateJoystickAxis();
+                if (On_JoystickMoveStart != null)
+                {
+                    //Debug.Log("On_JoystickMoveStart is not null");
+                    On_JoystickMoveStart(this);
+                }
+                isHolding = true;
             }
             else
-                Debug.Log("joyControl is not null 1");
-            if (joyControl.isRightSetting && PlatformMgr.Instance.GetBluetoothState()) // 蓝牙是否连接， 是否配置正确
             {
-                joyControl.isReady = true;                                            //判断是否ok
-            }
-            else
-            {
-                //HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
-                joyControl.isReady = false;
-                return;
-            }
-            if (joyControl.isReady)
-            {
-                GetComponent<WheelCheck>().enabled = true;
-                joyControl.TurnLeftwheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, radius);
-                joyControl.TurnRightwheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, radius);
-            }
-            else
-            {
-                GetComponent<WheelCheck>().enabled = false;
+                CalculateJoystickAxis();
+                if (On_JoystickMoveEnd != null)
+                {
+                    On_JoystickMoveEnd(this);
+                }
+                thumb.transform.localPosition = Vector3.zero;
+                FadeOut(1f, minAlpha);
+                isHolding = false;
             }
         }
         else
         {
-            if (joyControl != null && joyControl.isReady)
+            if (isPressed)
             {
-                joyControl.TurnLeftwheelSpeed(0, 0, radius);
-                joyControl.TurnRightwheelSpeed(0, 0, radius);
+                Lighting(1f);
+                CalculateJoystickAxis();
+                if (On_JoystickMoveStart != null)
+                {
+                    //Debug.Log("On_JoystickMoveStart is not null");
+                    On_JoystickMoveStart(this);
+                }
+                isHolding = true;
+
+                // check is useful 
+                if (joyControl == null)
+                {
+                    joyControl = ControllerManager.GetInst().widgetManager.joyStickManager.GetJoystickByID(gameObject.name);
+                    if (joyControl == null)
+                        return;
+                    else
+                        Debug.Log("joyControl is not null 0");
+                }
+                else
+                    Debug.Log("joyControl is not null 1");
+                if (joyControl.isRightSetting && PlatformMgr.Instance.GetBluetoothState()) // 蓝牙是否连接， 是否配置正确
+                {
+                    joyControl.isReady = true;                                            //判断是否ok
+                }
+                else
+                {
+                    //HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
+                    joyControl.isReady = false;
+                    return;
+                }
+                if (joyControl.isReady)
+                {
+                    GetComponent<WheelCheck>().enabled = true;
+                    joyControl.TurnLeftwheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, radius);
+                    joyControl.TurnRightwheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, radius);
+                }
+                else
+                {
+                    GetComponent<WheelCheck>().enabled = false;
+                }
             }
-            CalculateJoystickAxis();
-            if (On_JoystickMoveEnd != null)
+            else
             {
-                On_JoystickMoveEnd(this);
+                if (joyControl != null && joyControl.isReady)
+                {
+                    joyControl.TurnLeftwheelSpeed(0, 0, radius);
+                    joyControl.TurnRightwheelSpeed(0, 0, radius);
+                }
+                CalculateJoystickAxis();
+                if (On_JoystickMoveEnd != null)
+                {
+                    On_JoystickMoveEnd(this);
+                }
+                thumb.transform.localPosition = Vector3.zero;
+                FadeOut(1f, minAlpha);
+                isHolding = false;
             }
-            thumb.transform.localPosition = Vector3.zero;
-            FadeOut(1f, minAlpha);
-            isHolding = false;
-        }
+        }    
     }
 
     //void OnDragStart ()
@@ -209,17 +267,10 @@ public class Joystick : MonoBehaviour
         }      
         CalculateJoystickAxis();
 
-        //Debug.Log("no wheel is " + joyControl.isReady);
-
         if (joyControl != null && joyControl.isReady)
         {
             joyControl.TurnLeftwheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, radius);  //左轮转动
             joyControl.TurnRightwheelSpeed(thumb.transform.localPosition.x, thumb.transform.localPosition.y, radius); //右轮转动
-
-            //Debug.Log("left wheel is " + joyControl.joyData.leftUpID);
-            //Debug.Log("left wheel is " + joyControl.joyData.leftBottomID);
-            //Debug.Log("left wheel is " + joyControl.joyData.rightUpID);
-            //Debug.Log("left wheel is " + joyControl.joyData.rightBottomID);
         }
         
         if (On_JoystickMoveStart != null)

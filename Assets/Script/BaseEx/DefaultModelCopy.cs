@@ -7,6 +7,7 @@ using UnityEngine;
 using Game.Resource;
 using System.IO;
 using System.Text;
+using Game.Platform;
 
 /// <summary>
 /// Author:xj
@@ -69,11 +70,8 @@ public class DefaultModelCopy
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -107,7 +105,7 @@ public class DefaultModelCopy
         catch (System.Exception ex)
         {
             System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-            Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         return dict;
     }
@@ -375,14 +373,14 @@ public class DefaultModelCopy
         {
             mFinish(result);
         }
-        if (null != defaultActionsList)
+        /*if (null != defaultActionsList)
         {
             for (int i = 0, imax = defaultActionsList.Count; i < imax; ++i)
             {
                 ActionsManager.GetInst().AddOfficial(defaultActionsList[i]);
             }
             ActionsManager.GetInst().SaveOfficialActions();
-        }
+        }*/
     }
 
     /// <summary>

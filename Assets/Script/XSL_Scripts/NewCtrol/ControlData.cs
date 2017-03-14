@@ -12,6 +12,7 @@ using MyData;
 using MyMVC;
 using Game.Event;
 using Game.Platform;
+using Game.Resource;
 
 public class ControlData
 {
@@ -34,8 +35,8 @@ public class ControlData
 
     private ControlData()
     {
-        ActionDataPath = Application.persistentDataPath + "/" + RobotManager.GetInst().GetCurrentRobot().ID + NewCtrolview.ControllerID + ".xml";
-        UpdateActionData();  //唯一的robotid
+        //ActionDataPath = ResourcesEx.persistentDataPath + "/" + RobotManager.GetInst().GetCurrentRobot().ID + NewCtrolview.ControllerID + ".xml";
+        //UpdateActionData();  //唯一的robotid
     }
 
     public ActionXmlData curActionData;
@@ -79,7 +80,6 @@ public class ControlData
     /// <param name="actionNm"></param>
     public void DeletaAction(string actionNm)
     {
-        RobotManager.GetInst().GetCurrentRobot().DeleteActionsForName(actionNm);
     }
 
     #region // xml文件与数据类
@@ -149,18 +149,18 @@ public class ControlData
                 tempName = "icon_getdown";
                 break;
             default:
-                for (int i = 0; i < RobotManager.GetInst().GetCurrentRobot().GetActionsNameList().Count; i++)
+                /*for (int i = 0; i < RobotManager.GetInst().GetCurrentRobot().GetActionsNameList().Count; i++)
                 {
                     if (!temList.Contains(RobotManager.GetInst().GetCurrentRobot().GetActionsNameList()[i]))
                     {
                         tempName = RobotManager.GetInst().GetCurrentRobot().GetActionsNameList()[i];
                         break;
                     }
-                }
+                }*/
                 temList.Add(tempName);
                 return tempName;
         }
-        tempName = RobotManager.GetInst().GetCurrentRobot().GetActionNameForIcon(tempName);
+        //tempName = RobotManager.GetInst().GetCurrentRobot().GetActionNameForIcon(tempName);
         temList.Add(tempName);
         Debug.Log(tempName);
         return tempName;
@@ -285,12 +285,12 @@ public class ActionLogic
     #endregion
 
     #region //动作逻辑控制
-    public bool IsNameExist(string name)
+    public bool IsIdExist(string id)
     {
         bool f = false;
         foreach (var tem in playList)
         {
-            if (tem.GetComponentInChildren<UILabel>().text == name)
+            if (tem.name == id)
             {
                 f = true;
                 break;
@@ -298,19 +298,19 @@ public class ActionLogic
         }
         return f;
     }
-    public string GetCurActName()
+    public string GetCurActId()
     {
         string str = "";
         if (CurOperateAnim != null)
         {
-            str = CurOperateAnim.GetComponentInChildren<UILabel>().text;
+            str = CurOperateAnim.name;
         }
         return str;
     }
 
-    public string GetNowPlayingActionName()
+    public string GetNowPlayingActionId()
     {
-        return nowPlayingActionName;
+        return nowPlayingActionId;
         //if (runState == RunState.Run)
         //{
         //    return nowPlayingActionName;
@@ -319,9 +319,9 @@ public class ActionLogic
         //    return "";
     }
 
-    public string GetNowPauseActionName()
+    public string GetNowPauseActionId()
     {
-        return nowPauseActionName;
+        return nowPauseActionId;
         //if (runState == RunState.Pause)
         //{
         //    return nowPauseActionName;
@@ -337,8 +337,8 @@ public class ActionLogic
     {
         if (CurOperateAnim == null)
             return;
-        string actionNM = CurOperateAnim.GetComponentInChildren<UILabel>().text;//CurOperateAnim.transform.GetChild(0).GetComponent<UILabel>().text;
-        ControlData.GetIns().DeletaAction(actionNM);
+        string actionNM = CurOperateAnim.name;//CurOperateAnim.transform.GetChild(0).GetComponent<UILabel>().text;
+        RobotManager.GetInst().GetCurrentRobot().DeleteActionsForID(actionNM);
     }
 
     /// <summary>
@@ -372,11 +372,11 @@ public class ActionLogic
         }
         if (CurOperateAnim != null && go != CurOperateAnim) //切换
         {
-            if (nowPlayingActionName == go.GetComponentInChildren<UILabel>().text)
+            if (nowPlayingActionId == go.name)
             {
                 runState = RunState.Run;
             }
-            else if (nowPauseActionName == go.GetComponentInChildren<UILabel>().text)
+            else if (nowPauseActionId == go.name)
             {
                 runState = RunState.Pause;
             }
@@ -389,16 +389,16 @@ public class ActionLogic
         CurOperateAnim = go;
         go.GetComponent<UISprite>().width = 117;
         go.GetComponent<UISprite>().height = 117;
-        ActionName = go.GetComponentInChildren<UILabel>().text;
+        ActionId = go.name;
     }
-    string ActionName = "";
+    string ActionId = "";
     /// <summary>
     /// 播放按钮被按下
     /// </summary>
     /// <param name="go"></param>
     public void OnPlayBtnClicked(GameObject go)
     {
-        string actionNM = ActionName;
+        string actionNM = ActionId;
 //#if UNITY_EDITOR
 //        if (CurOperateAnim == null)
 //            return;
@@ -409,7 +409,7 @@ public class ActionLogic
         {
             HUDTextTips.ShowTextTip(LauguageTool.GetIns().GetText("connectRobotTip"));
           //  PlayActionOnlyMode(actionNM);
-            CurRobot.PlayActionsForName(actionNM);
+            CurRobot.PlayActionsForID(actionNM);
             return;
         }
 //#endif
@@ -493,8 +493,8 @@ public class ActionLogic
     /// <param name="sprite"></param>
     /// <param name="preNm"></param>
     /// <param name="finalNm"></param>
-    string nowPlayingActionName = "";
-    string nowPauseActionName = "";
+    string nowPlayingActionId = "";
+    string nowPauseActionId = "";
     void DoPlay(string actionNm, UISprite sprite,string preNm, string finalNm)
     {
 #if UNITY_EDITOR
@@ -529,7 +529,7 @@ public class ActionLogic
     {
         if (IsConnect && CurRobot != null)
         {
-            CurRobot.PlayActionsForName(actionNm);
+            CurRobot.PlayActionsForID(actionNm);
             runState = RunState.Run;
             // 变成暂停的图标 表示可以点击暂停 播放完之后 图标变为三角形
             Transform temp = CurOperateAnim.transform.GetChild(2); //UI图标切换
@@ -553,7 +553,7 @@ public class ActionLogic
     /// <param name="actionNm"></param>
     void PlayActionOnlyMode(string actionNm)
     {
-        ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForName(ActionName);
+        ActionSequence act = RobotManager.GetInst().GetCurrentRobot().GetActionsForID(ActionId);
         EventMgr.Inst.Fire(EventID.Ctrl_Robot_Action, new EventArg(act));
     }
 
@@ -562,20 +562,20 @@ public class ActionLogic
 #if UNITY_EDITOR
         runState = RunState.Run;
 
-        nowPauseActionName = "";
-        nowPlayingActionName = actionNm;
+        nowPauseActionId = "";
+        nowPlayingActionId = actionNm;
         actionTimeDuration = 8000f;
-        CurRobot.PlayActionsForName(actionNm);
+        CurRobot.PlayActionsForID(actionNm);
 #else
-        CurRobot.PlayActionsForName(actionNm);
+        CurRobot.PlayActionsForID(actionNm);
         runState = RunState.Run;
 
-        nowPauseActionName = "";
-        nowPlayingActionName = actionNm;
+        nowPauseActionId = "";
+        nowPlayingActionId = actionNm;
         //获取播放的时间 时间结束之后就
-        float duration = CurRobot.GetActionsTimeForName(actionNm);
+        float duration = CurRobot.GetActionsTimeForID(actionNm);
         //如果最后一帧有轮模式，则当前时间定为一个小时，
-        if (CurRobot.IsTrunModelForName(actionNm))
+        if (CurRobot.IsTurnModelForID(actionNm))
             duration = 3600000f;
         actionTimeDuration = duration;
 #endif
@@ -605,8 +605,8 @@ public class ActionLogic
         {
             temSprite.spriteName = "icon_play";
             runState = RunState.notRun;
-            nowPauseActionName = "";
-            nowPlayingActionName = "";
+            nowPauseActionId = "";
+            nowPlayingActionId = "";
 
             if (GetNextAction() != null)
                 ClientMain.GetInst().StartCoroutine(DoNextFrame());
@@ -614,8 +614,8 @@ public class ActionLogic
         }
         if (coroutineKey == myKey)  //表示最新执行的动作结束
         {
-            nowPauseActionName = "";
-            nowPlayingActionName = "";
+            nowPauseActionId = "";
+            nowPlayingActionId = "";
         }
     }
     IEnumerator DoNextFrame()
@@ -649,8 +649,8 @@ public class ActionLogic
                 shiftSprite.gameObject.AddComponent<UIButtonColor>();
             shiftSprite.GetComponent<UIButtonColor>().state = UIButtonColor.State.Normal;
             runState = RunState.notRun;
-            nowPauseActionName = "";
-            nowPlayingActionName = "";
+            nowPauseActionId = "";
+            nowPlayingActionId = "";
 
             if (GetNextAction() != null)
                 ClientMain.GetInst().StartCoroutine(DoNextFrame());
@@ -658,8 +658,8 @@ public class ActionLogic
         }
         if (coroutineKey == myKey)  //表示最新执行的动作结束
         {
-            nowPauseActionName = "";
-            nowPlayingActionName = "";
+            nowPauseActionId = "";
+            nowPlayingActionId = "";
         }
     }
     /// <summary>
@@ -689,8 +689,8 @@ public class ActionLogic
                 shiftSprite.spriteName = finalName;
             runState = RunState.notRun;
 
-            nowPlayingActionName = "";
-            nowPauseActionName = "";
+            nowPlayingActionId = "";
+            nowPauseActionId = "";
 
             if(GetNextAction() != null)
                 ClientMain.GetInst().StartCoroutine(DoNextFrame());
@@ -698,8 +698,8 @@ public class ActionLogic
         }
         if (coroutineKey == myKey)  //表示最新执行的动作结束
         {
-            nowPauseActionName = "";
-            nowPlayingActionName = "";
+            nowPauseActionId = "";
+            nowPlayingActionId = "";
         }
     }
 
@@ -707,8 +707,8 @@ public class ActionLogic
     {
 #if UNITY_EDITOR
         runState = RunState.Pause;
-        nowPauseActionName = actionNm;
-        nowPlayingActionName = "";
+        nowPauseActionId = actionNm;
+        nowPlayingActionId = "";
 
    //     CurRobot.PauseActionsForName(actionNm);   //暂停
         timeDuration = Time.time - timeDuration; // 从开始执行到暂停所花费的时间
@@ -716,10 +716,10 @@ public class ActionLogic
         if (IsConnect && CurRobot != null)
         {
             runState = RunState.Pause;
-            nowPauseActionName = actionNm;
-            nowPlayingActionName = "";
+            nowPauseActionId = actionNm;
+            nowPlayingActionId = "";
 
-            CurRobot.PauseActionsForName(actionNm);   //暂停
+            CurRobot.PauseActionsForID(actionNm);   //暂停
             timeDuration = Time.time - timeDuration; // 从开始执行到暂停所花费的时间
         }
 #endif
@@ -732,8 +732,8 @@ public class ActionLogic
         runState = RunState.Run;  // 播放状态
     //    CurRobot.ContinueActionsForName(actionNm); //继续播放
 
-        nowPlayingActionName = actionNm;
-        nowPauseActionName = "";
+        nowPlayingActionId = actionNm;
+        nowPauseActionId = "";
 
         actionTimeDuration -= timeDuration * 1000;
         ClientMain.GetInst().StartCoroutine(DoDuration(actionTimeDuration / 1000.0f, shiftSprite, finalName));
@@ -741,10 +741,10 @@ public class ActionLogic
         if (IsConnect && CurRobot != null)
         {
             runState = RunState.Run;  // 播放状态
-            CurRobot.ContinueActionsForName(actionNm); //继续播放
+            CurRobot.ContinueActionsForID(actionNm); //继续播放
 
-            nowPlayingActionName = actionNm;
-            nowPauseActionName = "";
+            nowPlayingActionId = actionNm;
+            nowPauseActionId = "";
 
             actionTimeDuration -= timeDuration * 1000;
             ClientMain.GetInst().StartCoroutine(DoDuration(actionTimeDuration / 1000.0f, shiftSprite, finalName));
@@ -780,8 +780,8 @@ public class ActionLogic
 #else
         CurRobot.StopNowPlayActions();
 #endif
-        nowPauseActionName = "";
-        nowPlayingActionName = "";
+        nowPauseActionId = "";
+        nowPlayingActionId = "";
     }
 
     void DoImitatePlay(string actionNm)  //模拟播放某个动作

@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Game.Platform;
+using Game.Resource;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -143,6 +145,105 @@ public class ServosConnection
         return null;
     }
 
+    public void Save(Robot robot)
+    {
+        try
+        {
+            string path = PublicFunction.CombinePath(ResourcesEx.GetRobotPath(robot.Name), "servos");
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            path = PublicFunction.CombinePath(path, "servos.txt");
+            bool addFileFlag = true;
+            if (File.Exists(path))
+            {
+                addFileFlag = false;
+            }
+            //FileInfo fileInfo = new FileInfo(path);
+            List<string> list = new List<string>();
+            //StreamWriter sw = new StreamWriter(fileInfo.Open(FileMode.OpenOrCreate));
+            if (null != mServosDict)
+            {
+                foreach (KeyValuePair<int, List<int>> kvp in mServosDict)
+                {
+                    list.Add(kvp.Key + " " + PublicFunction.ListToString<int>(kvp.Value));
+                    //sw.WriteLine(kvp.Key + " " + PublicFunction.ListToString<int>(kvp.Value));
+                }
+            }
+            StringBuilder angleServos = new StringBuilder();
+            StringBuilder turnServos = new StringBuilder();
+            foreach (KeyValuePair<byte, ServoModel> kvp in mServosModelDict)
+            {
+                if (kvp.Value == ServoModel.Servo_Model_Angle)
+                {
+                    if (angleServos.Length > 0)
+                    {
+                        angleServos.Append(PublicFunction.Separator_Comma);
+                    }
+                    angleServos.Append(kvp.Key);
+                }
+                else
+                {
+                    if (turnServos.Length > 0)
+                    {
+                        turnServos.Append(PublicFunction.Separator_Comma);
+                    }
+                    turnServos.Append(kvp.Key);
+                }
+            }
+            if (angleServos.Length > 0)
+            {
+                list.Add("angleServos:" + angleServos.ToString());
+                //sw.WriteLine("angleServos:" + angleServos.ToString());
+            }
+            if (turnServos.Length > 0)
+            {
+                list.Add("turnServos:" + turnServos.ToString());
+                //sw.WriteLine("turnServos:" + turnServos.ToString());
+            }
+            for (int i = 0, imax = mPartData.Count; i < imax; ++i)
+            {
+                list.Add("partData:" + mPartData[i].ToString());
+                //sw.WriteLine("partData:" + mPartData[i].ToString());
+            }
+            if (mPortConnectionDict.Count > 0)
+            {
+                StringBuilder portString = new StringBuilder();
+                foreach (KeyValuePair<string, string> kvp in mPortConnectionDict)
+                {
+                    if (portString.Length > 0)
+                    {
+                        portString.Append(PublicFunction.Separator_Or);
+                    }
+                    portString.Append(kvp.Key);
+                    portString.Append(PublicFunction.Separator_Comma);
+                    portString.Append(kvp.Value);
+                }
+                list.Add("portConnection:" + portString.ToString());
+                //sw.WriteLine("portConnection:" + portString.ToString());
+            }
+            /*sw.Flush();
+            sw.Dispose();
+            sw.Close();*/
+            File.WriteAllLines(path, list.ToArray());
+            PlatformMgr.Instance.Log(MyLogType.LogTypeEvent, "保存连线图：" + path);
+            if (addFileFlag)
+            {
+                PlatformMgr.Instance.OperateSyncFile(robot.Name, path, OperateFileType.Operate_File_Add);
+            }
+            else
+            {
+                PlatformMgr.Instance.OperateSyncFile(robot.Name, path, OperateFileType.Operate_File_Change);
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
+        }
+    }
+
     /// <summary>
     /// 
     /// </summary>
@@ -156,7 +257,8 @@ public class ServosConnection
             {
                 Directory.CreateDirectory(path);
             }
-            FileInfo fileInfo = new FileInfo(path + "/servos.txt");
+            path = PublicFunction.CombinePath(path, "servos.txt");
+            FileInfo fileInfo = new FileInfo(path);
             StreamWriter sw = new StreamWriter(fileInfo.Open(FileMode.OpenOrCreate));
             if (null != mServosDict)
             {
@@ -219,11 +321,8 @@ public class ServosConnection
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -298,11 +397,8 @@ public class ServosConnection
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         
     }
@@ -326,11 +422,8 @@ public class ServosConnection
         }
         catch (System.Exception ex)
         {
-            if (ClientMain.Exception_Log_Flag)
-            {
-                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                Debuger.LogError("ServosConnection-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-            }
+            System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+            PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, st.GetFrame(0).ToString() + "- error = " + ex.ToString());
         }
         return servosConnection;
     }
@@ -382,6 +475,13 @@ public class ServosConnection
                     }
                 }
             }
+            if (null != dataDict)
+            {
+                foreach (var kvp in dataDict)
+                {
+                    kvp.Value.Sort();
+                }
+            }
         }
         return dataDict;
     }
@@ -420,6 +520,96 @@ public class ServosConnection
         mPartData.Add(new TopologyPartData(data));
     }
 
+    public void DelIndependentTopologyData(TopologyPartData data)
+    {
+        if (data.isIndependent && null != mPartData)
+        {
+            for (int i = 0, imax = mPartData.Count; i < imax; ++i)
+            {
+                if (data.partType == mPartData[i].partType && data.id == mPartData[i].id && mPartData[i].isIndependent)
+                {
+                    mPartData.Remove(mPartData[i]);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void UpdateSersorTopologyData(Robot robot)
+    {
+        if (null != mPartData && null != robot && null != robot.MotherboardData)
+        {
+            TopologyPartData data = null;
+            List<TopologyPartData> delData = null;
+            Dictionary<TopologyPartType, Dictionary<byte, TopologyPartData>> oldSensorData = null;
+            bool changeFlag = false;
+            for (int i = 0, imax = mPartData.Count; i < imax; ++i)
+            {
+                data = mPartData[i];
+                if (data.partType < TopologyPartType.Infrared || data.partType >= TopologyPartType.MainBoard)
+                {
+                    continue;
+                }
+                if (data.isIndependent)
+                {
+                    SensorData sensorData = robot.MotherboardData.GetSensorData(data.partType);
+                    if (null == sensorData || !sensorData.ids.Contains(data.id))
+                    {//不存在次传感器，要删除
+                        if (null == delData)
+                        {
+                            delData = new List<TopologyPartData>();
+                        }
+                        delData.Add(data);
+                        continue;
+                    }
+                }
+                if (null == oldSensorData)
+                {
+                    oldSensorData = new Dictionary<TopologyPartType, Dictionary<byte, TopologyPartData>>();
+                }
+                if (!oldSensorData.ContainsKey(data.partType))
+                {
+                    Dictionary<byte, TopologyPartData> dict = new Dictionary<byte, TopologyPartData>();
+                    oldSensorData[data.partType] = dict;
+                }
+                oldSensorData[data.partType][data.id] = data;
+            }
+            if (null != delData)
+            {//删除传感器
+                for (int i = 0, imax = delData.Count; i < imax; ++i)
+                {
+                    mPartData.Remove(delData[i]);
+                }
+                delData.Clear();
+                changeFlag = true;
+            }
+            TopologyPartType[] sensorType = PublicFunction.Open_Topology_Part_Type;
+            for (int i = 0, imax = sensorType.Length; i < imax; ++i)
+            {
+                SensorData sensorData = robot.MotherboardData.GetSensorData(sensorType[i]);
+                if (null != sensorData)
+                {
+                    for (int sensorIndex = 0, sensorMax = sensorData.ids.Count; sensorIndex < sensorMax; ++sensorIndex)
+                    {
+                        if (null == oldSensorData || !oldSensorData.ContainsKey(sensorType[i]) || !oldSensorData[sensorType[i]].ContainsKey(sensorData.ids[sensorIndex]))
+                        {//以前不存在，需添加
+                            TopologyPartData newData = new TopologyPartData();
+                            newData.isIndependent = true;
+                            newData.id = sensorData.ids[sensorIndex];
+                            newData.partType = sensorType[i];
+                            mPartData.Add(newData);
+                            changeFlag = true;
+                        }
+                    }
+                }
+            }
+            if (changeFlag)
+            {
+                Save(robot);
+            }
+        }
+    }
+
     public void AddTopologyPartData(TopologyPartData data, Transform trans)
     {
         TopologyPartData newData = new TopologyPartData(data);
@@ -437,6 +627,21 @@ public class ServosConnection
         mPartData.Clear();
         mServosModelDict.Clear();
         mPortConnectionDict.Clear();
+    }
+
+    public bool IsNewSensor(TopologyPartType sensorType, byte id)
+    {
+        if (null != mPartData)
+        {
+            for (int i = 0, imax = mPartData.Count; i < imax; ++i)
+            {
+                if (mPartData[i].partType == sensorType && mPartData[i].id == id)
+                {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     #endregion
 

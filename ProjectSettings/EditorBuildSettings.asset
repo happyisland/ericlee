@@ -11,18 +11,10 @@ EditorBuildSettings:
     path: Assets/Scene/menuScene.unity
   - enabled: 1
     path: Assets/Scene/NewMain.unity
-  - enabled: 0
-    path: Assets/Scene/mainScene.unity
   - enabled: 1
     path: Assets/Scene/AssembleScene.unity
   - enabled: 1
     path: Assets/Scene/editAction.unity
-  - enabled: 0
-    path: Assets/Scene/ControlView.unity
-  - enabled: 0
-    path: Assets/Scene/NewControl.unity
-  - enabled: 0
-    path: Assets/Scene/ModifyController.unity
   - enabled: 1
     path: Assets/Scene/ModifyController.unity
   - enabled: 1

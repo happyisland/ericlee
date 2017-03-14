@@ -26,14 +26,14 @@ public class SetServosConnection : EditorWindow
     #endregion
 
     #region 公有函数
-    [MenuItem("MyTool/设置舵机连接情况", false, 1)]
+    /*[MenuItem("MyTool/设置舵机连接情况", false, 1)]
     public static void OpenSetServosConnection()
     {
         SetServosConnection windows = EditorWindow.GetWindow<SetServosConnection>(true, "SetServosConnection");
         windows.position = new Rect(400, 300, 500, 550);
 
 
-    }
+    }*/
     #endregion
 
     #region 其他函数

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Game.Scene;
+using Game.Platform;
 
 /// <summary>
 /// Author:xj
@@ -18,6 +19,7 @@ public class ActionEditScene : BaseScene
     #region 私有属性
     static string sOpenActionsName = null;
     static string sOpenActionsIcon = null;
+    static string sOpenActionsId = null;
     //ShowRobotIDUI mShowRobotDjID;
     ActionEditUI mActionEditUi;
     MoveSecond mMoveSecond;
@@ -35,15 +37,17 @@ public class ActionEditScene : BaseScene
     }
 
 
-    public static void OpenActions(string name)
+    public static void OpenActions(string id)
     {
-        sOpenActionsName = name;
+        sOpenActionsId = id;
         sOpenActionsIcon = null;
+        sOpenActionsName = null;
         SceneMgr.EnterScene(SceneType.EditAction);
     }
 
     public static void CreateActions(string name, string iconId)
     {
+        sOpenActionsId = null;
         sOpenActionsName = name;
         sOpenActionsIcon = iconId;
         SceneMgr.EnterScene(SceneType.EditAction);
@@ -58,10 +62,10 @@ public class ActionEditScene : BaseScene
             sOpenActionsName = null;
             sOpenActionsIcon = null;
         }
-        else if (!string.IsNullOrEmpty(sOpenActionsName))
+        else if (!string.IsNullOrEmpty(sOpenActionsId))
         {
-            mActionEditUi.OpenActions(sOpenActionsName);
-            sOpenActionsName = null;
+            mActionEditUi.OpenActions(sOpenActionsId);
+            sOpenActionsId = null;
         }
         mActionEditUi.Open();
         //Debug.Log("dfsfsf66666666");
@@ -97,11 +101,8 @@ public class ActionEditScene : BaseScene
             }
             catch (System.Exception ex)
             {
-                if (ClientMain.Exception_Log_Flag)
-                {
-                    System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
-                    Debuger.LogError(this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
-                }
+                System.Diagnostics.StackTrace st = new System.Diagnostics.StackTrace();
+                PlatformMgr.Instance.Log(MyLogType.LogTypeInfo, this.GetType() + "-" + st.GetFrame(0).ToString() + "- error = " + ex.ToString());
             }
             
         }
